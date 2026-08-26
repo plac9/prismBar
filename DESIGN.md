@@ -48,7 +48,7 @@ prismBar is a quiet macOS utility that restores control without turning the menu
 - The menu bar status item is monochrome and template-rendered.
 - The menu popover provides section state, recent activity, plugin panels, Settings, and Quit.
 - The main window uses `NavigationSplitView` for Overview, Menu Bar, Plugins, Shortcuts, Privacy, and About.
-- Settings use native controls and layout behavior. Custom styling is limited to brand accents, content illustration, and system-supported glass treatments.
+- Settings use native controls and layout behavior. Custom styling is limited to semantic content surfaces, brand accents, and system-supported interactive glass controls.
 - Onboarding is a focused window with one decision per step.
 
 ## Materials

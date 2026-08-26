@@ -64,10 +64,11 @@
 
   <h2>macOS adaptation matrix</h2>
   <table><thead><tr><th>Condition</th><th>Shipping response</th><th>Evidence</th></tr></thead><tbody>
-    <tr><td>Light and dark</td><td>Semantic system colors plus adaptive prism field</td><td><code>PrismBackdrop</code> and UI launch variants</td></tr>
-    <tr><td>Increased contrast</td><td>Reduced tint, stronger separators, semantic status color plus text</td><td><code>GlassCard</code></td></tr>
-    <tr><td>Reduced transparency</td><td>Opaque system background replaces glass and blurred light field</td><td><code>PrismBackdrop</code>, <code>GlassCard</code></td></tr>
-    <tr><td>Reduced motion</td><td>Calculator result transitions become identity transitions</td><td><code>PluginPanelView</code></td></tr>
+    <tr><td>Light and dark</td><td>Native window background and semantic system colors</td><td><code>ContentCard</code> and UI launch variants</td></tr>
+    <tr><td>Increased contrast</td><td>Stronger semantic separators with status symbols and text</td><td><code>ContentCard</code> contrast environment</td></tr>
+    <tr><td>Reduced transparency</td><td>Static content remains semantic while native interactive glass adapts with macOS</td><td>UI launch variant and source audit</td></tr>
+    <tr><td>Reduced motion</td><td>Calculator result transitions become identity transitions</td><td><code>PluginPanelView</code> motion environment</td></tr>
+    <tr><td>Page identity</td><td>Six contextual SF Symbols replace decorative page artwork</td><td>Contextual header UI test</td></tr>
     <tr><td>Keyboard and accessibility semantics</td><td>Native focus loop, command shortcuts, labeled controls, help, and item actions</td><td><code>AppLifecycle</code>, <code>PrismBarCommands</code>, <code>MenuBarItemRow</code></td></tr>
   </tbody></table>
 
@@ -82,7 +83,7 @@
   <h2>Release truth</h2>
   <table><thead><tr><th>Gate</th><th>Automated status</th></tr></thead><tbody>
     <tr><td>Exact product identity, macOS 27 arm64 baseline, licensing, privacy manifest</td><td class="pass">Implemented and automated</td></tr>
-    <tr><td>Core, sanitizer, analyzer, release-bundle, UI, plugin crash and hang tests</td><td class="pass">Automated in project verification</td></tr>
+    <tr><td>Core, sanitizer, analyzer, release-bundle, UI, plugin crash and hang tests</td><td class="pending">Final clean-revision gate pending</td></tr>
     <tr><td>VoiceOver, larger text, installed Accessibility grant, movement, displays, spaces, sleep, wake, logout, reboot</td><td class="pending">Requires physical signed-app matrix</td></tr>
     <tr><td>Public revision match, notarization, staple, clean-account Gatekeeper, publication</td><td class="pending">Owner-gated release work</td></tr>
   </tbody></table>

@@ -94,7 +94,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Build Overview, Menu Bar, Plugins, Shortcuts, Privacy, and About destinations.
 - [x] Preserve the main-window frame and restore its native keyboard focus loop.
 - [x] Build onboarding, empty, unavailable, revoked, error, and recovery surfaces.
-- [x] Integrate the system window background, sidebar extension, glass containers, and glass controls.
+- [x] Integrate the native system window background, semantic content surfaces, and standard interactive glass controls.
 - [x] Adopt system Liquid Glass components and remove decorative legacy styling.
 - [x] Implement keyboard navigation, help, focus, and accessibility actions.
 - [x] Verify every shipping destination remains operational in light, dark, increased contrast, reduced transparency, and reduced motion launch variants.
