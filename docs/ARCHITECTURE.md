@@ -114,7 +114,7 @@ The user interface never optimistically mutates the authoritative topology. It m
 
 Panel descriptors support a bounded set of host-rendered elements: text, result display, button, keypad grid, text field, divider, status, and action group. Descriptors contain data, semantic roles, accessibility labels, and stable identifiers. They cannot contain SwiftUI views, closures, selectors, class names, scripts, attributed HTML, file URLs, or executable payloads.
 
-The host sets an exact code-signing requirement on every `NSXPCConnection`. The service applies a reciprocal host requirement before accepting requests. Protocol version and declared capabilities are checked during handshake before any panel data is requested.
+The host and service enforce reciprocal exact code-signing requirements on every `NSXPCConnection`. The host validates the sealed embedded XPC bundle, exact bundle identifier, Team ID, protocol version, and declared capability set. Protocol version and capabilities are checked during handshake before any panel data is requested. Wire messages, descriptors, request concurrency, response size, timeout, and reconnect behavior are bounded.
 
 The host owns a bounded build-time registry of bundled plugin registrations. Each registration fixes the service identifier, display name, version, capability set, allowed application identifiers, default enabled state, and preference key before the app is signed. Duplicate or malformed registrations fail closed. A user can disable a plugin at any time, which invalidates its XPC connection and removes its panel without affecting menu bar control. Version 1 does not scan directories or accept downloaded plugin bundles.
 

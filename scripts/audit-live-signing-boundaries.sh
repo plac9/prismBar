@@ -2,8 +2,34 @@
 
 set -euo pipefail
 
+repository_root="$(git rev-parse --show-toplevel)"
+
+if [ "${1:-}" = "--documentation-only" ]; then
+  documentation=(
+    "$repository_root/docs/SECURITY-MODEL.md"
+    "$repository_root/docs/ARCHITECTURE.md"
+    "$repository_root/docs/DEPENDENCIES.md"
+  )
+  if rg -n -i 'manifest digest.*allowlist|digest.*allowlist' "${documentation[@]}"; then
+    printf 'Signing documentation audit failed: unsupported manifest digest allowlist claim remains.\n' >&2
+    exit 1
+  fi
+  for required_claim in \
+    'reciprocal code-signing requirements' \
+    'sealed embedded' \
+    'protocol version'; do
+    if ! rg -q "$required_claim" "$repository_root/docs/SECURITY-MODEL.md"; then
+      printf 'Signing documentation audit failed: missing implemented control: %s\n' \
+        "$required_claim" >&2
+      exit 1
+    fi
+  done
+  printf 'Signing documentation audit passed: documented controls match the reciprocal signed XPC boundary.\n'
+  exit 0
+fi
+
 if [ "$#" -ne 1 ]; then
-  printf 'Usage: %s /path/to/prismBar.app\n' "$0" >&2
+  printf 'Usage: %s --documentation-only | /path/to/prismBar.app\n' "$0" >&2
   exit 64
 fi
 

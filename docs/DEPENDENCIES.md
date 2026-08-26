@@ -11,6 +11,8 @@
 
 SwiftPM resolves no external package dependencies. The Release bundle contains two executables, no embedded third-party frameworks, and only links libraries supplied by macOS.
 
+The bundled service integrity boundary relies on the sealed application bundle, reciprocal exact code-signing requirements, fixed bundle identifiers and Team ID, protocol version, and a bounded declared capability set. No separately fetched digest catalog or runtime plugin download is used.
+
 ## Build and verification tools
 
 These tools run during development or CI and are not included in the application bundle.

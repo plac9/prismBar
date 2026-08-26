@@ -46,7 +46,8 @@ prismBar must provide useful menu bar control without becoming a route for infor
 
 - Only sealed embedded services are discoverable.
 - Host and service set reciprocal code-signing requirements.
-- Bundle identifier, Team ID, protocol version, and manifest digest are allowlisted.
+- The host validates the sealed embedded XPC bundle, exact bundle identifier, Team ID, protocol version, and declared capability set.
+- Wire messages, descriptors, request concurrency, response size, timeout, and reconnect behavior are bounded.
 - Hardened Runtime and library validation remain enabled.
 - No third-party install directory is scanned.
 
