@@ -23,7 +23,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Add explicit host and sandboxed-service entitlements.
 - [x] Add privacy manifest and generated Info.plists.
 - [x] Add deterministic fixtures containing synthetic menu items only.
-- [ ] Add self-hosted macOS CI with no signing secrets in pull-request jobs.
+- [x] Add ephemeral GitHub-hosted Xcode 27 CI with no signing or repository secrets.
 - [x] Prove package tests and unsigned app builds with Xcode 27.
 
 ## Phase 2: Permission and identity foundation

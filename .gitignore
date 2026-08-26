@@ -5,6 +5,10 @@ DerivedData/
 build/*
 !build/.gitkeep
 *.xcarchive
+*.xcresult/
+*.logarchive/
+*.xcactivitylog
+*.tracev3
 *.dSYM
 *.dmg
 *.pkg

@@ -191,6 +191,10 @@ private struct PluginPanelValidator {
     let allowedApplicationIdentifiers: Set<String>
     private var identifiers: Set<String> = []
 
+    init(allowedApplicationIdentifiers: Set<String>) {
+        self.allowedApplicationIdentifiers = allowedApplicationIdentifiers
+    }
+
     mutating func validate(_ update: PluginPanelUpdate) throws {
         guard update.panel.elements.count <= PluginPanelLimits.maximumElements else {
             throw PluginPanelValidationError.tooManyElements

@@ -1,0 +1,6 @@
+self-hosted-runner:
+  # actionlint 1.7.12 predates GitHub's ephemeral Xcode 27 preview label.
+  labels:
+    - xcode-27
+
+config-variables: null
