@@ -67,6 +67,37 @@ final class LaunchTests: XCTestCase {
         XCTAssertTrue(application.staticTexts["No global keyboard monitoring"].exists)
     }
 
+    func testEveryDestinationExposesItsShippingSurface() {
+        let application = XCUIApplication()
+        application.launch()
+
+        let destinations = [
+            ("Overview", "Your menu bar, in focus."),
+            ("Menu Bar", "Accessibility required"),
+            ("Plugins", "prismCalc"),
+            ("Shortcuts", "prismBar commands"),
+            ("Privacy", "Your menu bar stays on your Mac."),
+            ("About", "Mozilla Public License 2.0"),
+        ]
+
+        for (destination, expectedText) in destinations {
+            let cell = sidebarCell(named: destination, in: application)
+            XCTAssertTrue(cell.waitForExistence(timeout: 5))
+            cell.click()
+            XCTAssertTrue(
+                application.staticTexts[expectedText].waitForExistence(timeout: 5),
+                "Missing \(expectedText) in \(destination)"
+            )
+        }
+
+        XCTAssertTrue(
+            application.descendants(matching: .any)
+                .matching(identifier: "toolbar.connection")
+                .firstMatch.exists
+        )
+        XCTAssertTrue(application.buttons["toolbar.refresh"].exists)
+    }
+
     func testBundledPrismCalcPluginRunsAcrossTheSignedXPCBoundary() {
         let application = XCUIApplication()
         application.launch()
@@ -197,7 +228,7 @@ final class LaunchTests: XCTestCase {
             guard let executablePath = String(bytes: pathBytes, encoding: .utf8) else {
                 continue
             }
-            if executablePath.contains("/Library/Developer/Xcode/DerivedData/prismBar-") &&
+            if executablePath.contains("/Build/Products/Debug/prismBar.app/") &&
                 executablePath.hasSuffix(serviceSuffix) {
                 return processIdentifier
             }

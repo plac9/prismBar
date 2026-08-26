@@ -159,6 +159,7 @@ struct PluginsView: View {
 
 struct PluginPanelView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     let update: PluginPanelUpdate
     let compact: Bool
@@ -199,7 +200,7 @@ struct PluginPanelView: View {
         case let .result(result):
             Text(result.value)
                 .font(resultFont)
-                .contentTransition(.numericText())
+                .contentTransition(reduceMotion ? .identity : .numericText())
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .lineLimit(1)
                 .minimumScaleFactor(0.55)

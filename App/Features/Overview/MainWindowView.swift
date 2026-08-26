@@ -5,20 +5,50 @@
 import SwiftUI
 
 struct MainWindowView: View {
+    @Environment(AppModel.self) private var model
     @State private var selection: Destination? = .overview
 
     var body: some View {
         NavigationSplitView {
-            List(Destination.allCases, selection: $selection) { destination in
-                Label(destination.title, systemImage: destination.symbol)
-                    .tag(destination)
-                    .padding(.vertical, 3)
+            List(selection: $selection) {
+                Section {
+                    ForEach(Destination.primary) { destination in
+                        Label(destination.title, systemImage: destination.symbol)
+                            .tag(destination)
+                            .padding(.vertical, 4)
+                    }
+                }
+
+                Section("prismBar") {
+                    ForEach(Destination.information) { destination in
+                        Label(destination.title, systemImage: destination.symbol)
+                            .tag(destination)
+                            .padding(.vertical, 4)
+                    }
+                }
             }
             .scrollContentBackground(.hidden)
-            .navigationTitle("prismBar")
+            .safeAreaInset(edge: .top) {
+                HStack(spacing: 10) {
+                    PrismMark(size: 34)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("prismBar")
+                            .font(.headline)
+                        Text("Local menu bar control")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+            }
             .navigationSplitViewColumnWidth(min: 190, ideal: 220, max: 260)
         } detail: {
             detailView
+                .background {
+                    PrismBackdrop()
+                }
                 .backgroundExtensionEffect()
         }
         .background(.clear)
@@ -26,6 +56,22 @@ struct MainWindowView: View {
             PrismBackdrop()
         }
         .navigationTitle("prismBar")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Label(connectionLabel, systemImage: connectionSymbol)
+                    .font(.callout.weight(.medium))
+                    .foregroundStyle(connectionColor)
+                    .accessibilityIdentifier("toolbar.connection")
+            }
+
+            ToolbarItem(placement: .primaryAction) {
+                Button("Refresh", systemImage: "arrow.clockwise") {
+                    model.refreshAccessibility()
+                }
+                .disabled(model.menuBarState == .loading)
+                .accessibilityIdentifier("toolbar.refresh")
+            }
+        }
     }
 
     @ViewBuilder
@@ -44,6 +90,23 @@ struct MainWindowView: View {
         case .about:
             AboutView()
         }
+    }
+
+    private var connectionLabel: String {
+        switch model.accessibilityState {
+        case .granted: "Connected"
+        case .requiresStableInstall: "Install required"
+        case .identityMismatch: "Identity mismatch"
+        case .notRequested, .denied: "Access required"
+        }
+    }
+
+    private var connectionSymbol: String {
+        model.accessibilityState == .granted ? "checkmark.shield.fill" : "exclamationmark.shield.fill"
+    }
+
+    private var connectionColor: Color {
+        model.accessibilityState == .granted ? .green : .orange
     }
 }
 
@@ -80,4 +143,7 @@ private enum Destination: String, CaseIterable, Identifiable {
         case .about: "info.circle"
         }
     }
+
+    static let primary: [Destination] = [.overview, .menuBar, .plugins, .shortcuts]
+    static let information: [Destination] = [.privacy, .about]
 }

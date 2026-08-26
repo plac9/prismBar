@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import AppKit
 import prismBarEngine
 import SwiftUI
 
@@ -41,64 +42,83 @@ struct OverviewView: View {
                     }
                 }
 
+                permissionSurface
+
                 GlassCard {
-                    VStack(alignment: .leading, spacing: 16) {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text(actionTitle)
-                                    .font(.title2.bold())
-                                Text(actionMessage)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Image(systemName: actionSymbol)
-                                .font(.system(size: 34, weight: .medium))
-                                .foregroundStyle(.tint)
-                                .accessibilityHidden(true)
-                        }
-
-                        HStack(spacing: 10) {
-                            if needsPermissionAction {
-                                Button(permissionActionLabel) {
-                                    model.requestAccessibility()
-                                }
-                                .buttonStyle(.glassProminent)
-                                .accessibilityLabel(permissionActionLabel)
-                                .accessibilityIdentifier("accessibility.request")
-                            }
-
-                            Button("Check Again") {
-                                model.refreshAccessibility()
-                            }
-                            .buttonStyle(.glass)
-                            .accessibilityLabel("Check Again")
-                            .accessibilityIdentifier("accessibility.refresh")
-
-                            if model.accessibilityState == .granted {
-                                Button("Refresh Menu Bar") {
-                                    model.refreshMenuBar()
-                                }
-                                .buttonStyle(.glassProminent)
-                                .accessibilityIdentifier("menuBar.refresh")
-                            }
-                        }
+                    HStack(spacing: 24) {
+                        LocalPromise(title: "No screen capture", symbol: "eye.slash")
+                        Divider()
+                        LocalPromise(title: "No telemetry", symbol: "waveform.path.ecg.rectangle")
+                        Divider()
+                        LocalPromise(title: "No uploads", symbol: "lock.shield")
                     }
                 }
-
-                HStack(spacing: 18) {
-                    Label("No screen capture", systemImage: "eye.slash")
-                    Label("No telemetry", systemImage: "waveform.path.ecg.rectangle")
-                    Label("No content uploads", systemImage: "lock.shield")
-                }
-                .font(.callout.weight(.medium))
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 4)
             }
             .frame(maxWidth: 760, alignment: .leading)
             .padding(32)
         }
         .task {
             model.loadPluginIfNeeded()
+        }
+    }
+
+    private var permissionSurface: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 18) {
+                SectionHeading(actionTitle, message: actionMessage, systemImage: actionSymbol)
+
+                if model.accessibilityState == .denied {
+                    Divider()
+                    HStack(alignment: .top, spacing: 18) {
+                        RecoveryStep(
+                            number: 1,
+                            title: "Remove old entry",
+                            message: "In Accessibility, remove prismBar if listed."
+                        )
+                        RecoveryStep(
+                            number: 2,
+                            title: "Add this app",
+                            message: "Add /Applications/prismBar.app and enable it."
+                        )
+                        RecoveryStep(number: 3, title: "Reconnect", message: "Return here and choose Check Again.")
+                    }
+                }
+
+                HStack(spacing: 10) {
+                    if needsPermissionAction {
+                        Button(permissionActionLabel) {
+                            model.requestAccessibility()
+                        }
+                        .buttonStyle(.glassProminent)
+                        .accessibilityLabel(permissionActionLabel)
+                        .accessibilityIdentifier("accessibility.request")
+                    }
+
+                    if model.accessibilityState == .denied || model.accessibilityState == .requiresStableInstall {
+                        Button("Show in Finder", systemImage: "finder") {
+                            NSWorkspace.shared.activateFileViewerSelecting([
+                                URL(fileURLWithPath: "/Applications/prismBar.app"),
+                            ])
+                        }
+                        .buttonStyle(.glass)
+                    }
+
+                    Button("Check Again") {
+                        model.refreshAccessibility()
+                    }
+                    .buttonStyle(.glass)
+                    .accessibilityLabel("Check Again")
+                    .accessibilityIdentifier("accessibility.refresh")
+
+                    if model.accessibilityState == .granted {
+                        Button("Refresh Menu Bar") {
+                            model.refreshMenuBar()
+                        }
+                        .buttonStyle(.glassProminent)
+                        .accessibilityIdentifier("menuBar.refresh")
+                    }
+                }
+            }
         }
     }
 
@@ -195,6 +215,44 @@ struct OverviewView: View {
         case .disabled:
             model.isPluginEnabled ? "prismCalc paused" : "prismCalc disabled"
         }
+    }
+}
+
+private struct RecoveryStep: View {
+    let number: Int
+    let title: String
+    let message: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 9) {
+            Text("\(number)")
+                .font(.caption.bold())
+                .frame(width: 24, height: 24)
+                .glassEffect(.regular.tint(.cyan.opacity(0.12)), in: .circle)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.callout.weight(.semibold))
+                Text(message)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+private struct LocalPromise: View {
+    let title: String
+    let symbol: String
+
+    var body: some View {
+        Label(title, systemImage: symbol)
+            .font(.callout.weight(.medium))
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity)
     }
 }
 

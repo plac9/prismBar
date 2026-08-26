@@ -34,7 +34,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Use Apple's documented Accessibility prompt and recheck whenever the app returns to the foreground.
 - [x] Reject undocumented System Settings URL schemes from the product.
 - [x] Implement runtime revocation behavior.
-- [ ] Render onboarding and recovery states using native macOS 27 components.
+- [x] Render onboarding and recovery states using native macOS 27 components.
 - [ ] Prove grant, revoke, relaunch, and signed-upgrade behavior in `/Applications`.
 
 ## Phase 3: Menu bar topology engine
@@ -90,11 +90,11 @@ The project is complete only when every gate below has authoritative evidence fr
 
 ## Phase 8: Complete macOS 27 experience
 
-- [ ] Build Overview, Menu Bar, Plugins, Shortcuts, Privacy, and About destinations.
+- [x] Build Overview, Menu Bar, Plugins, Shortcuts, Privacy, and About destinations.
 - [x] Preserve the main-window frame and restore its native keyboard focus loop.
-- [ ] Build onboarding, empty, unavailable, revoked, error, and recovery surfaces.
+- [x] Build onboarding, empty, unavailable, revoked, error, and recovery surfaces.
 - [x] Integrate the system window background, sidebar extension, glass containers, and glass controls.
-- [ ] Adopt system Liquid Glass components and remove decorative legacy styling.
+- [x] Adopt system Liquid Glass components and remove decorative legacy styling.
 - [ ] Implement full keyboard navigation, VoiceOver, help, focus, and accessibility actions.
 - [ ] Verify light, dark, increased contrast, reduced transparency, reduced motion, and text-size variants.
 - [x] Implement original application and template menu bar icons with no thaw imagery.

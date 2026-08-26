@@ -98,6 +98,8 @@ struct MenuBarView: View {
                 }
             }
 
+            actionStatus
+
             VStack(alignment: .leading, spacing: 10) {
                 if let snapshot = model.menuBarSnapshot {
                     if snapshot.unavailableSourceCount > 0 {
@@ -144,12 +146,6 @@ struct MenuBarView: View {
                     .scrollContentBackground(.hidden)
                     .frame(minHeight: 220)
 
-                    if case let .result(message) = model.menuBarActionState {
-                        Text(message)
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                            .accessibilityIdentifier("menuBar.actionResult")
-                    }
                 } else {
                     Spacer(minLength: 24)
                     ContentUnavailableView(
@@ -182,6 +178,53 @@ struct MenuBarView: View {
             }
             selectedItemIDs.formIntersection(snapshot.items.map(\.id))
         }
+    }
+
+    @ViewBuilder
+    private var actionStatus: some View {
+        switch model.menuBarActionState {
+        case .idle:
+            EmptyView()
+        case .moving:
+            HStack(spacing: 10) {
+                ProgressView()
+                    .controlSize(.small)
+                Text("Moving and verifying against macOS…")
+                    .font(.callout.weight(.medium))
+                Spacer()
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .glassEffect(.regular.tint(.blue.opacity(0.10)), in: .rect(cornerRadius: 14))
+            .accessibilityIdentifier("menuBar.actionProgress")
+        case let .result(message):
+            Label(message, systemImage: resultSymbol(for: message))
+                .font(.callout.weight(.medium))
+                .foregroundStyle(resultColor(for: message))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .glassEffect(
+                    .regular.tint(resultColor(for: message).opacity(0.08)),
+                    in: .rect(cornerRadius: 14)
+                )
+                .accessibilityIdentifier("menuBar.actionResult")
+        }
+    }
+
+    private func resultSymbol(for message: String) -> String {
+        isSuccessfulResult(message) ? "checkmark.circle.fill" : "exclamationmark.triangle.fill"
+    }
+
+    private func resultColor(for message: String) -> Color {
+        isSuccessfulResult(message) ? .green : .orange
+    }
+
+    private func isSuccessfulResult(_ message: String) -> Bool {
+        message.hasPrefix("Move verified") ||
+            message.hasPrefix("Batch move verified") ||
+            message.hasPrefix("Reset verified") ||
+            message.hasSuffix("already visible.")
     }
 
     private func items(
@@ -238,142 +281,5 @@ struct MenuBarView: View {
         model.accessibilityState == .granted
             ? "prismBar is building a fresh local topology."
             : "Return to Overview to grant or refresh Accessibility access."
-    }
-}
-
-private struct MenuBarItemRow: View {
-    @Environment(AppModel.self) private var model
-    let item: MenuBarItem
-    let destinations: [MenuBarItem]
-    let surfaceLabel: String
-    let section: MenuBarSection?
-    @Binding var isSelected: Bool
-    @State private var destinationIndex: Int
-
-    init(
-        item: MenuBarItem,
-        destinations: [MenuBarItem],
-        surfaceLabel: String,
-        section: MenuBarSection?,
-        isSelected: Binding<Bool>
-    ) {
-        self.item = item
-        self.destinations = destinations
-        self.surfaceLabel = surfaceLabel
-        self.section = section
-        _isSelected = isSelected
-        _destinationIndex = State(initialValue: item.position)
-    }
-
-    var body: some View {
-        HStack(spacing: 14) {
-            Toggle("Select \(item.displayName)", isOn: $isSelected)
-                .labelsHidden()
-                .toggleStyle(.checkbox)
-                .disabled(!canMove)
-
-            Image(systemName: ownershipSymbol)
-                .frame(width: 22)
-                .foregroundStyle(.secondary)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(item.displayName)
-                    .lineLimit(1)
-                Text("\(ownershipLabel), \(surfaceLabel)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Spacer()
-
-            Text(sectionLabel)
-                .font(.caption.weight(.medium))
-                .foregroundStyle(section == .hidden ? .secondary : .primary)
-
-            if section == .hidden {
-                Button("Show", systemImage: "eye") {
-                    model.moveMenuBarItem(item.id, to: .visible)
-                }
-                .disabled(!canMove)
-            } else if section == .visible {
-                Button("Hide", systemImage: "eye.slash") {
-                    model.moveMenuBarItem(item.id, to: .hidden)
-                }
-                .disabled(!canMove)
-            }
-
-            Picker("Position", selection: $destinationIndex) {
-                ForEach(Array(destinations.enumerated()), id: \.element.id) { offset, destination in
-                    Text("\(offset + 1)").tag(destination.position)
-                }
-            }
-            .labelsHidden()
-            .frame(width: 74)
-            .disabled(!canMove)
-            .onChange(of: item.position) { _, newPosition in
-                destinationIndex = newPosition
-            }
-
-            Button("Move") {
-                model.moveMenuBarItem(item.id, to: destinationIndex)
-            }
-            .disabled(!canMove || destinationIndex == item.position)
-        }
-        .padding(.vertical, 4)
-        .accessibilityElement(children: .contain)
-        .accessibilityActions {
-            if canMove, section == .hidden {
-                Button("Show") {
-                    model.moveMenuBarItem(item.id, to: .visible)
-                }
-            } else if canMove, section == .visible {
-                Button("Hide") {
-                    model.moveMenuBarItem(item.id, to: .hidden)
-                }
-            }
-
-            if canMove, let firstDestination = destinations.first,
-               firstDestination.id != item.id {
-                Button("Move to First Position") {
-                    model.moveMenuBarItem(item.id, to: firstDestination.position)
-                }
-            }
-
-            if canMove, let lastDestination = destinations.last,
-               lastDestination.id != item.id {
-                Button("Move to Last Position") {
-                    model.moveMenuBarItem(item.id, to: lastDestination.position)
-                }
-            }
-        }
-    }
-
-    private var canMove: Bool {
-        item.isMovable && !model.isMenuBarActionInProgress
-    }
-
-    private var ownershipLabel: String {
-        switch item.ownership {
-        case .application: "Application item"
-        case .system: "macOS item"
-        case .selfOwned: "prismBar item"
-        }
-    }
-
-    private var sectionLabel: String {
-        switch section {
-        case .hidden: "Hidden"
-        case .visible: "Visible"
-        case .controller: "prismBar"
-        case nil: "Unassigned"
-        }
-    }
-
-    private var ownershipSymbol: String {
-        switch item.ownership {
-        case .application: "app"
-        case .system: "apple.logo"
-        case .selfOwned: "triangle"
-        }
     }
 }
