@@ -77,13 +77,13 @@ final class LaunchTests: XCTestCase {
 
         XCTAssertTrue(
             application.staticTexts
-                .matching(NSPredicate(format: "label CONTAINS %@", PrivacyCopyFixture.observation))
+                .matching(NSPredicate(format: "value CONTAINS %@", PrivacyCopyFixture.observation))
                 .firstMatch
                 .waitForExistence(timeout: 5)
         )
         XCTAssertTrue(
             application.staticTexts
-                .matching(NSPredicate(format: "label CONTAINS %@", PrivacyCopyFixture.boundary))
+                .matching(NSPredicate(format: "value CONTAINS %@", PrivacyCopyFixture.boundary))
                 .firstMatch
                 .exists
         )
