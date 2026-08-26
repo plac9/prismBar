@@ -58,3 +58,58 @@ struct MenuBarDragGeometryTests {
         #expect(before.end.horizontal < after.end.horizontal)
     }
 }
+
+@Suite("Menu bar drag cleanup")
+struct MenuBarDragCleanupTests {
+    @Test("releases the button and restores the pointer after success")
+    func cleansUpAfterSuccess() {
+        let recorder = DragEventRecorder()
+
+        MenuBarDragLifecycle().perform(
+            press: { recorder.record(.press) },
+            release: { recorder.record(.release) },
+            restorePointer: { recorder.record(.restore) },
+            drag: { recorder.record(.drag) }
+        )
+
+        #expect(recorder.events == [.press, .drag, .release, .restore])
+    }
+
+    @Test("releases the button and restores the pointer after cancellation")
+    func cleansUpAfterCancellation() {
+        let recorder = DragEventRecorder()
+
+        #expect(throws: TestDragError.cancelled) {
+            try MenuBarDragLifecycle().perform(
+                press: { recorder.record(.press) },
+                release: { recorder.record(.release) },
+                restorePointer: { recorder.record(.restore) },
+                drag: {
+                    recorder.record(.drag)
+                    throw TestDragError.cancelled
+                }
+            )
+        }
+
+        #expect(recorder.events == [.press, .drag, .release, .restore])
+    }
+}
+
+private enum TestDragEvent: Equatable {
+    case press
+    case drag
+    case release
+    case restore
+}
+
+private enum TestDragError: Error {
+    case cancelled
+}
+
+private final class DragEventRecorder {
+    private(set) var events: [TestDragEvent] = []
+
+    func record(_ event: TestDragEvent) {
+        events.append(event)
+    }
+}

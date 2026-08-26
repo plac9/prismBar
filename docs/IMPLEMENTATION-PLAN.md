@@ -53,7 +53,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Implement hide, show, section visibility, and reset semantics.
 - [x] Verify every operation against a fresh topology snapshot before reporting success.
 - [ ] Add equivalent keyboard and accessibility actions.
-- [ ] Prove pointer and modifier cleanup on cancellation and failure.
+- [x] Prove mouse-up and pointer restoration on cancellation and failure; use per-event Command flags without synthesizing modifier key state.
 
 ## Phase 5: Status item and daily workflow
 

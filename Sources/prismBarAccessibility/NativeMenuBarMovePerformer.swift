@@ -46,6 +46,24 @@ public struct MenuBarDragGeometry: Sendable {
     }
 }
 
+public struct MenuBarDragLifecycle: Sendable {
+    public init() {}
+
+    public func perform(
+        press: () -> Void,
+        release: () -> Void,
+        restorePointer: () -> Void,
+        drag: () throws -> Void
+    ) rethrows {
+        press()
+        defer {
+            release()
+            restorePointer()
+        }
+        try drag()
+    }
+}
+
 public enum NativeMenuBarMoveError: Error, Equatable, Sendable {
     case eventCreationFailed
     case cancelled
@@ -143,20 +161,21 @@ public actor NativeMenuBarMovePerformer: MenuBarMovePerforming {
     private func perform(_ drag: PreparedDrag) throws {
         drag.moveToStart.post(tap: .cghidEventTap)
         Thread.sleep(forTimeInterval: 0.025)
-        drag.mouseDown.post(tap: .cghidEventTap)
-        defer {
-            drag.mouseUp.post(tap: .cghidEventTap)
-            drag.restorePointer.post(tap: .cghidEventTap)
-        }
-
-        Thread.sleep(forTimeInterval: 0.04)
-        guard !Task.isCancelled else {
-            throw NativeMenuBarMoveError.cancelled
-        }
-        drag.midpointDrag.post(tap: .cghidEventTap)
-        Thread.sleep(forTimeInterval: 0.04)
-        drag.endpointDrag.post(tap: .cghidEventTap)
-        Thread.sleep(forTimeInterval: 0.04)
+        try MenuBarDragLifecycle().perform(
+            press: { drag.mouseDown.post(tap: .cghidEventTap) },
+            release: { drag.mouseUp.post(tap: .cghidEventTap) },
+            restorePointer: { drag.restorePointer.post(tap: .cghidEventTap) },
+            drag: {
+                Thread.sleep(forTimeInterval: 0.04)
+                guard !Task.isCancelled else {
+                    throw NativeMenuBarMoveError.cancelled
+                }
+                drag.midpointDrag.post(tap: .cghidEventTap)
+                Thread.sleep(forTimeInterval: 0.04)
+                drag.endpointDrag.post(tap: .cghidEventTap)
+                Thread.sleep(forTimeInterval: 0.04)
+            }
+        )
     }
 
     private func mouseEvent(
