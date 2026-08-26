@@ -18,25 +18,27 @@ struct OverviewView: View {
                         "Every change is checked against the menu bar macOS actually presents."
                 )
 
-                HStack(spacing: 14) {
-                    StatusTile(
-                        title: "Accessibility",
-                        value: accessibilityLabel,
-                        symbol: accessibilitySymbol,
-                        isReady: model.accessibilityState == .granted
-                    )
-                    StatusTile(
-                        title: "Menu items",
-                        value: menuBarLabel,
-                        symbol: "menubar.rectangle",
-                        isReady: model.menuBarState == .ready
-                    )
-                    StatusTile(
-                        title: "Plugin",
-                        value: pluginLabel,
-                        symbol: "puzzlepiece.extension",
-                        isReady: model.pluginState == .ready
-                    )
+                GlassEffectContainer(spacing: 14) {
+                    HStack(spacing: 14) {
+                        StatusTile(
+                            title: "Accessibility",
+                            value: accessibilityLabel,
+                            symbol: accessibilitySymbol,
+                            isReady: model.accessibilityState == .granted
+                        )
+                        StatusTile(
+                            title: "Menu items",
+                            value: menuBarLabel,
+                            symbol: "menubar.rectangle",
+                            isReady: model.menuBarState == .ready
+                        )
+                        StatusTile(
+                            title: "Plugin",
+                            value: pluginLabel,
+                            symbol: "puzzlepiece.extension",
+                            isReady: model.pluginState == .ready
+                        )
+                    }
                 }
 
                 GlassCard {

@@ -6,19 +6,18 @@ import SwiftUI
 
 struct SettingsRootView: View {
     var body: some View {
-        ZStack {
-            PrismBackdrop()
-
-            TabView {
-                Tab("General", systemImage: "gearshape") {
-                    GeneralSettingsView()
-                }
-
-                Tab("Privacy", systemImage: "hand.raised") {
-                    PrivacySettingsView()
-                }
+        TabView {
+            Tab("General", systemImage: "gearshape") {
+                GeneralSettingsView()
             }
-            .padding(12)
+
+            Tab("Privacy", systemImage: "hand.raised") {
+                PrivacySettingsView()
+            }
+        }
+        .padding(12)
+        .containerBackground(for: .window) {
+            PrismBackdrop()
         }
     }
 }

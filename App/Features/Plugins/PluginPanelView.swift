@@ -104,7 +104,7 @@ struct PluginsView: View {
                     .frame(maxWidth: .infinity, minHeight: 280)
             case .ready:
                 if let update = model.pluginPanel {
-                    PluginPanelView(update: update, compact: false)
+                    PluginPanelView(update: update, compact: true)
                 }
             case .unavailable, .disabled:
                 ContentUnavailableView {
@@ -286,8 +286,8 @@ struct PluginPanelView: View {
         switch style {
         case .standard: .secondary
         case .secondary: .gray
-        case .operation: .orange
-        case .accent: .blue
+        case .operation: .indigo
+        case .accent: .cyan
         }
     }
 

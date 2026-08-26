@@ -63,7 +63,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Use the native macOS 27 expanded-interface session for the command center.
 - [x] Ensure normal click opens the command center, Escape dismisses it, and the same item reopens it.
 - [x] Add primary section actions, current state, plugin panels, Settings, and Quit.
-- [ ] Add shortcut discovery and conflict detection.
+- [x] Add shortcut discovery and conflict detection without global keyboard monitoring.
 - [x] Prove menu operation with no main window open through a native XCUITest.
 
 ## Phase 6: Plugin platform
@@ -93,6 +93,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [ ] Build Overview, Menu Bar, Plugins, Shortcuts, Privacy, and About destinations.
 - [x] Preserve the main-window frame and restore its native keyboard focus loop.
 - [ ] Build onboarding, empty, unavailable, revoked, error, and recovery surfaces.
+- [x] Integrate the system window background, sidebar extension, glass containers, and glass controls.
 - [ ] Adopt system Liquid Glass components and remove decorative legacy styling.
 - [ ] Implement full keyboard navigation, VoiceOver, help, focus, and accessibility actions.
 - [ ] Verify light, dark, increased contrast, reduced transparency, reduced motion, and text-size variants.

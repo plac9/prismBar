@@ -9,7 +9,8 @@ struct PrismBackdrop: View {
 
     var body: some View {
         ZStack {
-            Color(nsColor: .windowBackgroundColor)
+            Rectangle()
+                .fill(.windowBackground)
 
             if !reduceTransparency {
                 GeometryReader { proxy in
@@ -45,9 +46,9 @@ struct PrismMark: View {
         Image("PrismMark")
             .resizable()
             .scaledToFit()
-        .frame(width: size, height: size)
-        .shadow(color: .blue.opacity(0.20), radius: size * 0.16, y: size * 0.08)
-        .accessibilityHidden(true)
+            .frame(width: size, height: size)
+            .shadow(color: .blue.opacity(0.20), radius: size * 0.16, y: size * 0.08)
+            .accessibilityHidden(true)
     }
 }
 
@@ -61,7 +62,10 @@ struct GlassCard<Content: View>: View {
     var body: some View {
         content
             .padding(20)
-            .glassEffect(.regular, in: .rect(cornerRadius: 22))
+            .glassEffect(
+                .regular.tint(Color.accentColor.opacity(0.07)),
+                in: .rect(cornerRadius: 22)
+            )
     }
 }
 

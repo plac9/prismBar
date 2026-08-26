@@ -8,37 +8,42 @@ struct MainWindowView: View {
     @State private var selection: Destination? = .overview
 
     var body: some View {
-        ZStack {
-            PrismBackdrop()
-
-            NavigationSplitView {
-                List(Destination.allCases, selection: $selection) { destination in
-                    Label(destination.title, systemImage: destination.symbol)
-                        .tag(destination)
-                        .padding(.vertical, 3)
-                }
-                .scrollContentBackground(.hidden)
-                .navigationTitle("prismBar")
-                .navigationSplitViewColumnWidth(min: 190, ideal: 220, max: 260)
-            } detail: {
-                switch selection ?? .overview {
-                case .overview:
-                    OverviewView()
-                case .menuBar:
-                    MenuBarView()
-                case .plugins:
-                    PluginsView()
-                case .shortcuts:
-                    ShortcutsView()
-                case .privacy:
-                    PrivacyView()
-                case .about:
-                    AboutView()
-                }
+        NavigationSplitView {
+            List(Destination.allCases, selection: $selection) { destination in
+                Label(destination.title, systemImage: destination.symbol)
+                    .tag(destination)
+                    .padding(.vertical, 3)
             }
-            .background(.clear)
+            .scrollContentBackground(.hidden)
+            .navigationTitle("prismBar")
+            .navigationSplitViewColumnWidth(min: 190, ideal: 220, max: 260)
+        } detail: {
+            detailView
+                .backgroundExtensionEffect()
+        }
+        .background(.clear)
+        .containerBackground(for: .window) {
+            PrismBackdrop()
         }
         .navigationTitle("prismBar")
+    }
+
+    @ViewBuilder
+    private var detailView: some View {
+        switch selection ?? .overview {
+        case .overview:
+            OverviewView()
+        case .menuBar:
+            MenuBarView()
+        case .plugins:
+            PluginsView()
+        case .shortcuts:
+            ShortcutsView()
+        case .privacy:
+            PrivacyView()
+        case .about:
+            AboutView()
+        }
     }
 }
 
