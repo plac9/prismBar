@@ -71,9 +71,7 @@ struct MenuBarView: View {
                             ForEach(items(in: .visible, snapshot: snapshot)) { item in
                                 MenuBarItemRow(
                                     item: item,
-                                    destinations: items(in: .visible, snapshot: snapshot).filter {
-                                        $0.surfaceID == item.surfaceID
-                                    },
+                                    destinations: snapshot.movementDestinations(for: item.id),
                                     surfaceLabel: surfaceLabel(for: item, snapshot: snapshot),
                                     section: .visible
                                 )
@@ -89,9 +87,7 @@ struct MenuBarView: View {
                                 ForEach(hiddenItems) { item in
                                     MenuBarItemRow(
                                         item: item,
-                                        destinations: hiddenItems.filter {
-                                            $0.surfaceID == item.surfaceID
-                                        },
+                                        destinations: snapshot.movementDestinations(for: item.id),
                                         surfaceLabel: surfaceLabel(for: item, snapshot: snapshot),
                                         section: .hidden
                                     )

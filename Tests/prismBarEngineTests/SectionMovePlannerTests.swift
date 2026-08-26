@@ -164,6 +164,50 @@ struct SectionMovePlannerTests {
         }
     }
 
+    @Test("offers direct destinations only within the same section and display")
+    func directPositionDestinations() {
+        let firstSurface = MenuBarSurfaceID(rawValue: "first")
+        let secondSurface = MenuBarSurfaceID(rawValue: "second")
+        let snapshot = MenuBarSnapshot(
+            generation: 1,
+            items: [
+                item("first-hidden", position: 0, surfaceID: firstSurface),
+                item(
+                    "first-divider",
+                    position: 1,
+                    role: .hiddenSectionDivider,
+                    surfaceID: firstSurface
+                ),
+                item("first-visible-one", position: 2, surfaceID: firstSurface),
+                item("second-hidden", position: 3, surfaceID: secondSurface),
+                item(
+                    "second-divider",
+                    position: 4,
+                    role: .hiddenSectionDivider,
+                    surfaceID: secondSurface
+                ),
+                item("first-visible-two", position: 5, surfaceID: firstSurface),
+                item("second-visible", position: 6, surfaceID: secondSurface),
+            ]
+        )
+
+        #expect(
+            snapshot.movementDestinations(
+                for: MenuBarItemID(rawValue: "first-visible-one")
+            ).map(\.id.rawValue) == ["first-visible-one", "first-visible-two"]
+        )
+        #expect(
+            snapshot.movementDestinations(
+                for: MenuBarItemID(rawValue: "second-visible")
+            ).map(\.id.rawValue) == ["second-visible"]
+        )
+        #expect(
+            snapshot.movementDestinations(
+                for: MenuBarItemID(rawValue: "first-divider")
+            ).isEmpty
+        )
+    }
+
     private func fixtureSnapshot() -> MenuBarSnapshot {
         MenuBarSnapshot(
             generation: 1,

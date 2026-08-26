@@ -172,4 +172,20 @@ public struct MenuBarSnapshot: Equatable, Codable, Sendable {
         }
         return itemIndex < dividerIndex ? .hidden : .visible
     }
+
+    public func movementDestinations(for itemID: MenuBarItemID) -> [MenuBarItem] {
+        guard let item = items.first(where: { $0.id == itemID }),
+              item.role == .item,
+              let itemSection = section(for: itemID),
+              itemSection != .controller
+        else {
+            return []
+        }
+
+        return items.filter { candidate in
+            candidate.role == .item &&
+                candidate.surfaceID == item.surfaceID &&
+                section(for: candidate.id) == itemSection
+        }
+    }
 }

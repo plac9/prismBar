@@ -40,49 +40,76 @@ struct StatusMenuView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
-                ForEach(Array(snapshot.items.filter { $0.role == .item }.prefix(6))) { item in
-                    Menu(item.displayName) {
-                        if snapshot.section(for: item.id) == .hidden {
-                            Button("Show") {
-                                model.moveMenuBarItem(item.id, to: .visible)
-                            }
-                        } else if snapshot.section(for: item.id) == .visible {
-                            Button("Hide") {
-                                model.moveMenuBarItem(item.id, to: .hidden)
-                            }
-                        }
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 4) {
+                        ForEach(snapshot.items.filter { $0.role == .item }) { item in
+                            Menu(item.displayName) {
+                                if snapshot.section(for: item.id) == .hidden {
+                                    Button("Show") {
+                                        model.moveMenuBarItem(item.id, to: .visible)
+                                    }
+                                } else if snapshot.section(for: item.id) == .visible {
+                                    Button("Hide") {
+                                        model.moveMenuBarItem(item.id, to: .hidden)
+                                    }
+                                }
 
-                        Divider()
+                                Divider()
 
-                        Button("Move Left") {
-                            if let destination = neighborDestination(
-                                for: item,
-                                offset: -1,
-                                snapshot: snapshot
-                            ) {
-                                model.moveMenuBarItem(item.id, to: destination)
-                            }
-                        }
-                        .disabled(
-                            !canMove(item) ||
-                                neighborDestination(for: item, offset: -1, snapshot: snapshot) == nil
-                        )
+                                let destinations = snapshot.movementDestinations(for: item.id)
+                                Menu("Move to Position") {
+                                    ForEach(Array(destinations.enumerated()), id: \.element.id) { offset, destination in
+                                        Button("Position \(offset + 1)") {
+                                            model.moveMenuBarItem(item.id, to: destination.position)
+                                        }
+                                        .disabled(destination.id == item.id)
+                                    }
+                                }
+                                .disabled(!canMove(item) || destinations.count < 2)
 
-                        Button("Move Right") {
-                            if let destination = neighborDestination(
-                                for: item,
-                                offset: 1,
-                                snapshot: snapshot
-                            ) {
-                                model.moveMenuBarItem(item.id, to: destination)
+                                Divider()
+
+                                Button("Move Left") {
+                                    if let destination = neighborDestination(
+                                        for: item,
+                                        offset: -1,
+                                        snapshot: snapshot
+                                    ) {
+                                        model.moveMenuBarItem(item.id, to: destination)
+                                    }
+                                }
+                                .disabled(
+                                    !canMove(item) ||
+                                        neighborDestination(
+                                            for: item,
+                                            offset: -1,
+                                            snapshot: snapshot
+                                        ) == nil
+                                )
+
+                                Button("Move Right") {
+                                    if let destination = neighborDestination(
+                                        for: item,
+                                        offset: 1,
+                                        snapshot: snapshot
+                                    ) {
+                                        model.moveMenuBarItem(item.id, to: destination)
+                                    }
+                                }
+                                .disabled(
+                                    !canMove(item) ||
+                                        neighborDestination(
+                                            for: item,
+                                            offset: 1,
+                                            snapshot: snapshot
+                                        ) == nil
+                                )
                             }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        .disabled(
-                            !canMove(item) ||
-                                neighborDestination(for: item, offset: 1, snapshot: snapshot) == nil
-                        )
                     }
                 }
+                .frame(maxHeight: 210)
 
                 Button("Refresh Menu Items", systemImage: "arrow.clockwise") {
                     model.refreshMenuBar()
@@ -167,12 +194,7 @@ struct StatusMenuView: View {
         offset: Int,
         snapshot: MenuBarSnapshot
     ) -> Int? {
-        guard let section = snapshot.section(for: item.id) else { return nil }
-        let sectionItems = snapshot.items.filter { candidate in
-            candidate.role == .item &&
-                candidate.surfaceID == item.surfaceID &&
-                snapshot.section(for: candidate.id) == section
-        }
+        let sectionItems = snapshot.movementDestinations(for: item.id)
         guard let index = sectionItems.firstIndex(where: { $0.id == item.id }) else { return nil }
         let destination = index + offset
         guard sectionItems.indices.contains(destination) else { return nil }
