@@ -70,8 +70,9 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Implement bounded declarative panel validation and native rendering.
 - [x] Implement reciprocal XPC code-signing requirements.
 - [x] Add sandboxed service entitlements with no network or file authority.
-- [ ] Implement health, timeout, crash-loop, disable, and recovery behavior.
-- [ ] Prove hostile descriptor, wrong signature, hang, crash, and version mismatch tests.
+- [x] Implement bounded timeout, failure-budget disable, stale-callback suppression, and manual recovery behavior.
+- [x] Prove hostile descriptor, hang, crash, and version mismatch behavior.
+- [ ] Prove live wrong-signature rejection and finish the user-facing plugin health state.
 
 ## Phase 7: prismCalc plugin
 

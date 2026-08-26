@@ -27,6 +27,10 @@ enum PluginClientError: Error, Equatable {
 final class PrismCalcPluginClient {
     private static let failureLimit = 3
     private static let requestTimeout = Duration.seconds(2)
+    private static let panelRecoveryDelays: [Duration] = [
+        .milliseconds(400),
+        .seconds(3),
+    ]
 
     private let codec = PluginWireCodec()
     private let policy: BundledPluginPolicy
@@ -46,7 +50,14 @@ final class PrismCalcPluginClient {
     }
 
     func loadPanel() async throws -> PluginPanelUpdate {
-        try await performPanelRequest(.panel)
+        for delay in Self.panelRecoveryDelays {
+            do {
+                return try await performPanelRequest(.panel)
+            } catch let error as PluginClientError where error.isTransientTransportFailure {
+                try await Task.sleep(for: delay)
+            }
+        }
+        return try await performPanelRequest(.panel)
     }
 
     func invoke(_ commandIdentifier: String) async throws -> PluginPanelUpdate {
@@ -113,23 +124,11 @@ final class PrismCalcPluginClient {
         return try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { continuation in
                 gate.install(continuation)
-
-                let proxy = connection.remoteObjectProxyWithErrorHandler { error in
-                    let failure = PluginTransportFailure.classify(error)
-                    gate.resolve(.failure(Self.clientError(for: failure)))
-                }
-                guard let service = proxy as? PluginXPCServiceProtocol else {
-                    gate.resolve(.failure(.unavailable))
-                    return
-                }
-
-                service.process(requestData) { data, serviceError in
-                    guard let data else {
-                        gate.resolve(.failure(Self.clientError(for: serviceError)))
-                        return
-                    }
-                    gate.resolve(.success(data))
-                }
+                PluginRequestBridge.start(
+                    requestData: requestData,
+                    connection: connection,
+                    gate: gate
+                )
 
                 Task { @MainActor [weak self] in
                     try? await Task.sleep(for: Self.requestTimeout)
@@ -151,15 +150,17 @@ final class PrismCalcPluginClient {
         let connection = NSXPCConnection(serviceName: policy.pluginIdentifier)
         connection.setCodeSigningRequirement(policy.codeSigningRequirement)
         connection.remoteObjectInterface = NSXPCInterface(with: PluginXPCServiceProtocol.self)
-        connection.interruptionHandler = { [weak self] in
+        connection.interruptionHandler = { [weak self, weak connection] in
             Task { @MainActor in
-                self?.invalidateConnection()
+                guard let self, self.connection === connection else { return }
+                self.invalidateConnection()
             }
         }
-        connection.invalidationHandler = { [weak self] in
+        connection.invalidationHandler = { [weak self, weak connection] in
             Task { @MainActor in
-                self?.connection = nil
-                self?.authenticated = false
+                guard let self, self.connection === connection else { return }
+                self.connection = nil
+                self.authenticated = false
             }
         }
         connection.activate()
@@ -186,7 +187,33 @@ final class PrismCalcPluginClient {
         return .invalidResponse
     }
 
-    private nonisolated static func clientError(
+}
+
+private nonisolated enum PluginRequestBridge {
+    static func start(
+        requestData: Data,
+        connection: NSXPCConnection,
+        gate: PluginRequestGate
+    ) {
+        let proxy = connection.remoteObjectProxyWithErrorHandler { error in
+            let failure = PluginTransportFailure.classify(error)
+            gate.resolve(.failure(clientError(for: failure)))
+        }
+        guard let service = proxy as? PluginXPCServiceProtocol else {
+            gate.resolve(.failure(.unavailable))
+            return
+        }
+
+        service.process(requestData) { data, serviceError in
+            guard let data else {
+                gate.resolve(.failure(clientError(for: serviceError)))
+                return
+            }
+            gate.resolve(.success(data))
+        }
+    }
+
+    private static func clientError(
         for failure: PluginTransportFailure
     ) -> PluginClientError {
         switch failure {
@@ -203,7 +230,7 @@ final class PrismCalcPluginClient {
         }
     }
 
-    private nonisolated static func clientError(for error: NSError?) -> PluginClientError {
+    private static func clientError(for error: NSError?) -> PluginClientError {
         guard let error,
               let failure = PluginServiceFailure.classify(error)
         else {
@@ -222,6 +249,18 @@ final class PrismCalcPluginClient {
 }
 
 private extension PluginClientError {
+    var isTransientTransportFailure: Bool {
+        switch self {
+        case .connectionInterrupted, .invalidConnection, .invalidReply,
+             .timedOut, .unavailable:
+            true
+        case .busy, .cancelled, .disabledForSession, .invalidResponse,
+             .rejected, .serviceInvalidRequest, .serviceInvalidResponse,
+             .serviceRejectedRequest, .trustRejected:
+            false
+        }
+    }
+
     var countsTowardFailureLimit: Bool {
         switch self {
         case .connectionInterrupted, .invalidConnection, .invalidReply,

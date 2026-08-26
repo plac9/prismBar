@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import Darwin
 import XCTest
 
 @MainActor
@@ -106,10 +107,92 @@ final class LaunchTests: XCTestCase {
         XCTAssertTrue(application.buttons["Quit prismBar"].exists)
     }
 
+    func testHungPluginTimesOutWithoutHangingHostAndRecovers() throws {
+        let application = XCUIApplication()
+        application.launch()
+        try openReadyPlugin(in: application)
+
+        let servicePID = try XCTUnwrap(Self.pluginServicePID())
+        XCTAssertEqual(kill(servicePID, SIGSTOP), 0)
+        defer {
+            _ = kill(servicePID, SIGCONT)
+        }
+
+        application.buttons["Seven"].click()
+        XCTAssertTrue(application.staticTexts["prismCalc unavailable"].waitForExistence(timeout: 5))
+        XCTAssertEqual(application.state, .runningForeground)
+
+        XCTAssertEqual(kill(servicePID, SIGCONT), 0)
+        application.buttons["Retry"].click()
+        XCTAssertTrue(application.buttons["Seven"].waitForExistence(timeout: 5))
+        XCTAssertEqual(application.state, .runningForeground)
+    }
+
+    func testCrashedPluginDoesNotCrashHostAndRecovers() throws {
+        let application = XCUIApplication()
+        application.launch()
+        try openReadyPlugin(in: application)
+
+        let servicePID = try XCTUnwrap(Self.pluginServicePID())
+        XCTAssertEqual(kill(servicePID, SIGSTOP), 0)
+        application.buttons["Seven"].click()
+        XCTAssertEqual(kill(servicePID, SIGKILL), 0)
+
+        XCTAssertTrue(application.staticTexts["prismCalc unavailable"].waitForExistence(timeout: 5))
+        XCTAssertEqual(application.state, .runningForeground)
+
+        application.buttons["Retry"].click()
+        XCTAssertTrue(application.buttons["Seven"].waitForExistence(timeout: 8))
+        XCTAssertEqual(application.state, .runningForeground)
+    }
+
     private func sidebarCell(named name: String, in application: XCUIApplication) -> XCUIElement {
         application.outlines["Sidebar"].cells
             .containing(.staticText, identifier: name)
             .element
+    }
+
+    private func openReadyPlugin(in application: XCUIApplication) throws {
+        let pluginsDestination = sidebarCell(named: "Plugins", in: application)
+        XCTAssertTrue(pluginsDestination.waitForExistence(timeout: 5))
+        pluginsDestination.click()
+        XCTAssertTrue(application.buttons["Seven"].waitForExistence(timeout: 7))
+        _ = try XCTUnwrap(Self.pluginServicePID())
+    }
+
+    private nonisolated static func pluginServicePID() -> pid_t? {
+        var processIdentifiers = [pid_t](repeating: 0, count: 16_384)
+        let byteCount = proc_listallpids(
+            &processIdentifiers,
+            Int32(processIdentifiers.count * MemoryLayout<pid_t>.stride)
+        )
+        guard byteCount > 0 else { return nil }
+
+        let processCount = Int(byteCount) / MemoryLayout<pid_t>.stride
+        let serviceSuffix = "/Build/Products/Debug/prismBar.app/Contents/XPCServices/" +
+            "prismCalcPluginService.xpc/Contents/MacOS/prismCalcPluginService"
+
+        for processIdentifier in processIdentifiers.prefix(processCount) where processIdentifier > 0 {
+            var pathBuffer = [CChar](repeating: 0, count: Int(MAXPATHLEN) * 4)
+            let pathLength = proc_pidpath(
+                processIdentifier,
+                &pathBuffer,
+                UInt32(pathBuffer.count)
+            )
+            guard pathLength > 0 else { continue }
+
+            let pathBytes = pathBuffer.prefix(Int(pathLength))
+                .prefix { $0 != 0 }
+                .map { UInt8(bitPattern: $0) }
+            guard let executablePath = String(bytes: pathBytes, encoding: .utf8) else {
+                continue
+            }
+            if executablePath.contains("/Library/Developer/Xcode/DerivedData/prismBar-") &&
+                executablePath.hasSuffix(serviceSuffix) {
+                return processIdentifier
+            }
+        }
+        return nil
     }
 
 }
