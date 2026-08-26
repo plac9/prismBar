@@ -78,6 +78,61 @@ struct TopologyAssemblerTests {
         #expect(identifier.count == 64)
     }
 
+    @Test("bounds untrusted accessibility metadata before assembly")
+    func boundsObservationMetadata() {
+        let oversized = String(repeating: "x", count: 20_000)
+        let owner = RunningApplicationDescriptor(
+            processIdentifier: 42,
+            bundleIdentifier: "com.example." + oversized,
+            displayName: oversized,
+            isSelf: false
+        )
+        let observation = MenuBarObservation(
+            owner: owner,
+            stableToken: oversized,
+            displayName: oversized,
+            frame: MenuBarItemFrame(minX: 100, minY: 0, width: 24, height: 24),
+            isEnabled: true,
+            surfaceToken: oversized
+        )
+
+        #expect(owner.bundleIdentifier?.count == 255)
+        #expect(owner.displayName.count == 120)
+        #expect(observation.stableToken.count == 512)
+        #expect(observation.displayName?.count == 120)
+        #expect(observation.surfaceToken?.count == 120)
+
+        let snapshot = TopologyAssembler().assemble(generation: 1, observations: [observation])
+        #expect(snapshot.items.count == 1)
+        #expect(snapshot.items[0].displayName.count == 120)
+
+        let oversizedScalarSequence = "a" + String(repeating: "\u{0301}", count: 20_000)
+        let scalarBoundedObservation = MenuBarObservation(
+            owner: owner,
+            stableToken: oversizedScalarSequence,
+            displayName: oversizedScalarSequence,
+            frame: nil,
+            isEnabled: true,
+            surfaceToken: oversizedScalarSequence
+        )
+        #expect(scalarBoundedObservation.stableToken.unicodeScalars.count == 512)
+        #expect(scalarBoundedObservation.displayName?.unicodeScalars.count == 120)
+        #expect(scalarBoundedObservation.surfaceToken?.unicodeScalars.count == 120)
+    }
+
+    @Test("caps the authoritative snapshot when aggregate observations exceed the limit")
+    func capsAggregateObservations() {
+        let observations = (0 ..< 2_050).map { index in
+            observation(token: "item-\(index)", horizontalPosition: Double(index))
+        }
+
+        let snapshot = TopologyAssembler().assemble(generation: 1, observations: observations)
+
+        #expect(snapshot.items.count == 2_048)
+        #expect(snapshot.unavailableSourceCount == 1)
+        #expect(!snapshot.isComplete)
+    }
+
     @Test("recognizes the exact hidden section divider without exposing it as movable")
     func recognizesHiddenDivider() {
         let snapshot = TopologyAssembler().assemble(

@@ -106,6 +106,7 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
     private static let applicationTimeout: Float = 0.25
     private static let maximumTraversalDepth = 4
     private static let maximumElementsPerApplication = 256
+    private static let maximumTotalObservations = 2_048
 
     public init() {}
 
@@ -121,12 +122,21 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
         let surfaceResolver = ActiveDisplaySurfaceCatalog.current()
         observations.reserveCapacity(applications.count)
 
-        for application in applications {
+        for (applicationIndex, application) in applications.enumerated() {
+            guard observations.count < Self.maximumTotalObservations else {
+                unavailableSourceCount += applications.count - applicationIndex
+                break
+            }
             do {
-                try observations.append(contentsOf: readObservations(
+                let applicationObservations = try readObservations(
                     for: application,
                     surfaceResolver: surfaceResolver
-                ))
+                )
+                let remainingCapacity = Self.maximumTotalObservations - observations.count
+                observations.append(contentsOf: applicationObservations.prefix(remainingCapacity))
+                if applicationObservations.count > remainingCapacity {
+                    unavailableSourceCount += 1
+                }
             } catch MenuBarAuthorizationError.permissionRevoked {
                 throw MenuBarAuthorizationError.permissionRevoked
             } catch {

@@ -6,6 +6,18 @@ import CryptoKit
 import Foundation
 import prismBarCore
 
+private enum AccessibilityMetadataLimits {
+    static let bundleIdentifierCharacters = 255
+    static let ownerDisplayNameCharacters = 120
+    static let stableTokenCharacters = 512
+    static let itemDisplayNameCharacters = 120
+    static let surfaceTokenCharacters = 120
+
+    static func bounded(_ value: String, characters: Int) -> String {
+        String(value.unicodeScalars.prefix(characters))
+    }
+}
+
 public struct RunningApplicationDescriptor: Equatable, Sendable {
     public let processIdentifier: Int32
     public let bundleIdentifier: String?
@@ -19,8 +31,16 @@ public struct RunningApplicationDescriptor: Equatable, Sendable {
         isSelf: Bool
     ) {
         self.processIdentifier = processIdentifier
-        self.bundleIdentifier = bundleIdentifier
-        self.displayName = displayName
+        self.bundleIdentifier = bundleIdentifier.map {
+            AccessibilityMetadataLimits.bounded(
+                $0,
+                characters: AccessibilityMetadataLimits.bundleIdentifierCharacters
+            )
+        }
+        self.displayName = AccessibilityMetadataLimits.bounded(
+            displayName,
+            characters: AccessibilityMetadataLimits.ownerDisplayNameCharacters
+        )
         self.isSelf = isSelf
     }
 }
@@ -42,16 +62,30 @@ public struct MenuBarObservation: Equatable, Sendable {
         surfaceToken: String? = nil
     ) {
         self.owner = owner
-        self.stableToken = stableToken
-        self.displayName = displayName
+        self.stableToken = AccessibilityMetadataLimits.bounded(
+            stableToken,
+            characters: AccessibilityMetadataLimits.stableTokenCharacters
+        )
+        self.displayName = displayName.map {
+            AccessibilityMetadataLimits.bounded(
+                $0,
+                characters: AccessibilityMetadataLimits.itemDisplayNameCharacters
+            )
+        }
         self.frame = frame
         self.isEnabled = isEnabled
-        self.surfaceToken = surfaceToken
+        self.surfaceToken = surfaceToken.map {
+            AccessibilityMetadataLimits.bounded(
+                $0,
+                characters: AccessibilityMetadataLimits.surfaceTokenCharacters
+            )
+        }
     }
 }
 
 public struct TopologyAssembler: Sendable {
     private static let maximumDisplayNameLength = 120
+    private static let maximumObservations = 2_048
     private static let systemBundleIdentifiers = [
         "com.apple.controlcenter",
         "com.apple.systemuiserver",
@@ -67,7 +101,8 @@ public struct TopologyAssembler: Sendable {
         observations: [MenuBarObservation],
         unavailableSourceCount: Int = 0
     ) -> MenuBarSnapshot {
-        let ordered = observations.sorted(by: observationOrder)
+        let wasTruncated = observations.count > Self.maximumObservations
+        let ordered = observations.prefix(Self.maximumObservations).sorted(by: observationOrder)
         var occurrenceCounts: [String: Int] = [:]
 
         let items = ordered.enumerated().map { position, observation in
@@ -99,10 +134,18 @@ public struct TopologyAssembler: Sendable {
             )
         }
 
+        let boundedUnavailableSourceCount = max(0, unavailableSourceCount)
+        let finalUnavailableSourceCount: Int = if wasTruncated,
+                                                  boundedUnavailableSourceCount < .max {
+            boundedUnavailableSourceCount + 1
+        } else {
+            boundedUnavailableSourceCount
+        }
+
         return MenuBarSnapshot(
             generation: generation,
             items: items,
-            unavailableSourceCount: unavailableSourceCount
+            unavailableSourceCount: finalUnavailableSourceCount
         )
     }
 
