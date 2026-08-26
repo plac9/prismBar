@@ -67,6 +67,10 @@ struct OverviewView: View {
             VStack(alignment: .leading, spacing: 18) {
                 SectionHeading(actionTitle, message: actionMessage, systemImage: actionSymbol)
 
+                Text(PrivacyCopy.observation + " " + PrivacyCopy.boundary)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
                 if model.accessibilityState == .denied {
                     Divider()
                     HStack(alignment: .top, spacing: 18) {

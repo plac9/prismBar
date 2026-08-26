@@ -67,6 +67,28 @@ final class LaunchTests: XCTestCase {
         XCTAssertTrue(application.staticTexts["No global keyboard monitoring"].exists)
     }
 
+    func testPrivacyTruthNamesLocalObservationAndDataBoundary() {
+        let application = XCUIApplication()
+        application.launch()
+
+        let privacyDestination = sidebarCell(named: "Privacy", in: application)
+        XCTAssertTrue(privacyDestination.waitForExistence(timeout: 5))
+        privacyDestination.click()
+
+        XCTAssertTrue(
+            application.staticTexts
+                .matching(NSPredicate(format: "label CONTAINS %@", PrivacyCopyFixture.observation))
+                .firstMatch
+                .waitForExistence(timeout: 5)
+        )
+        XCTAssertTrue(
+            application.staticTexts
+                .matching(NSPredicate(format: "label CONTAINS %@", PrivacyCopyFixture.boundary))
+                .firstMatch
+                .exists
+        )
+    }
+
     func testEveryDestinationExposesItsShippingSurface() {
         let application = XCUIApplication()
         application.launch()
@@ -321,4 +343,11 @@ final class LaunchTests: XCTestCase {
         return nil
     }
 
+}
+
+private enum PrivacyCopyFixture {
+    static let observation = "prismBar observes local menu bar structure on activation, when you refresh, " +
+        "and during requested movement."
+    static let boundary = "It does not capture the screen or upload menu titles, process identity, " +
+        "coordinates, or topology."
 }

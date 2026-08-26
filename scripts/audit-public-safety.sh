@@ -59,6 +59,17 @@ if git grep -I -q '^version https://git-lfs.github.com/spec/' -- .; then
   fail 'Git LFS pointers are not permitted in the self-contained source release'
 fi
 
+if ! rg -q 'on activation, when you refresh' App ||
+   ! rg -q 'during requested movement' App; then
+  fail 'privacy copy does not disclose every local observation trigger'
+fi
+if rg -q 'Accessibility is used only when you request' App; then
+  fail 'privacy copy incorrectly describes Accessibility as request-only'
+fi
+if ! rg -q 'does not capture the screen or upload menu titles' App; then
+  fail 'privacy copy does not state the capture and upload boundary'
+fi
+
 remote_urls="$(git remote -v | awk '{print $2}' | LC_ALL=C sort -u)"
 if [ -n "$remote_urls" ] && printf '%s\n' "$remote_urls" | \
   rg -v -q '^(https://github\.com/plac9/prismBar(\.git)?|git@github\.com:plac9/prismBar\.git)$'; then

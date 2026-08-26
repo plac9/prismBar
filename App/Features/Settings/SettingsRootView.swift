@@ -125,8 +125,12 @@ private struct PrivacySettingsView: View {
         VStack(alignment: .leading, spacing: 18) {
             SettingsHeader(
                 title: "Private by construction",
-                message: "No capture pipeline, analytics SDK, telemetry client, or remote service."
+                message: PrivacyCopy.observation
             )
+
+            Text(PrivacyCopy.boundary)
+                .font(.callout)
+                .foregroundStyle(.secondary)
 
             ContentCard {
                 VStack(spacing: 12) {

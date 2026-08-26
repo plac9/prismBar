@@ -12,8 +12,7 @@ struct PrivacyView: View {
                     symbol: "hand.raised",
                     eyebrow: "Private by construction",
                     title: "Your menu bar stays on your Mac.",
-                    message: "prismBar observes only the accessibility structure needed to organize items. " +
-                        "It never captures, recognizes, uploads, or profiles what is on screen."
+                    message: PrivacyCopy.observation + " " + PrivacyCopy.boundary
                 )
                 .accessibilityIdentifier("privacy.header.hand.raised")
 
@@ -22,8 +21,8 @@ struct PrivacyView: View {
                         Label("One permission, one purpose", systemImage: "checkmark.shield")
                             .font(.title2.bold())
                         Text(
-                            "Accessibility is used only when you request menu bar discovery or movement. " +
-                                "Permission state is rechecked live and is never stored as trusted truth."
+                            "Permission state is rechecked live and is never stored as trusted truth. " +
+                                PrivacyCopy.observation
                         )
                         .foregroundStyle(.secondary)
 
