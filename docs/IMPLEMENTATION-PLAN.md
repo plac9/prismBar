@@ -53,6 +53,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Implement order-preserving multi-item Hide and Show with a fresh verification for every item.
 - [x] Implement hide, show, section visibility, and reset semantics.
 - [x] Verify every operation against a fresh topology snapshot before reporting success.
+- [x] Reject input when the target display has no reserved menu bar area or geometry crosses displays.
 - [ ] Add equivalent keyboard and accessibility actions.
 - [x] Prove mouse-up and pointer restoration on cancellation and failure; use per-event Command flags without synthesizing modifier key state.
 

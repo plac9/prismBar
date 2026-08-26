@@ -19,6 +19,7 @@ public enum MoveExecutionOutcome: Equatable, Sendable {
     case topologyChanged
     case itemUnavailable
     case permissionRevoked
+    case menuBarUnavailable
     case observationFailed
     case inputFailed
 }
@@ -104,6 +105,8 @@ public actor VerifiedMoveCoordinator<
             return nil
         } catch MenuBarAuthorizationError.permissionRevoked {
             return .permissionRevoked
+        } catch MenuBarInputError.menuBarUnavailable {
+            return .menuBarUnavailable
         } catch {
             return .inputFailed
         }

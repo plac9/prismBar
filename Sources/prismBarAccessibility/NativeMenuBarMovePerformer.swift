@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import AppKit
 @preconcurrency import ApplicationServices
 import CoreGraphics
 import Foundation
@@ -15,6 +16,67 @@ public struct MenuBarDragPoint: Equatable, Sendable {
 public struct MenuBarDragGesture: Equatable, Sendable {
     public let start: MenuBarDragPoint
     public let end: MenuBarDragPoint
+}
+
+struct MenuBarInputSurface: Equatable, Sendable {
+    let frame: MenuBarItemFrame
+    let reservedMenuBarHeight: Double
+}
+
+struct MenuBarInputSafetyValidator: Sendable {
+    func allows(
+        source: MenuBarItemFrame,
+        destination: MenuBarItemFrame,
+        surfaces: [MenuBarInputSurface]
+    ) -> Bool {
+        guard let sourceSurfaceIndex = surfaces.firstIndex(where: { contains(source, in: $0) }),
+              let destinationSurfaceIndex = surfaces.firstIndex(where: { contains(destination, in: $0) })
+        else {
+            return false
+        }
+        return sourceSurfaceIndex == destinationSurfaceIndex
+    }
+
+    private func contains(_ item: MenuBarItemFrame, in surface: MenuBarInputSurface) -> Bool {
+        let frame = surface.frame
+        let itemMaxX = item.minX + item.width
+        let itemMidY = item.minY + item.height / 2
+        let frameMaxX = frame.minX + frame.width
+        let menuBarMaxY = frame.minY + surface.reservedMenuBarHeight
+
+        return surface.reservedMenuBarHeight > 0 &&
+            surface.reservedMenuBarHeight <= 128 &&
+            item.minX >= frame.minX &&
+            itemMaxX <= frameMaxX &&
+            itemMidY >= frame.minY &&
+            itemMidY <= menuBarMaxY
+    }
+}
+
+private enum NativeMenuBarSurfaceCatalog {
+    @MainActor
+    static func current() -> [MenuBarInputSurface] {
+        NSScreen.screens.compactMap { screen in
+            guard let screenNumber = screen.deviceDescription[
+                NSDeviceDescriptionKey("NSScreenNumber")
+            ] as? NSNumber else {
+                return nil
+            }
+
+            let displayFrame = CGDisplayBounds(CGDirectDisplayID(screenNumber.uint32Value))
+            guard displayFrame.width > 0, displayFrame.height > 0 else { return nil }
+
+            return MenuBarInputSurface(
+                frame: MenuBarItemFrame(
+                    minX: displayFrame.minX,
+                    minY: displayFrame.minY,
+                    width: displayFrame.width,
+                    height: displayFrame.height
+                ),
+                reservedMenuBarHeight: max(0, screen.frame.maxY - screen.visibleFrame.maxY)
+            )
+        }
+    }
 }
 
 public struct MenuBarDragGeometry: Sendable {
@@ -87,12 +149,20 @@ public actor NativeMenuBarMovePerformer: MenuBarMovePerforming {
         source: MenuBarItemFrame,
         destination: MenuBarItemFrame,
         insertionEdge: MenuBarInsertionEdge
-    ) throws {
+    ) async throws {
         guard AXIsProcessTrusted() else {
             throw MenuBarAuthorizationError.permissionRevoked
         }
         guard !Task.isCancelled else {
             throw NativeMenuBarMoveError.cancelled
+        }
+        let surfaces = await NativeMenuBarSurfaceCatalog.current()
+        guard MenuBarInputSafetyValidator().allows(
+            source: source,
+            destination: destination,
+            surfaces: surfaces
+        ) else {
+            throw MenuBarInputError.menuBarUnavailable
         }
 
         let gesture = geometry.gesture(

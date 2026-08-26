@@ -146,6 +146,20 @@ struct VerifiedMoveCoordinatorTests {
         #expect(await inputPerformer.executionCount == 1)
     }
 
+    @Test("reports an unavailable menu bar without retrying input")
+    func reportsUnavailableMenuBar() async throws {
+        let initial = snapshot(names: ["one", "two"], generation: 1)
+        let plan = try MovePlanner().plan(item: id("two"), to: 0, in: initial)
+        let performer = CountingFailingMovePerformer(error: MenuBarInputError.menuBarUnavailable)
+        let coordinator = VerifiedMoveCoordinator(
+            reader: SnapshotSequenceReader(snapshots: [initial]),
+            performer: performer
+        )
+
+        #expect(await coordinator.execute(plan) == .menuBarUnavailable)
+        #expect(await performer.executionCount == 1)
+    }
+
     @Test("a no-op plan verifies fresh topology without producing input")
     func verifiesNoOpWithoutInput() async throws {
         let initial = snapshot(names: ["one", "two"], generation: 1)

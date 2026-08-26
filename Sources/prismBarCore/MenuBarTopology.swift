@@ -75,6 +75,10 @@ public enum MenuBarAuthorizationError: Error, Equatable, Sendable {
     case permissionRevoked
 }
 
+public enum MenuBarInputError: Error, Equatable, Sendable {
+    case menuBarUnavailable
+}
+
 public protocol MenuBarMovePerforming: Sendable {
     func move(
         source: MenuBarItemFrame,

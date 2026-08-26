@@ -59,6 +59,67 @@ struct MenuBarDragGeometryTests {
     }
 }
 
+@Suite("Menu bar input safety")
+struct MenuBarInputSafetyTests {
+    private let validator = MenuBarInputSafetyValidator()
+    private let visibleSurface = MenuBarInputSurface(
+        frame: MenuBarItemFrame(minX: 0, minY: 0, width: 1800, height: 1169),
+        reservedMenuBarHeight: 39
+    )
+
+    @Test("allows input only inside one visible menu bar surface")
+    func allowsVisibleSameSurfaceInput() {
+        let source = MenuBarItemFrame(minX: 1500, minY: 8, width: 24, height: 24)
+        let destination = MenuBarItemFrame(minX: 1200, minY: 8, width: 24, height: 24)
+
+        #expect(validator.allows(source: source, destination: destination, surfaces: [visibleSurface]))
+    }
+
+    @Test("rejects auto-hidden or full-screen menu bar surfaces")
+    func rejectsSurfacesWithoutReservedMenuBarSpace() {
+        let unavailableSurface = MenuBarInputSurface(
+            frame: visibleSurface.frame,
+            reservedMenuBarHeight: 0
+        )
+        let source = MenuBarItemFrame(minX: 1500, minY: 8, width: 24, height: 24)
+        let destination = MenuBarItemFrame(minX: 1200, minY: 8, width: 24, height: 24)
+
+        #expect(!validator.allows(
+            source: source,
+            destination: destination,
+            surfaces: [unavailableSurface]
+        ))
+    }
+
+    @Test("rejects stale geometry outside the reserved menu bar area")
+    func rejectsStaleGeometry() {
+        let staleSource = MenuBarItemFrame(minX: 1500, minY: 90, width: 24, height: 24)
+        let destination = MenuBarItemFrame(minX: 1200, minY: 8, width: 24, height: 24)
+
+        #expect(!validator.allows(
+            source: staleSource,
+            destination: destination,
+            surfaces: [visibleSurface]
+        ))
+    }
+
+    @Test("rejects input that crosses displays")
+    func rejectsCrossDisplayInput() {
+        let secondSurface = MenuBarInputSurface(
+            frame: MenuBarItemFrame(minX: 1800, minY: 0, width: 1440, height: 900),
+            reservedMenuBarHeight: 30
+        )
+        let source = MenuBarItemFrame(minX: 1500, minY: 8, width: 24, height: 24)
+        let destination = MenuBarItemFrame(minX: 2000, minY: 4, width: 24, height: 24)
+
+        #expect(!validator.allows(
+            source: source,
+            destination: destination,
+            surfaces: [visibleSurface, secondSurface]
+        ))
+    }
+}
+
 @Suite("Menu bar drag cleanup")
 struct MenuBarDragCleanupTests {
     @Test("releases the button and restores the pointer after success")

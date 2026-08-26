@@ -293,6 +293,8 @@ extension AppModel {
             "The selected item is no longer available."
         case .permissionRevoked:
             "Accessibility access was revoked. Re-enable prismBar before moving items."
+        case .menuBarUnavailable:
+            "The menu bar is hidden or unavailable on this display. Show it, then try again."
         case .observationFailed:
             "The result could not be verified. Refresh before trying again."
         case .inputFailed:
