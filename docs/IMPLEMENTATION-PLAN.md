@@ -28,10 +28,11 @@ The project is complete only when every gate below has authoritative evidence fr
 
 ## Phase 2: Permission and identity foundation
 
-- [ ] Write failing tests for every permission state and transition.
-- [ ] Implement stable-install detection and current signing identity inspection.
-- [ ] Implement live Accessibility trust checks without cached truth.
-- [ ] Implement correct System Settings deep link and foreground recheck.
+- [x] Write failing tests for every permission state and transition.
+- [x] Implement stable-install detection and current signing identity inspection.
+- [x] Implement live Accessibility trust checks without cached truth.
+- [x] Use Apple's documented Accessibility prompt and recheck whenever the app returns to the foreground.
+- [x] Reject undocumented System Settings URL schemes from the product.
 - [ ] Implement runtime revocation behavior.
 - [ ] Render onboarding and recovery states using native macOS 27 components.
 - [ ] Prove grant, revoke, relaunch, and signed-upgrade behavior in `/Applications`.

@@ -13,6 +13,7 @@ struct prismBarApp: App {
     var body: some Scene {
         MenuBarExtra {
             StatusMenuView()
+                .environment(AppModel.shared)
         } label: {
             Image(systemName: "triangle")
                 .accessibilityLabel("prismBar")
@@ -21,6 +22,7 @@ struct prismBarApp: App {
 
         Settings {
             SettingsRootView()
+                .environment(AppModel.shared)
                 .frame(width: 560, height: 420)
         }
     }

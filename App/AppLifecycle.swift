@@ -20,7 +20,7 @@ final class AppWindowController: NSObject, NSWindowDelegate {
         )
         window.title = "prismBar"
         window.contentMinSize = NSSize(width: 760, height: 520)
-        window.contentViewController = NSHostingController(rootView: MainWindowView())
+        window.contentViewController = NSHostingController(rootView: MainWindowRootView())
         window.isReleasedWhenClosed = false
         window.delegate = self
         window.center()
@@ -38,6 +38,12 @@ final class AppWindowController: NSObject, NSWindowDelegate {
             self,
             selector: #selector(applicationDidFinishLaunching(_:)),
             name: NSApplication.didFinishLaunchingNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(applicationDidBecomeActive(_:)),
+            name: NSApplication.didBecomeActiveNotification,
             object: nil
         )
     }
@@ -59,6 +65,18 @@ final class AppWindowController: NSObject, NSWindowDelegate {
             object: nil
         )
         isObservingLaunch = false
+        AppModel.shared.refreshAccessibility()
         show()
+    }
+
+    @objc private func applicationDidBecomeActive(_: Notification) {
+        AppModel.shared.refreshAccessibility()
+    }
+}
+
+private struct MainWindowRootView: View {
+    var body: some View {
+        MainWindowView()
+            .environment(AppModel.shared)
     }
 }

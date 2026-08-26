@@ -7,6 +7,7 @@ import SwiftUI
 
 struct StatusMenuView: View {
     @Environment(\.openSettings) private var openSettings
+    @Environment(AppModel.self) private var model
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -24,6 +25,11 @@ struct StatusMenuView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+
+            Divider()
+
+            Label(accessibilityLabel, systemImage: accessibilitySymbol)
+                .foregroundStyle(model.accessibilityState == .granted ? .green : .secondary)
 
             Divider()
 
@@ -45,5 +51,13 @@ struct StatusMenuView: View {
         }
         .padding(14)
         .frame(width: 280)
+    }
+
+    private var accessibilityLabel: String {
+        model.accessibilityState == .granted ? "Accessibility ready" : "Accessibility needs attention"
+    }
+
+    private var accessibilitySymbol: String {
+        model.accessibilityState == .granted ? "checkmark.shield" : "exclamationmark.shield"
     }
 }

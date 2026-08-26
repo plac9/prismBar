@@ -16,3 +16,6 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 - Sandboxed out-of-process prismCalc plugin service that requires the exact signed host.
 - Versioned, bounded plugin wire protocol and independently authored calculator reducer.
 - Unit and physical-host UI launch tests.
+- Live Accessibility authorization state based on a fresh macOS trust check.
+- Stable `/Applications/prismBar.app` and exact signing identity validation before requesting Accessibility access.
+- Accessible permission recovery controls with foreground refresh behavior.

@@ -13,4 +13,13 @@ final class LaunchTests: XCTestCase {
         XCTAssertTrue(mainWindow.waitForExistence(timeout: 5))
         XCTAssertEqual(mainWindow.title, "prismBar")
     }
+
+    func testPermissionRecoveryControlIsAccessible() {
+        let application = XCUIApplication()
+        application.launch()
+
+        let refreshButton = application.buttons["accessibility.refresh"]
+        XCTAssertTrue(refreshButton.waitForExistence(timeout: 5))
+        XCTAssertEqual(refreshButton.label, "Check Again")
+    }
 }
