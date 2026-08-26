@@ -108,31 +108,13 @@ public struct MenuBarDragGeometry: Sendable {
     }
 }
 
-public struct MenuBarDragLifecycle: Sendable {
-    public init() {}
-
-    public func perform(
-        press: () -> Void,
-        release: () -> Void,
-        restorePointer: () -> Void,
-        drag: () throws -> Void
-    ) rethrows {
-        press()
-        defer {
-            release()
-            restorePointer()
-        }
-        try drag()
-    }
-}
-
 public enum NativeMenuBarMoveError: Error, Equatable, Sendable {
     case eventCreationFailed
     case cancelled
 }
 
 public actor NativeMenuBarMovePerformer: MenuBarMovePerforming {
-    private struct PreparedDrag {
+    private struct PreparedDrag: @unchecked Sendable {
         let moveToStart: CGEvent
         let mouseDown: CGEvent
         let midpointDrag: CGEvent
@@ -142,6 +124,9 @@ public actor NativeMenuBarMovePerformer: MenuBarMovePerforming {
     }
 
     private let geometry = MenuBarDragGeometry()
+    private let lifecycle = DeadlineAwareMenuBarDragLifecycle(
+        pauser: SystemMenuBarDragPauser()
+    )
 
     public init() {}
 
@@ -173,7 +158,7 @@ public actor NativeMenuBarMovePerformer: MenuBarMovePerforming {
             insertionEdge: insertionEdge
         )
         let prepared = try prepare(gesture: gesture)
-        try perform(prepared)
+        try await perform(prepared, deadline: deadline)
     }
 
     private func prepare(gesture: MenuBarDragGesture) throws -> PreparedDrag {
@@ -230,24 +215,26 @@ public actor NativeMenuBarMovePerformer: MenuBarMovePerforming {
         )
     }
 
-    private func perform(_ drag: PreparedDrag) throws {
-        drag.moveToStart.post(tap: .cghidEventTap)
-        Thread.sleep(forTimeInterval: 0.025)
-        try MenuBarDragLifecycle().perform(
-            press: { drag.mouseDown.post(tap: .cghidEventTap) },
-            release: { drag.mouseUp.post(tap: .cghidEventTap) },
-            restorePointer: { drag.restorePointer.post(tap: .cghidEventTap) },
-            drag: {
-                Thread.sleep(forTimeInterval: 0.04)
-                guard !Task.isCancelled else {
-                    throw NativeMenuBarMoveError.cancelled
-                }
+    private func perform(
+        _ drag: PreparedDrag,
+        deadline: OperationDeadline
+    ) async throws {
+        try await lifecycle.perform(deadline: deadline) { stage in
+            switch stage {
+            case .position:
+                drag.moveToStart.post(tap: .cghidEventTap)
+            case .press:
+                drag.mouseDown.post(tap: .cghidEventTap)
+            case .midpoint:
                 drag.midpointDrag.post(tap: .cghidEventTap)
-                Thread.sleep(forTimeInterval: 0.04)
+            case .endpoint:
                 drag.endpointDrag.post(tap: .cghidEventTap)
-                Thread.sleep(forTimeInterval: 0.04)
+            case .release:
+                drag.mouseUp.post(tap: .cghidEventTap)
+            case .restore:
+                drag.restorePointer.post(tap: .cghidEventTap)
             }
-        )
+        }
     }
 
     private func mouseEvent(
