@@ -22,23 +22,30 @@ public enum MoveExecutionOutcome: Equatable, Sendable {
     case menuBarUnavailable
     case observationFailed
     case inputFailed
+    case timedOut
 }
 
 public actor VerifiedMoveCoordinator<
     Reader: MenuBarSnapshotReading,
     Performer: MenuBarMovePerforming
 > {
-    private enum SnapshotReadResult {
+    private enum SnapshotReadResult: Sendable {
         case success(MenuBarSnapshot)
         case failure(MoveExecutionOutcome)
     }
 
     private let reader: Reader
     private let performer: Performer
+    private let operationTimeout: Duration
 
-    public init(reader: Reader, performer: Performer) {
+    public init(
+        reader: Reader,
+        performer: Performer,
+        operationTimeout: Duration = .seconds(8)
+    ) {
         self.reader = reader
         self.performer = performer
+        self.operationTimeout = operationTimeout
     }
 
     public func execute(_ plan: MovePlan) async -> MoveExecutionOutcome {
@@ -80,12 +87,30 @@ public actor VerifiedMoveCoordinator<
     }
 
     private func readSnapshot() async -> SnapshotReadResult {
-        do {
-            return .success(try await reader.snapshot())
-        } catch MenuBarAuthorizationError.permissionRevoked {
-            return .failure(.permissionRevoked)
-        } catch {
-            return .failure(.observationFailed)
+        await withTaskGroup(of: SnapshotReadResult.self) { group in
+            group.addTask { [reader] in
+                do {
+                    return .success(try await reader.snapshot())
+                } catch MenuBarAuthorizationError.permissionRevoked {
+                    return .failure(.permissionRevoked)
+                } catch is CancellationError {
+                    return .failure(.timedOut)
+                } catch {
+                    return .failure(.observationFailed)
+                }
+            }
+            group.addTask { [operationTimeout] in
+                do {
+                    try await Task.sleep(for: operationTimeout)
+                    return .failure(.timedOut)
+                } catch {
+                    return .failure(.timedOut)
+                }
+            }
+
+            let result = await group.next() ?? .failure(.observationFailed)
+            group.cancelAll()
+            return result
         }
     }
 
@@ -96,19 +121,37 @@ public actor VerifiedMoveCoordinator<
     ) async -> MoveExecutionOutcome? {
         let insertionEdge: MenuBarInsertionEdge =
             plan.sourceIndex < plan.destinationIndex ? .after : .before
-        do {
-            try await performer.move(
-                source: sourceFrame,
-                destination: destinationFrame,
-                insertionEdge: insertionEdge
-            )
-            return nil
-        } catch MenuBarAuthorizationError.permissionRevoked {
-            return .permissionRevoked
-        } catch MenuBarInputError.menuBarUnavailable {
-            return .menuBarUnavailable
-        } catch {
-            return .inputFailed
+        return await withTaskGroup(of: MoveExecutionOutcome?.self) { group in
+            group.addTask { [performer] in
+                do {
+                    try await performer.move(
+                        source: sourceFrame,
+                        destination: destinationFrame,
+                        insertionEdge: insertionEdge
+                    )
+                    return nil
+                } catch MenuBarAuthorizationError.permissionRevoked {
+                    return .permissionRevoked
+                } catch MenuBarInputError.menuBarUnavailable {
+                    return .menuBarUnavailable
+                } catch is CancellationError {
+                    return .timedOut
+                } catch {
+                    return .inputFailed
+                }
+            }
+            group.addTask { [operationTimeout] in
+                do {
+                    try await Task.sleep(for: operationTimeout)
+                    return .timedOut
+                } catch {
+                    return .timedOut
+                }
+            }
+
+            let result = await group.next() ?? .inputFailed
+            group.cancelAll()
+            return result
         }
     }
 

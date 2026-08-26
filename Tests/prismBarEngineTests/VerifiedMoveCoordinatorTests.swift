@@ -160,6 +160,38 @@ struct VerifiedMoveCoordinatorTests {
         #expect(await performer.executionCount == 1)
     }
 
+    @Test("times out a stalled observation without producing input")
+    func timesOutStalledObservation() async throws {
+        let initial = snapshot(names: ["one", "two"], generation: 1)
+        let plan = try MovePlanner().plan(item: id("two"), to: 0, in: initial)
+        let performer = RecordingMovePerformer()
+        let coordinator = VerifiedMoveCoordinator(
+            reader: StalledSnapshotReader(),
+            performer: performer,
+            operationTimeout: .milliseconds(20)
+        )
+
+        #expect(await coordinator.execute(plan) == .timedOut)
+        #expect(await performer.executionCount == 0)
+    }
+
+    @Test("times out stalled input without retrying or verifying")
+    func timesOutStalledInput() async throws {
+        let initial = snapshot(names: ["one", "two"], generation: 1)
+        let plan = try MovePlanner().plan(item: id("two"), to: 0, in: initial)
+        let reader = SnapshotSequenceReader(snapshots: [initial])
+        let performer = StalledMovePerformer()
+        let coordinator = VerifiedMoveCoordinator(
+            reader: reader,
+            performer: performer,
+            operationTimeout: .milliseconds(20)
+        )
+
+        #expect(await coordinator.execute(plan) == .timedOut)
+        #expect(await performer.executionCount == 1)
+        #expect(await reader.remainingCount == 0)
+    }
+
     @Test("a no-op plan verifies fresh topology without producing input")
     func verifiesNoOpWithoutInput() async throws {
         let initial = snapshot(names: ["one", "two"], generation: 1)
@@ -239,6 +271,17 @@ private actor SnapshotSequenceReader: MenuBarSnapshotReading {
         }
         return snapshots.removeFirst()
     }
+
+    var remainingCount: Int {
+        snapshots.count
+    }
+}
+
+private struct StalledSnapshotReader: MenuBarSnapshotReading {
+    func snapshot() async throws -> MenuBarSnapshot {
+        try await Task.sleep(for: .seconds(30))
+        throw VerifiedMoveError.observationFailed
+    }
 }
 
 private actor RecordingMovePerformer: MenuBarMovePerforming {
@@ -304,5 +347,18 @@ private actor CountingFailingMovePerformer: MenuBarMovePerforming {
     ) throws {
         executionCount += 1
         throw error
+    }
+}
+
+private actor StalledMovePerformer: MenuBarMovePerforming {
+    private(set) var executionCount = 0
+
+    func move(
+        source _: MenuBarItemFrame,
+        destination _: MenuBarItemFrame,
+        insertionEdge _: MenuBarInsertionEdge
+    ) async throws {
+        executionCount += 1
+        try await Task.sleep(for: .seconds(30))
     }
 }

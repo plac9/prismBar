@@ -299,6 +299,8 @@ extension AppModel {
             "The result could not be verified. Refresh before trying again."
         case .inputFailed:
             "macOS rejected the move input."
+        case .timedOut:
+            "macOS did not finish the move in time. Nothing else was attempted. Refresh and try again."
         }
     }
 }

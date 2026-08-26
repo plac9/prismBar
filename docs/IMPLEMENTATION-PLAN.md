@@ -48,7 +48,7 @@ The project is complete only when every gate below has authoritative evidence fr
 
 ## Phase 4: Verified actions and recovery
 
-- [ ] Write failing tests for arbitrary-position moves, group moves, stale targets, revocation, rejection, partial movement, and timeout.
+- [x] Write tests for arbitrary-position moves, group moves, stale targets, revocation, rejection, partial movement, and bounded timeout.
 - [x] Implement direct multi-position movement in one action.
 - [x] Implement order-preserving multi-item Hide and Show with a fresh verification for every item.
 - [x] Implement hide, show, section visibility, and reset semantics.
