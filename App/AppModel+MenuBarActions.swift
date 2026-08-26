@@ -8,10 +8,11 @@ import prismBarEngine
 extension AppModel {
     func moveMenuBarItem(_ itemID: MenuBarItemID, to destinationIndex: Int) {
         guard accessibilityState == .granted,
-              let displayedSnapshot = menuBarSnapshot
+              let displayedSnapshot = menuBarSnapshot,
+              !isMenuBarActionInProgress
         else { return }
 
-        menuBarActionState = .moving(itemID)
+        menuBarActionState = .moving
         Task { [weak self] in
             guard let self else { return }
             let wasCollapsed = isHiddenSectionCollapsed
@@ -47,9 +48,11 @@ extension AppModel {
     }
 
     func moveMenuBarItem(_ itemID: MenuBarItemID, to section: MenuBarSection) {
-        guard accessibilityState == .granted else { return }
+        guard accessibilityState == .granted,
+              !isMenuBarActionInProgress
+        else { return }
 
-        menuBarActionState = .moving(itemID)
+        menuBarActionState = .moving
         Task { [weak self] in
             guard let self else { return }
             let wasCollapsed = isHiddenSectionCollapsed
@@ -91,17 +94,22 @@ extension AppModel {
     func moveMenuBarItems(_ itemIDs: Set<MenuBarItemID>, to section: MenuBarSection) {
         guard accessibilityState == .granted,
               section != .controller,
-              !itemIDs.isEmpty
+              !itemIDs.isEmpty,
+              !isMenuBarActionInProgress
         else { return }
 
+        menuBarActionState = .moving
         Task { [weak self] in
             await self?.performBatchMove(itemIDs, to: section)
         }
     }
 
     func resetMenuBar() {
-        guard accessibilityState == .granted else { return }
+        guard accessibilityState == .granted,
+              !isMenuBarActionInProgress
+        else { return }
 
+        menuBarActionState = .moving
         Task { [weak self] in
             guard let self else { return }
             await revealHiddenSectionForAction()
@@ -109,13 +117,12 @@ extension AppModel {
             do {
                 let initial = try await menuBarController.snapshot()
                 let itemIDs = SectionResetPlanner().hiddenItemsToReveal(in: initial)
-                guard let firstItemID = itemIDs.first else {
+                guard !itemIDs.isEmpty else {
                     menuBarActionState = .result("Every menu bar item is already visible.")
                     refreshMenuBar()
                     return
                 }
 
-                menuBarActionState = .moving(firstItemID)
                 for itemID in itemIDs {
                     let snapshot = try await menuBarController.snapshot()
                     let plan = try SectionMovePlanner().plan(
@@ -152,6 +159,10 @@ extension AppModel {
     }
 
     func setHiddenSectionCollapsed(_ collapsed: Bool) {
+        guard accessibilityState == .granted,
+              !isMenuBarActionInProgress
+        else { return }
+
         let actualState = MenuBarSectionStatusController.shared.setCollapsed(
             collapsed,
             dividerFrame: menuBarSnapshot?.hiddenSectionDivider?.frame
@@ -202,14 +213,13 @@ extension AppModel {
                 to: section,
                 in: initialSnapshot
             )
-            guard let firstItemID = orderedItemIDs.first else {
+            guard !orderedItemIDs.isEmpty else {
                 menuBarActionState = .result("No selected items can move to that section.")
                 await restoreHiddenSectionIfNeeded(wasCollapsed)
                 refreshMenuBar()
                 return
             }
 
-            menuBarActionState = .moving(firstItemID)
             let execution = try await executeBatchMoves(orderedItemIDs, to: section)
             if let failure = execution.failure {
                 await finishFailedBatchMove(
