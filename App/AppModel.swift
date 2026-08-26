@@ -28,6 +28,7 @@ enum PluginLoadingState: Equatable {
     case loading
     case ready
     case unavailable
+    case paused
     case disabled
 }
 
@@ -226,7 +227,7 @@ extension AppModel {
                 pluginState = .ready
             } catch PluginClientError.disabledForSession {
                 guard let self, revision == pluginRevision else { return }
-                pluginState = .disabled
+                pluginState = .paused
                 pluginMessage = "prismCalc paused after repeated failures. Retry when ready."
             } catch let error as PluginClientError {
                 guard let self, revision == pluginRevision else { return }
@@ -293,7 +294,7 @@ extension AppModel {
                 applyPluginMutations(update.mutations)
             } catch PluginClientError.disabledForSession {
                 guard let self, revision == pluginRevision else { return }
-                pluginState = .disabled
+                pluginState = .paused
                 pluginMessage = "prismCalc paused after repeated failures. Retry when ready."
             } catch let error as PluginClientError {
                 guard let self, revision == pluginRevision else { return }

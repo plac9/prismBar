@@ -76,12 +76,12 @@ struct PluginsView: View {
                         capabilityBadge(capability)
                     }
                     Spacer()
-                    Label(
-                        model.pluginState == .ready ? "Signature verified" : "Signature required",
-                        systemImage: model.pluginState == .ready ? "checkmark.shield" : "lock.shield"
-                    )
+                    Label(pluginHealthTitle, systemImage: pluginHealthSymbol)
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(pluginHealthColor)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Plugin health: \(pluginHealthTitle)")
+                    .accessibilityIdentifier("plugin.health")
                 }
             }
         }
@@ -106,7 +106,7 @@ struct PluginsView: View {
                 if let update = model.pluginPanel {
                     PluginPanelView(update: update, compact: true)
                 }
-            case .unavailable, .disabled:
+            case .unavailable, .paused, .disabled:
                 ContentUnavailableView {
                     Label("prismCalc unavailable", systemImage: "puzzlepiece.extension")
                 } description: {
@@ -126,6 +126,47 @@ struct PluginsView: View {
             get: { model.isPluginEnabled },
             set: { model.setPluginEnabled($0) }
         )
+    }
+
+    private var pluginHealthTitle: String {
+        switch model.pluginState {
+        case .idle, .loading:
+            "Verifying service"
+        case .ready:
+            "Verified and ready"
+        case .unavailable:
+            "Connection needs attention"
+        case .paused:
+            "Paused for safety"
+        case .disabled:
+            "Plugin off"
+        }
+    }
+
+    private var pluginHealthSymbol: String {
+        switch model.pluginState {
+        case .idle, .loading:
+            "lock.shield"
+        case .ready:
+            "checkmark.shield"
+        case .unavailable:
+            "exclamationmark.triangle"
+        case .paused:
+            "pause.circle"
+        case .disabled:
+            "power"
+        }
+    }
+
+    private var pluginHealthColor: Color {
+        switch model.pluginState {
+        case .ready:
+            .green
+        case .unavailable, .paused:
+            .orange
+        case .idle, .loading, .disabled:
+            .secondary
+        }
     }
 
     private func capabilityBadge(_ capability: PluginCapability) -> some View {

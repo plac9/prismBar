@@ -140,7 +140,7 @@ struct StatusMenuView: View {
                 Button("Enable prismCalc", systemImage: "puzzlepiece.extension") {
                     model.setPluginEnabled(true)
                 }
-            } else if model.pluginState == .unavailable || model.pluginState == .disabled {
+            } else if model.pluginState == .unavailable || model.pluginState == .paused {
                 Button("Retry prismCalc", systemImage: "arrow.clockwise") {
                     model.retryPlugin()
                 }

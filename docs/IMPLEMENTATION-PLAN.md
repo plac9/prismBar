@@ -76,7 +76,8 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Add sandboxed service entitlements with no network or file authority.
 - [x] Implement bounded timeout, failure-budget disable, stale-callback suppression, and manual recovery behavior.
 - [x] Prove hostile descriptor, hang, crash, and version mismatch behavior.
-- [ ] Prove live wrong-signature rejection and finish the user-facing plugin health state.
+- [ ] Prove live wrong-signature rejection.
+- [x] Finish the user-facing plugin health state for off, verifying, ready, interrupted, and safety-paused conditions.
 
 ## Phase 7: prismCalc plugin
 

@@ -157,6 +157,9 @@ final class LaunchTests: XCTestCase {
 
         let panelTitle = application.staticTexts["prismCalc"]
         XCTAssertTrue(panelTitle.waitForExistence(timeout: 7), application.debugDescription)
+        let health = application.descendants(matching: .any)["plugin.health"]
+        XCTAssertTrue(health.waitForExistence(timeout: 3))
+        XCTAssertEqual(health.label, "Plugin health: Verified and ready")
 
         application.buttons["Seven"].click()
         application.buttons["Add"].click()
@@ -210,6 +213,10 @@ final class LaunchTests: XCTestCase {
 
         application.buttons["Seven"].click()
         XCTAssertTrue(application.staticTexts["prismCalc unavailable"].waitForExistence(timeout: 5))
+        XCTAssertEqual(
+            application.descendants(matching: .any)["plugin.health"].label,
+            "Plugin health: Connection needs attention"
+        )
         XCTAssertNotEqual(application.state, .notRunning)
 
         XCTAssertEqual(kill(servicePID, SIGCONT), 0)
@@ -229,6 +236,10 @@ final class LaunchTests: XCTestCase {
         XCTAssertEqual(kill(servicePID, SIGKILL), 0)
 
         XCTAssertTrue(application.staticTexts["prismCalc unavailable"].waitForExistence(timeout: 5))
+        XCTAssertEqual(
+            application.descendants(matching: .any)["plugin.health"].label,
+            "Plugin health: Connection needs attention"
+        )
         XCTAssertNotEqual(application.state, .notRunning)
 
         application.buttons["Retry"].click()

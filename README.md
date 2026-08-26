@@ -41,6 +41,10 @@ contains no screenshots or observed menu metadata.
 Run the native UI suite through `./scripts/test-ui.sh`. The wrapper preserves whether the exact
 installed `/Applications/prismBar.app` process was running and restores it after XCUITest exits.
 
+Run revision-bound automated lifecycle soak verification with `./scripts/stress-verify.sh`. It
+repeats the complete Swift and native UI suites for 15 minutes by default, records only sanitized
+aggregate evidence under ignored `build/`, and keeps physical signed-app movement as a separate gate.
+
 ## Status
 
 Architecture is locked and the clean-room implementation is in progress. No release claim should be inferred until the physical macOS 27, signing, notarization, security, privacy, and accessibility gates in `docs/IMPLEMENTATION-PLAN.md` pass.

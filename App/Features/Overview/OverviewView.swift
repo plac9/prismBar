@@ -73,7 +73,7 @@ struct OverviewView: View {
                         RecoveryStep(
                             number: 1,
                             title: "Remove old entry",
-                            message: "In Accessibility, remove prismBar if listed."
+                            message: "In Device Control and Data Access, remove prismBar if listed."
                         )
                         RecoveryStep(
                             number: 2,
@@ -164,7 +164,8 @@ struct OverviewView: View {
         case .notRequested:
             "prismBar needs Accessibility only to observe and move menu bar items you control."
         case .denied:
-            "Review prismBar in Privacy & Security > Accessibility. If it is already enabled, " +
+            "Review prismBar in Privacy & Security > Device Control and Data Access. " +
+                "If it is already enabled, " +
                 "remove that entry, add /Applications/prismBar.app again, then choose Check Again."
         case .granted:
             "Open Menu Bar to move, hide, reveal, or recover items."
@@ -212,8 +213,10 @@ struct OverviewView: View {
             "prismCalc ready"
         case .unavailable:
             "prismCalc unavailable"
+        case .paused:
+            "prismCalc paused for safety"
         case .disabled:
-            model.isPluginEnabled ? "prismCalc paused" : "prismCalc disabled"
+            "prismCalc disabled"
         }
     }
 }
