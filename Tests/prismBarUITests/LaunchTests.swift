@@ -166,6 +166,12 @@ final class LaunchTests: XCTestCase {
             XCTAssertEqual(mainWindow.title, "prismBar")
 
             for destination in ["Overview", "Menu Bar", "Plugins", "Shortcuts", "Privacy", "About"] {
+                application.activate()
+                XCTAssertEqual(
+                    application.state,
+                    .runningForeground,
+                    "prismBar did not recover foreground focus for \(launchArguments)"
+                )
                 let cell = sidebarCell(named: destination, in: application)
                 XCTAssertTrue(
                     cell.waitForExistence(timeout: 5),
