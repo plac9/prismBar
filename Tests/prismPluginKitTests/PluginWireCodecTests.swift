@@ -70,4 +70,49 @@ struct PluginWireCodecTests {
             try PluginWireCodec().encode(PluginResponse.panel(update))
         }
     }
+
+    @Test("handles a deterministic hostile byte corpus without trapping")
+    func hostileByteCorpus() throws {
+        var generator = DeterministicByteGenerator(seed: 0x5052_4953_4D42_4152)
+        let codec = PluginWireCodec()
+
+        for sample in 0 ..< 2_048 {
+            let length = Int(generator.next() % 2_049)
+            let data = Data((0 ..< length).map { _ in generator.nextByte() })
+
+            do {
+                let request = try codec.decode(PluginRequest.self, from: data)
+                #expect(try codec.encode(request).count <= PluginWireCodec.maximumMessageBytes)
+            } catch {
+                #expect(data.count <= PluginWireCodec.maximumMessageBytes)
+            }
+
+            if sample.isMultiple(of: 128) {
+                let oversized = Data(
+                    repeating: generator.nextByte(),
+                    count: PluginWireCodec.maximumMessageBytes + 1
+                )
+                #expect(throws: PluginWireError.messageTooLarge(oversized.count)) {
+                    try codec.decode(PluginRequest.self, from: oversized)
+                }
+            }
+        }
+    }
+}
+
+private struct DeterministicByteGenerator {
+    private var state: UInt64
+
+    init(seed: UInt64) {
+        state = seed
+    }
+
+    mutating func next() -> UInt64 {
+        state = state &* 6_364_136_223_846_793_005 &+ 1_442_695_040_888_963_407
+        return state
+    }
+
+    mutating func nextByte() -> UInt8 {
+        UInt8(truncatingIfNeeded: next() >> 24)
+    }
 }

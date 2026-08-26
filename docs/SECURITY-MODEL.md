@@ -145,6 +145,7 @@ Every entitlement addition requires an ADR, privacy update, threat-model update,
 - logs contain no menu titles, process names, paths, expressions, environment values, or secret canaries
 - release bundle contains only expected executables and libraries
 - host and plugins have the exact entitlement allowlists
+- deterministic hostile wire and calculator corpora remain bounded under Address Sanitizer and Thread Sanitizer
 - `codesign --verify --deep --strict`, `spctl`, notarization, and stapler validation pass
 
 ## Residual risks

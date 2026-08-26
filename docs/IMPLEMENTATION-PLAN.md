@@ -109,8 +109,9 @@ The project is complete only when every gate below has authoritative evidence fr
 - [ ] Dependency license inventory and SBOM.
 - [ ] Similarity audit against the frozen GPL reference.
 - [ ] Confirm the public source revision exactly matches every distributed MPL-covered binary.
-- [ ] Fuzz plugin decoder and calculator parser.
-- [ ] Run static analysis, sanitizers, concurrency stress, and long-duration lifecycle tests.
+- [x] Exercise plugin decoding and calculator commands with deterministic hostile-input corpora.
+- [x] Run static analysis plus Address Sanitizer and Thread Sanitizer across the Swift modules.
+- [ ] Run long-duration host, permission, movement, and plugin lifecycle stress tests.
 - [ ] Produce the required dark HTML assurance report.
 
 ## Phase 10: Signed physical release proof

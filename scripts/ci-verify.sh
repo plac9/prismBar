@@ -36,6 +36,10 @@ fi
 swiftlint lint --strict
 swift test
 swift test -c release
+swift test --sanitize=address --scratch-path \
+  "${CI_ADDRESS_SANITIZER_DIR:-$repository_root/build/SwiftPM-ASan}"
+swift test --sanitize=thread --scratch-path \
+  "${CI_THREAD_SANITIZER_DIR:-$repository_root/build/SwiftPM-TSan}"
 
 derived_data_directory="${CI_DERIVED_DATA_DIR:-$repository_root/build/CI-DerivedData}"
 common_build_arguments=(

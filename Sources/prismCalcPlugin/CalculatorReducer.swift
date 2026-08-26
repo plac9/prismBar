@@ -45,6 +45,8 @@ public enum CalculatorError: Error, Equatable, Sendable {
 }
 
 public struct CalculatorReducer: Sendable {
+    public static let maximumInputCharacters = 32
+
     public private(set) var state: CalculatorState
 
     private let historyLimit: Int
@@ -103,7 +105,7 @@ private extension CalculatorReducer {
         if startsNewInput || input == "0" {
             input = String(digit)
             startsNewInput = false
-        } else {
+        } else if input.count < Self.maximumInputCharacters {
             input.append(String(digit))
         }
         state.display = input
@@ -113,7 +115,7 @@ private extension CalculatorReducer {
         if startsNewInput {
             input = "0."
             startsNewInput = false
-        } else if !input.contains(".") {
+        } else if !input.contains("."), input.count < Self.maximumInputCharacters {
             input.append(".")
         }
         state.display = input
