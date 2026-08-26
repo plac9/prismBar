@@ -117,9 +117,9 @@ The project is complete only when every gate below has authoritative evidence fr
 
 ## Phase 10: Signed physical release proof
 
-- [ ] Verify Apple identifier and signing configuration for `com.laclairtech.prismbar`.
-- [ ] Archive with Xcode 27 using Developer ID and Hardened Runtime.
-- [ ] Verify nested signing order and exact entitlement allowlists.
+- [x] Verify Apple identifier and signing configuration for `com.laclairtech.prismbar`.
+- [x] Archive with Xcode 27 using Developer ID and Hardened Runtime.
+- [x] Verify nested signing order and exact entitlement allowlists.
 - [ ] Package, notarize, staple, and validate the distribution artifact.
 - [ ] Install through the shipping flow to `/Applications/prismBar.app`.
 - [ ] Complete the physical macOS 27 permission, move, status item, plugin, relaunch, upgrade, displays, spaces, full-screen, sleep, wake, logout, and reboot matrix.
