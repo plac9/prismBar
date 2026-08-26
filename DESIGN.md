@@ -1,114 +1,135 @@
 ---
+version: alpha
+name: prismBar Prism Deck
+description: Native macOS 27 design contract for prismBar command, workspace, and tool surfaces
 colors:
-  primary: "#58AFFF"
-  glacier: "#58AFFF"
-  deepWater: "#0B3558"
-  frost: "#EAF6FF"
-  success: "#34C759"
-  warning: "#FF9F0A"
-  danger: "#FF453A"
-rounded:
-  compactControl: 8
-  control: 12
-  panel: 18
-spacing:
-  compact: 6
-  standard: 12
-  section: 20
-  content: 24
+  primary: "#0067D9"
+  refractedBlue: "#38A8FF"
+  refractedViolet: "#6750D8"
+  refractedCyan: "#007C91"
+  lightContent: "#F5F5F7"
+  lightPrimaryText: "#1D1D1F"
 typography:
-  display:
-    fontFamily: "SF Pro Rounded"
+  pageTitle:
+    fontFamily: SF Pro Display
+    fontSize: 28px
+    fontWeight: 700
+    lineHeight: 1.15
+    letterSpacing: -0.01em
+  sectionTitle:
+    fontFamily: SF Pro Text
+    fontSize: 15px
     fontWeight: 600
+    lineHeight: 1.25
   body:
-    fontFamily: "SF Pro"
+    fontFamily: SF Pro Text
+    fontSize: 13px
     fontWeight: 400
-  data:
-    fontFamily: "SF Mono"
+    lineHeight: 1.35
+  detail:
+    fontFamily: SF Pro Text
+    fontSize: 11px
     fontWeight: 400
+    lineHeight: 1.3
+  numeric:
+    fontFamily: SF Mono
+    fontSize: 28px
+    fontWeight: 500
+    lineHeight: 1.1
+rounded:
+  control: 8px
+  surface: 12px
+  prominent: 16px
+  pill: 999px
+spacing:
+  xxs: 4px
+  xs: 8px
+  sm: 12px
+  md: 16px
+  lg: 24px
+  xl: 32px
+components:
+  primary-button:
+    textColor: "#FFFFFF"
+    backgroundColor: "{colors.primary}"
+    rounded: "{rounded.control}"
+    padding: "{spacing.sm}"
+    typography: "{typography.body}"
+  tool-badge:
+    textColor: "{colors.lightPrimaryText}"
+    backgroundColor: "{colors.lightContent}"
+    rounded: "{rounded.pill}"
+    padding: "{spacing.xs}"
+    typography: "{typography.detail}"
+  prism-edge-blue:
+    backgroundColor: "{colors.refractedBlue}"
+    height: 2px
+  prism-edge-violet:
+    backgroundColor: "{colors.refractedViolet}"
+    height: 2px
+  prism-edge-cyan:
+    backgroundColor: "{colors.refractedCyan}"
+    height: 2px
 ---
 
-# prismBar Design Contract
+# Overview
 
-## Product posture
+prismBar should feel like a compact macOS instrument: immediately understandable, precise under pressure, and distinct through refracted-light details rather than decorative chrome. The system owns window materials, Liquid Glass, focus, selection, and control behavior. prismBar contributes a calm information hierarchy, a glacier-blue action color, and rare spectral accents that make the product recognizable without turning utility surfaces into artwork.
 
-prismBar is a quiet macOS utility that restores control without turning the menu bar into another dashboard. It should feel like a first-party system surface: immediate, calm, precise, and transparent about authority.
+# Colors
 
-## Experience principles
+`primary` is the product action tint for enabled primary controls and selected tool identity. Refracted blue, violet, and cyan form the prism spectrum. Use them only for the app mark, a narrow decorative prism edge, or a short transition between product modes. They are not page backgrounds, status colors, or replacements for semantic system colors.
 
-1. **Permission is a state, not a wall.** Explain why access is needed, show the exact current state, offer one primary action, and recheck without requiring a relaunch.
-2. **The menu is the command center.** A normal click on the status item opens useful controls. No mystery clicks and no inert icon.
-3. **Direct manipulation first.** Drag an item to any valid destination in one gesture. Buttons and keyboard commands are equivalent recovery paths.
-4. **Glass has hierarchy.** Use system Liquid Glass for navigation and controls. Do not stack decorative translucent cards or put glass on every content surface.
-5. **Color communicates sparingly.** Glacier blue is the brand accent. Success, warning, and danger remain semantic system colors with text and symbols.
-6. **Privacy is visible.** Permission and About surfaces plainly state that prismBar does not capture the screen or upload menu content.
+Content backgrounds, primary text, secondary text, separators, warnings, destructive states, success, and keyboard focus use native semantic macOS values. The light and dark content tokens document visual targets for design tooling, not hardcoded appearance overrides. SwiftUI implementations must use semantic system values and follow the active system appearance.
 
-## Surface hierarchy
+# Typography
 
-- The menu bar status item is monochrome and template-rendered.
-- The menu popover provides section state, recent activity, plugin panels, Settings, and Quit.
-- The main window uses `NavigationSplitView` for Overview, Menu Bar, Plugins, Shortcuts, Privacy, and About.
-- Settings use native controls and layout behavior. Custom styling is limited to semantic content surfaces, brand accents, and system-supported interactive glass controls.
-- Onboarding is a focused window with one decision per step.
+Use Apple system text styles in shipping SwiftUI code. The type tokens document hierarchy and design-tool targets. Page titles are compact and confident. Section titles label small groups. Body copy explains one decision at a time. Detail text is used only for secondary state and capability descriptions. Numeric results use monospaced digits but remain readable with system text scaling.
 
-## Materials
+# Layout
 
-- Window chrome, sidebars, toolbars, menus, popovers, buttons, and navigation adopt macOS 27 system Liquid Glass automatically.
-- Content backgrounds use system window and control backgrounds.
-- Custom glass effects are allowed only for a distinct floating control group that cannot be expressed with a standard component.
-- Reduce Transparency replaces materials with opaque semantic system surfaces.
-- Increase Contrast and Differentiate Without Color remain fully functional.
+The menu-bar Prism Deck is a compact command surface with two stable modes: Bar and Tools. Keep one primary task above the fold and preserve a predictable footer for opening the workspace and Settings. The main workspace uses a standard `NavigationSplitView`. Tool experiences open in independent utility windows so they can remain available without keeping Settings or the workspace open.
 
-## Color
+Use the spacing tokens as rhythm, not as fixed geometry that defeats platform adaptation. Preserve comfortable click targets, keyboard traversal, and localization growth. Avoid dense dashboard grids in the compact menu-bar surface.
 
-The named hex values define brand intent and asset production. Runtime UI prefers adaptive system colors and derives brand colors for the current appearance. No user-facing state relies on color alone.
+# Elevation & Depth
 
-- `glacier`: selection tint and restrained brand emphasis
-- `deepWater`: dark artwork depth, never body text
-- `frost`: light artwork highlight, never forced as a background
-- semantic state: system green, orange, and red with symbol and label
+macOS owns elevation through native windows, menus, popovers, sheets, and Liquid Glass. Do not paint a translucent full-window background, stack blur cards, or add decorative drop shadows. Content grouping uses semantic fills, separators, list selection, and whitespace. A prism spectrum may appear as a one-pixel or two-pixel identity edge, never as a readability layer.
 
-## Typography
+# Shapes
 
-- Navigation and controls use system text styles.
-- Product moments may use system rounded design.
-- Coordinates, shortcut sequences, version identifiers, and diagnostic codes use monospaced system text.
-- No fixed user-facing font sizes and no forced uppercase.
+Use standard control shapes wherever SwiftUI supplies them. `control` is for small custom hosts around validated plugin controls. `surface` is for bounded content groups. `prominent` is reserved for the empty-state or onboarding hero. `pill` is limited to short capability or health labels. Do not turn every row into a rounded card.
 
-## Motion
+# Motion
 
-- Reordering uses spring motion only when it clarifies the final position.
-- Permission checks use a calm progress indicator and announce their result.
-- Reduce Motion replaces spatial transitions with fades or immediate state changes.
-- No ambient animation, pulsing decoration, or continuous icon motion.
+Movement should explain state change, not decorate idle surfaces. Reordering may use a short system spring only when it clarifies the verified destination. Permission checks use a calm progress indicator. Reduce Motion replaces spatial and numeric transitions with fades or immediate state changes. Do not add ambient animation, pulsing decoration, continuous icon movement, or animated backgrounds.
 
-## Accessibility
+# Icon Direction
 
-- Every icon-only control has a label, help text, and keyboard equivalent where appropriate.
-- Minimum target size is 28 by 28 points for macOS controls, with larger primary controls.
-- Focus order follows visual order.
-- Drag operations have Move To, Move Before, and Move After accessibility actions.
-- Permission state changes are announced through an accessibility notification.
-- Text and non-text contrast meet WCAG AA.
+The application icon is a prism that bends a cool beam into a compact spectrum, expressed with bold layers suitable for Icon Composer. The menu-bar icon is a monochrome template mark derived from the same prism geometry and optimized independently for status-item size. Neither surface uses ice, cubes, melting forms, snow, droplets, or inherited thaw imagery.
 
-## Icon direction
+# Components
 
-The application icon is a prism that bends a cool beam into a compact spectrum, expressed with simple bold layers for Icon Composer. It must not contain an ice cube, melting cube, snow, droplets, or thaw imagery.
+The primary button launches the single most useful next action and should normally be a standard bordered-prominent SwiftUI button using the app tint. The tool badge is a compact label for a capability or verified state. In dark appearance it must use native semantic foreground and fill values rather than the light reference colors in the token block.
 
-The menu bar icon is a template symbol derived from the prism silhouette. It must remain legible at 16 points, use no embedded color, and indicate open state through system selection behavior rather than a second illustration.
+The Prism Deck mode control is a standard segmented picker. Menu-item rows use native list behavior and expose direct move, hide, show, and recovery actions. Tool launchers identify the tool, its purpose, current health, and one launch action. Plugin-generated panels are rendered only from the closed, validated host vocabulary.
+
+# Do's and Don'ts
 
 ## Do
 
-- Prefer `MenuBarExtra`, `NavigationSplitView`, `ToolbarItem`, `Form`, `Table`, `Grid`, and standard button styles.
-- Let the system provide glass, hover, pressed, focus, vibrancy, and window behaviors.
-- Show useful empty, unavailable, permission, and recovery states.
-- Use concise verbs: Hide, Show, Move, Recheck, Open Settings, Copy Result.
+- Let standard SwiftUI and AppKit components receive macOS 27 Liquid Glass automatically.
+- Keep daily menu-bar control in Prism Deck, deeper organization in the workspace, and infrequent preferences in Settings.
+- Call user-facing extensions Tools and explain that plugins are the isolated framework underneath.
+- Give every icon-only control an accessibility label and help text.
+- Respect Reduce Transparency, Increase Contrast, Differentiate Without Color, and Reduce Motion.
+- Use specific, actionable failures instead of an unexplained exclamation mark.
 
-## Do not
+## Don't
 
-- Paint a custom gradient behind the entire application.
-- simulate Liquid Glass with blur stacks, borders, shadows, and translucent cards
-- use orange inherited from the reference product
-- show raw process names, AX identifiers, PIDs, or internal errors in the normal interface
-- reduce the app to a generic form with no hierarchy or identity
-- duplicate an action in multiple adjacent controls without a clear primary path
+- Do not embed a working calculator in Settings or the Tools management page.
+- Do not advertise arbitrary third-party plugin installation.
+- Do not simulate Liquid Glass with custom blur, shine, translucency, or stacked material cards.
+- Do not use thaw, ice, cube, droplet, or melting imagery.
+- Do not expose observed menu titles, process identity, paths, coordinates, Accessibility values, or plugin payloads in logs or diagnostics.
+- Do not use spectral colors as status semantics or on large content backgrounds.
