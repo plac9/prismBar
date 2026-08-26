@@ -39,4 +39,35 @@ struct PluginWireCodecTests {
 
         #expect(decoded == request)
     }
+
+    @Test("rejects unknown wire cases")
+    func rejectsUnknownWireCases() {
+        let unknownRequest = Data(#"{"unknown":{"_0":{}}}"#.utf8)
+
+        #expect(throws: (any Error).self) {
+            try PluginWireCodec().decode(PluginRequest.self, from: unknownRequest)
+        }
+    }
+
+    @Test("rejects an encoded message over the wire limit")
+    func rejectsOversizedEncodedMessage() {
+        let update = PluginPanelUpdate(
+            panel: .init(
+                identifier: "oversized.panel",
+                title: "Oversized",
+                elements: (0 ..< 300).map { index in
+                    .result(.init(
+                        identifier: "result.\(index)",
+                        value: String(repeating: "9", count: 256),
+                        accessibilityLabel: "Result"
+                    ))
+                }
+            ),
+            mutations: []
+        )
+
+        #expect(throws: (any Error).self) {
+            try PluginWireCodec().encode(PluginResponse.panel(update))
+        }
+    }
 }

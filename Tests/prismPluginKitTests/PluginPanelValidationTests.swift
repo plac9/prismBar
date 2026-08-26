@@ -106,6 +106,64 @@ struct PluginPanelValidationTests {
         }
     }
 
+    @Test("rejects URL-bearing content before rendering or mutation")
+    func rejectsURLContent() {
+        for unsafeValue in [
+            "https://example.invalid",
+            "FILE:///private/example",
+            "javascript:run()",
+            "data:text/plain,example",
+        ] {
+            let update = PluginPanelUpdate(
+                panel: PluginPanelDescriptor(
+                    identifier: "calculator.panel",
+                    title: "prismCalc",
+                    elements: [
+                        .result(.init(
+                            identifier: "calculator.display",
+                            value: unsafeValue,
+                            accessibilityLabel: "Result"
+                        )),
+                    ]
+                ),
+                mutations: []
+            )
+
+            #expect(throws: PluginPanelValidationError.urlContent) {
+                try update.validated(allowedApplicationIdentifiers: [])
+            }
+        }
+    }
+
+    @Test("rejects oversized descriptor collections")
+    func rejectsOversizedCollections() {
+        let elements = (0 ... PluginPanelLimits.maximumElements).map { index in
+            PluginPanelElement.status(.init(
+                identifier: "status.\(index)",
+                message: "Ready",
+                kind: .information
+            ))
+        }
+        let tooManyElements = PluginPanelUpdate(
+            panel: .init(identifier: "calculator.panel", title: "prismCalc", elements: elements),
+            mutations: []
+        )
+        #expect(throws: PluginPanelValidationError.tooManyElements) {
+            try tooManyElements.validated(allowedApplicationIdentifiers: [])
+        }
+
+        let tooManyMutations = PluginPanelUpdate(
+            panel: fixtureUpdate().panel,
+            mutations: Array(
+                repeating: .copyText("42"),
+                count: PluginPanelLimits.maximumMutations + 1
+            )
+        )
+        #expect(throws: PluginPanelValidationError.tooManyMutations) {
+            try tooManyMutations.validated(allowedApplicationIdentifiers: [])
+        }
+    }
+
     private func fixtureUpdate() -> PluginPanelUpdate {
         PluginPanelUpdate(
             panel: PluginPanelDescriptor(

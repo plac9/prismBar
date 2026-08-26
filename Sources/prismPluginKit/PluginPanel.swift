@@ -180,6 +180,7 @@ public enum PluginPanelValidationError: Error, Equatable, Sendable {
     case labelTooLong
     case valueTooLong
     case controlCharacters
+    case urlContent
     case tooManyElements
     case invalidKeypad
     case tooManyActions
@@ -289,20 +290,34 @@ private struct PluginPanelValidator {
         guard label.count <= PluginPanelLimits.maximumLabelCharacters else {
             throw PluginPanelValidationError.labelTooLong
         }
-        try rejectControlCharacters(in: label)
+        try validateTextSafety(label)
     }
 
     private func validateValue(_ value: String) throws {
         guard value.count <= PluginPanelLimits.maximumValueCharacters else {
             throw PluginPanelValidationError.valueTooLong
         }
-        try rejectControlCharacters(in: value)
+        try validateTextSafety(value)
     }
 
-    private func rejectControlCharacters(in value: String) throws {
+    private func validateTextSafety(_ value: String) throws {
         let controlCharacters = CharacterSet.controlCharacters
         for scalar in value.unicodeScalars where controlCharacters.contains(scalar) {
             throw PluginPanelValidationError.controlCharacters
+        }
+
+        let normalized = value.lowercased()
+        let forbiddenURLMarkers = [
+            "http://",
+            "https://",
+            "ftp://",
+            "file://",
+            "data:",
+            "javascript:",
+            "mailto:",
+        ]
+        guard !forbiddenURLMarkers.contains(where: normalized.contains) else {
+            throw PluginPanelValidationError.urlContent
         }
     }
 }
