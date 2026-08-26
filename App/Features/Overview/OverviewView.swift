@@ -57,11 +57,11 @@ struct OverviewView: View {
 
                         HStack(spacing: 10) {
                             if needsPermissionAction {
-                                Button("Allow Accessibility Access") {
+                                Button(permissionActionLabel) {
                                     model.requestAccessibility()
                                 }
                                 .buttonStyle(.glassProminent)
-                                .accessibilityLabel("Allow Accessibility Access")
+                                .accessibilityLabel(permissionActionLabel)
                                 .accessibilityIdentifier("accessibility.request")
                             }
 
@@ -119,17 +119,50 @@ struct OverviewView: View {
     }
 
     private var actionTitle: String {
-        model.accessibilityState == .granted ? "Ready when you are" : "Finish secure setup"
+        switch model.accessibilityState {
+        case .requiresStableInstall:
+            "Move prismBar into Applications"
+        case .identityMismatch:
+            "Install the current signed build"
+        case .notRequested:
+            "Allow Accessibility"
+        case .denied:
+            "Reconnect Accessibility"
+        case .granted:
+            "Ready when you are"
+        }
     }
 
     private var actionMessage: String {
-        model.accessibilityState == .granted
-            ? "Open Menu Bar to move, hide, reveal, or recover items."
-            : "prismBar needs Accessibility only to observe and move menu bar items you control."
+        switch model.accessibilityState {
+        case .requiresStableInstall:
+            "Run the signed app from /Applications/prismBar.app before granting access."
+        case .identityMismatch:
+            "The running code does not match prismBar's expected signed identity. Reinstall the current build."
+        case .notRequested:
+            "prismBar needs Accessibility only to observe and move menu bar items you control."
+        case .denied:
+            "Review prismBar in Privacy & Security > Accessibility. If it is already enabled, " +
+                "remove that entry, add /Applications/prismBar.app again, then choose Check Again."
+        case .granted:
+            "Open Menu Bar to move, hide, reveal, or recover items."
+        }
     }
 
     private var actionSymbol: String {
-        model.accessibilityState == .granted ? "arrow.right.circle" : "lock.open.display"
+        switch model.accessibilityState {
+        case .requiresStableInstall: "arrow.down.app"
+        case .identityMismatch: "signature"
+        case .notRequested: "lock.open.display"
+        case .denied: "arrow.clockwise.circle"
+        case .granted: "arrow.right.circle"
+        }
+    }
+
+    private var permissionActionLabel: String {
+        model.accessibilityState == .denied
+            ? "Review Accessibility Access"
+            : "Allow Accessibility Access"
     }
 
     private var menuBarLabel: String {

@@ -53,7 +53,7 @@ private struct GeneralSettingsView: View {
 
                     HStack(spacing: 10) {
                         if needsPermissionRequest {
-                            Button("Allow Access") {
+                            Button(permissionActionLabel) {
                                 model.requestAccessibility()
                             }
                             .buttonStyle(.glassProminent)
@@ -111,8 +111,13 @@ private struct GeneralSettingsView: View {
         case .notRequested:
             "Not requested. macOS will show its standard consent prompt."
         case .denied:
-            "Not granted. Allow prismBar in System Settings, then check again."
+            "Not granted. If prismBar is already enabled in Accessibility, remove it, " +
+                "add /Applications/prismBar.app again, then check again."
         }
+    }
+
+    private var permissionActionLabel: String {
+        model.accessibilityState == .denied ? "Review Access" : "Allow Access"
     }
 }
 
