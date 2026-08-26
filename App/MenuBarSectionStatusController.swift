@@ -95,7 +95,15 @@ final class MenuBarSectionStatusController {
     }
 
     private func screen(containing frame: MenuBarItemFrame) -> NSScreen? {
-        let point = NSPoint(x: frame.minX + frame.width / 2, y: frame.minY + frame.height / 2)
-        return NSScreen.screens.first { NSMouseInRect(point, $0.frame, false) }
+        guard let primaryScreen = NSScreen.screens.first else { return nil }
+        let accessibilityPoint = NSPoint(
+            x: frame.minX + frame.width / 2,
+            y: frame.minY + frame.height / 2
+        )
+        let appKitPoint = NSPoint(
+            x: accessibilityPoint.x,
+            y: primaryScreen.frame.maxY - accessibilityPoint.y
+        )
+        return NSScreen.screens.first { NSMouseInRect(appKitPoint, $0.frame, false) }
     }
 }

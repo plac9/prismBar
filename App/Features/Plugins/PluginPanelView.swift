@@ -10,18 +10,18 @@ struct PluginsView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Plugins")
-                        .font(.largeTitle.bold())
-                    Text("Useful tools in isolated, signed services. Plugins never receive Accessibility access.")
-                        .foregroundStyle(.secondary)
-                }
+            VStack(alignment: .leading, spacing: 24) {
+                PageHeader(
+                    eyebrow: "Extensions",
+                    title: "Plugins",
+                    message: "Focused tools in isolated, signed services. Plugins never receive " +
+                        "Accessibility, file, or network access."
+                )
 
                 pluginContent
             }
-            .frame(maxWidth: 680, alignment: .leading)
-            .padding(28)
+            .frame(maxWidth: 760, alignment: .leading)
+            .padding(32)
         }
         .task {
             model.loadPluginIfNeeded()
@@ -63,8 +63,14 @@ struct PluginPanelView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: compact ? 10 : 16) {
             if !compact {
-                Label(update.panel.title, systemImage: "plus.forwardslash.minus")
-                    .font(.title2.bold())
+                HStack {
+                    Label(update.panel.title, systemImage: "plus.forwardslash.minus")
+                        .font(.title2.bold())
+                    Spacer()
+                    Label("Isolated service", systemImage: "checkmark.shield")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
             }
 
             ForEach(Array(update.panel.elements.enumerated()), id: \.offset) { _, element in
@@ -106,14 +112,7 @@ struct PluginPanelView: View {
                 spacing: compact ? 5 : 8
             ) {
                 ForEach(keypad.keys, id: \.identifier) { key in
-                    Button(key.label) {
-                        model.invokePluginCommand(key.commandIdentifier)
-                    }
-                    .buttonStyle(.bordered)
-                    .tint(keyTint(key.style))
-                    .disabled(model.isPluginActionInProgress)
-                    .accessibilityLabel(key.accessibilityLabel)
-                    .accessibilityIdentifier(key.identifier)
+                    keyButton(key)
                 }
             }
         case let .actions(group):
@@ -131,12 +130,41 @@ struct PluginPanelView: View {
     }
 
     @ViewBuilder
+    private func keyButton(_ key: PluginKeyDescriptor) -> some View {
+        if key.style == .accent {
+            Button {
+                model.invokePluginCommand(key.commandIdentifier)
+            } label: {
+                Text(key.label)
+                    .frame(maxWidth: .infinity, minHeight: compact ? 26 : 40)
+            }
+            .buttonStyle(.glassProminent)
+            .tint(keyTint(key.style))
+            .disabled(model.isPluginActionInProgress)
+            .accessibilityLabel(key.accessibilityLabel)
+            .accessibilityIdentifier(key.identifier)
+        } else {
+            Button {
+                model.invokePluginCommand(key.commandIdentifier)
+            } label: {
+                Text(key.label)
+                    .frame(maxWidth: .infinity, minHeight: compact ? 26 : 40)
+            }
+            .buttonStyle(.glass)
+            .tint(keyTint(key.style))
+            .disabled(model.isPluginActionInProgress)
+            .accessibilityLabel(key.accessibilityLabel)
+            .accessibilityIdentifier(key.identifier)
+        }
+    }
+
+    @ViewBuilder
     private func actionButton(_ action: PluginActionDescriptor) -> some View {
         if action.style == .accent {
             Button(action.label) {
                 model.invokePluginCommand(action.commandIdentifier)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.glassProminent)
             .disabled(model.isPluginActionInProgress)
             .accessibilityLabel(action.accessibilityLabel)
             .accessibilityIdentifier(action.identifier)
@@ -144,7 +172,7 @@ struct PluginPanelView: View {
             Button(action.label) {
                 model.invokePluginCommand(action.commandIdentifier)
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.glass)
             .disabled(model.isPluginActionInProgress)
             .accessibilityLabel(action.accessibilityLabel)
             .accessibilityIdentifier(action.identifier)
@@ -153,8 +181,8 @@ struct PluginPanelView: View {
 
     private func keyTint(_ style: PluginKeyStyle) -> Color {
         switch style {
-        case .standard: .primary
-        case .secondary: .secondary
+        case .standard: .secondary
+        case .secondary: .gray
         case .operation: .orange
         case .accent: .blue
         }

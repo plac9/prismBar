@@ -35,6 +35,37 @@ final class LaunchTests: XCTestCase {
         XCTAssertTrue(application.staticTexts["Accessibility required"].waitForExistence(timeout: 5))
     }
 
+    func testChangingDestinationsDoesNotResizeOrDisplaceTheWindow() {
+        let application = XCUIApplication()
+        application.launch()
+
+        let mainWindow = application.windows.firstMatch
+        XCTAssertTrue(mainWindow.waitForExistence(timeout: 5))
+        let initialFrame = mainWindow.frame
+
+        let menuBarDestination = sidebarCell(named: "Menu Bar", in: application)
+        XCTAssertTrue(menuBarDestination.waitForExistence(timeout: 5))
+        menuBarDestination.click()
+
+        XCTAssertTrue(application.staticTexts["Accessibility required"].waitForExistence(timeout: 5))
+        XCTAssertEqual(mainWindow.frame.origin.x, initialFrame.origin.x, accuracy: 1)
+        XCTAssertEqual(mainWindow.frame.origin.y, initialFrame.origin.y, accuracy: 1)
+        XCTAssertEqual(mainWindow.frame.width, initialFrame.width, accuracy: 1)
+        XCTAssertEqual(mainWindow.frame.height, initialFrame.height, accuracy: 1)
+    }
+
+    func testShortcutsDestinationExposesPrivacyPreservingCommands() {
+        let application = XCUIApplication()
+        application.launch()
+
+        let shortcutsDestination = sidebarCell(named: "Shortcuts", in: application)
+        XCTAssertTrue(shortcutsDestination.waitForExistence(timeout: 5))
+        shortcutsDestination.click()
+
+        XCTAssertTrue(application.staticTexts["prismBar commands"].waitForExistence(timeout: 5))
+        XCTAssertTrue(application.staticTexts["No global keyboard monitoring"].exists)
+    }
+
     func testBundledPrismCalcPluginRunsAcrossTheSignedXPCBoundary() {
         let application = XCUIApplication()
         application.launch()

@@ -11,55 +11,88 @@ struct OverviewView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Your menu bar, under control.")
-                        .font(.system(.largeTitle, design: .rounded, weight: .semibold))
-                    Text(
-                        "prismBar keeps menu bar organization local " +
-                            "and makes every change verifiable and recoverable."
+                PageHeader(
+                    eyebrow: "Local control",
+                    title: "Your menu bar, in focus.",
+                    message: "Organize once, move directly, and recover confidently. " +
+                        "Every change is checked against the menu bar macOS actually presents."
+                )
+
+                HStack(spacing: 14) {
+                    StatusTile(
+                        title: "Accessibility",
+                        value: accessibilityLabel,
+                        symbol: accessibilitySymbol,
+                        isReady: model.accessibilityState == .granted
                     )
-                    .font(.title3)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                    StatusTile(
+                        title: "Menu items",
+                        value: menuBarLabel,
+                        symbol: "menubar.rectangle",
+                        isReady: model.menuBarState == .ready
+                    )
+                    StatusTile(
+                        title: "Plugin",
+                        value: pluginLabel,
+                        symbol: "puzzlepiece.extension",
+                        isReady: model.pluginState == .ready
+                    )
                 }
 
-                GroupBox("Current state") {
-                    LabeledContent("Accessibility", value: accessibilityLabel)
-                    LabeledContent("Menu items", value: menuBarLabel)
-                    LabeledContent("Plugins", value: pluginLabel)
-
-                    HStack {
-                        if needsPermissionAction {
-                            Button("Allow Accessibility Access") {
-                                model.requestAccessibility()
+                GlassCard {
+                    VStack(alignment: .leading, spacing: 16) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(actionTitle)
+                                    .font(.title2.bold())
+                                Text(actionMessage)
+                                    .foregroundStyle(.secondary)
                             }
-                            .buttonStyle(.borderedProminent)
-                            .accessibilityLabel("Allow Accessibility Access")
-                            .accessibilityIdentifier("accessibility.request")
+                            Spacer()
+                            Image(systemName: actionSymbol)
+                                .font(.system(size: 34, weight: .medium))
+                                .foregroundStyle(.tint)
+                                .accessibilityHidden(true)
                         }
 
-                        Button("Check Again") {
-                            model.refreshAccessibility()
-                        }
-                        .accessibilityLabel("Check Again")
-                        .accessibilityIdentifier("accessibility.refresh")
-
-                        if model.accessibilityState == .granted {
-                            Button("Refresh Menu Bar") {
-                                model.refreshMenuBar()
+                        HStack(spacing: 10) {
+                            if needsPermissionAction {
+                                Button("Allow Accessibility Access") {
+                                    model.requestAccessibility()
+                                }
+                                .buttonStyle(.glassProminent)
+                                .accessibilityLabel("Allow Accessibility Access")
+                                .accessibilityIdentifier("accessibility.request")
                             }
-                            .accessibilityIdentifier("menuBar.refresh")
+
+                            Button("Check Again") {
+                                model.refreshAccessibility()
+                            }
+                            .buttonStyle(.glass)
+                            .accessibilityLabel("Check Again")
+                            .accessibilityIdentifier("accessibility.refresh")
+
+                            if model.accessibilityState == .granted {
+                                Button("Refresh Menu Bar") {
+                                    model.refreshMenuBar()
+                                }
+                                .buttonStyle(.glassProminent)
+                                .accessibilityIdentifier("menuBar.refresh")
+                            }
                         }
                     }
                 }
 
-                GroupBox("Privacy") {
-                    Label("No screen capture or OCR", systemImage: "eye.slash")
-                    Label("No analytics or telemetry", systemImage: "chart.bar.xaxis")
-                    Label("No menu content leaves this Mac", systemImage: "lock.shield")
+                HStack(spacing: 18) {
+                    Label("No screen capture", systemImage: "eye.slash")
+                    Label("No telemetry", systemImage: "waveform.path.ecg.rectangle")
+                    Label("No content uploads", systemImage: "lock.shield")
                 }
+                .font(.callout.weight(.medium))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 4)
             }
-            .frame(maxWidth: 700, alignment: .leading)
+            .frame(maxWidth: 760, alignment: .leading)
             .padding(32)
         }
         .task {
@@ -79,6 +112,24 @@ struct OverviewView: View {
 
     private var needsPermissionAction: Bool {
         model.accessibilityState == .notRequested || model.accessibilityState == .denied
+    }
+
+    private var accessibilitySymbol: String {
+        model.accessibilityState == .granted ? "checkmark.shield" : "exclamationmark.shield"
+    }
+
+    private var actionTitle: String {
+        model.accessibilityState == .granted ? "Ready when you are" : "Finish secure setup"
+    }
+
+    private var actionMessage: String {
+        model.accessibilityState == .granted
+            ? "Open Menu Bar to move, hide, reveal, or recover items."
+            : "prismBar needs Accessibility only to observe and move menu bar items you control."
+    }
+
+    private var actionSymbol: String {
+        model.accessibilityState == .granted ? "arrow.right.circle" : "lock.open.display"
     }
 
     private var menuBarLabel: String {
@@ -109,5 +160,30 @@ struct OverviewView: View {
         case .disabled:
             "prismCalc paused"
         }
+    }
+}
+
+private struct StatusTile: View {
+    let title: String
+    let value: String
+    let symbol: String
+    let isReady: Bool
+
+    var body: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 10) {
+                Image(systemName: symbol)
+                    .font(.title2)
+                    .foregroundStyle(isReady ? .green : .secondary)
+                Text(title)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Text(value)
+                    .font(.subheadline.weight(.semibold))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, minHeight: 94, alignment: .topLeading)
+        }
+        .accessibilityElement(children: .combine)
     }
 }

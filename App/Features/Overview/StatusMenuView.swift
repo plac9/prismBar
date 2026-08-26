@@ -19,10 +19,7 @@ struct StatusMenuView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
-                Image(systemName: "triangle")
-                    .font(.title2)
-                    .foregroundStyle(.tint)
-                    .accessibilityHidden(true)
+                PrismMark(size: 32)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("prismBar")
@@ -39,7 +36,7 @@ struct StatusMenuView: View {
                 .foregroundStyle(model.accessibilityState == .granted ? .green : .secondary)
 
             if let snapshot = model.menuBarSnapshot {
-                Text("\(snapshot.items.count) menu items")
+                Text("\(snapshot.items.filter { $0.role == .item }.count) menu items")
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
@@ -58,17 +55,32 @@ struct StatusMenuView: View {
                         Divider()
 
                         Button("Move Left") {
-                            model.moveMenuBarItem(item.id, to: max(0, item.position - 1))
+                            if let destination = neighborDestination(
+                                for: item,
+                                offset: -1,
+                                snapshot: snapshot
+                            ) {
+                                model.moveMenuBarItem(item.id, to: destination)
+                            }
                         }
-                        .disabled(!canMove(item) || item.position == 0)
+                        .disabled(
+                            !canMove(item) ||
+                                neighborDestination(for: item, offset: -1, snapshot: snapshot) == nil
+                        )
 
                         Button("Move Right") {
-                            model.moveMenuBarItem(
-                                item.id,
-                                to: min(snapshot.items.count - 1, item.position + 1)
-                            )
+                            if let destination = neighborDestination(
+                                for: item,
+                                offset: 1,
+                                snapshot: snapshot
+                            ) {
+                                model.moveMenuBarItem(item.id, to: destination)
+                            }
                         }
-                        .disabled(!canMove(item) || item.position == snapshot.items.count - 1)
+                        .disabled(
+                            !canMove(item) ||
+                                neighborDestination(for: item, offset: 1, snapshot: snapshot) == nil
+                        )
                     }
                 }
 
@@ -148,5 +160,20 @@ struct StatusMenuView: View {
 
     private func canMove(_ item: MenuBarItem) -> Bool {
         item.isMovable && !model.isMenuBarActionInProgress
+    }
+
+    private func neighborDestination(
+        for item: MenuBarItem,
+        offset: Int,
+        snapshot: MenuBarSnapshot
+    ) -> Int? {
+        guard let section = snapshot.section(for: item.id) else { return nil }
+        let sectionItems = snapshot.items.filter { candidate in
+            candidate.role == .item && snapshot.section(for: candidate.id) == section
+        }
+        guard let index = sectionItems.firstIndex(where: { $0.id == item.id }) else { return nil }
+        let destination = index + offset
+        guard sectionItems.indices.contains(destination) else { return nil }
+        return sectionItems[destination].position
     }
 }

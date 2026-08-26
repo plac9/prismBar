@@ -8,40 +8,35 @@ struct MainWindowView: View {
     @State private var selection: Destination? = .overview
 
     var body: some View {
-        NavigationSplitView {
-            List(Destination.allCases, selection: $selection) { destination in
-                Label(destination.title, systemImage: destination.symbol)
-                    .tag(destination)
+        ZStack {
+            PrismBackdrop()
+
+            NavigationSplitView {
+                List(Destination.allCases, selection: $selection) { destination in
+                    Label(destination.title, systemImage: destination.symbol)
+                        .tag(destination)
+                        .padding(.vertical, 3)
+                }
+                .scrollContentBackground(.hidden)
+                .navigationTitle("prismBar")
+                .navigationSplitViewColumnWidth(min: 190, ideal: 220, max: 260)
+            } detail: {
+                switch selection ?? .overview {
+                case .overview:
+                    OverviewView()
+                case .menuBar:
+                    MenuBarView()
+                case .plugins:
+                    PluginsView()
+                case .shortcuts:
+                    ShortcutsView()
+                case .privacy:
+                    PrivacyView()
+                case .about:
+                    AboutView()
+                }
             }
-            .navigationTitle("prismBar")
-            .navigationSplitViewColumnWidth(min: 190, ideal: 220, max: 260)
-        } detail: {
-            switch selection ?? .overview {
-            case .overview:
-                OverviewView()
-            case .menuBar:
-                MenuBarView()
-            case .plugins:
-                PluginsView()
-            case .shortcuts:
-                PlaceholderDestination(
-                    title: "Shortcuts",
-                    message: "Keyboard controls and conflict checks will appear here.",
-                    symbol: "keyboard"
-                )
-            case .privacy:
-                PlaceholderDestination(
-                    title: "Privacy",
-                    message: "No screenshots, OCR, analytics, telemetry, or menu-content uploads.",
-                    symbol: "hand.raised"
-                )
-            case .about:
-                PlaceholderDestination(
-                    title: "About",
-                    message: "Independent, public-source software from LaClair Technologies.",
-                    symbol: "info.circle"
-                )
-            }
+            .background(.clear)
         }
         .navigationTitle("prismBar")
     }
@@ -79,16 +74,5 @@ private enum Destination: String, CaseIterable, Identifiable {
         case .privacy: "hand.raised"
         case .about: "info.circle"
         }
-    }
-}
-
-private struct PlaceholderDestination: View {
-    let title: String
-    let message: String
-    let symbol: String
-
-    var body: some View {
-        ContentUnavailableView(title, systemImage: symbol, description: Text(message))
-            .padding(24)
     }
 }

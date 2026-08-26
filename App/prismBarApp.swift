@@ -17,5 +17,8 @@ struct prismBarApp: App {
                 .environment(AppModel.shared)
                 .frame(width: 560, height: 420)
         }
+        .commands {
+            PrismBarCommands(model: AppModel.shared)
+        }
     }
 }

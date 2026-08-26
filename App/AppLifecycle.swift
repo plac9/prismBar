@@ -19,8 +19,14 @@ final class AppWindowController: NSObject, NSWindowDelegate {
             defer: false
         )
         window.title = "prismBar"
+        window.titleVisibility = .hidden
+        window.titlebarAppearsTransparent = true
+        window.titlebarSeparatorStyle = .none
+        window.styleMask.insert(.fullSizeContentView)
+        window.toolbarStyle = .unified
         window.contentMinSize = NSSize(width: 760, height: 520)
         window.contentViewController = NSHostingController(rootView: MainWindowRootView())
+        window.setContentSize(NSSize(width: 920, height: 640))
         window.isReleasedWhenClosed = false
         window.delegate = self
         window.center()

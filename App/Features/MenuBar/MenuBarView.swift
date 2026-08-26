@@ -11,73 +11,110 @@ struct MenuBarView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Menu Bar")
-                        .font(.largeTitle.weight(.semibold))
-                    Text("Choose an exact destination. Every move is rechecked against macOS.")
-                        .foregroundStyle(.secondary)
-                }
-                Spacer()
-                Button(
-                    model.isHiddenSectionCollapsed ? "Reveal Hidden Items" : "Fold Hidden Items",
-                    systemImage: model.isHiddenSectionCollapsed ? "eye" : "eye.slash"
-                ) {
-                    model.setHiddenSectionCollapsed(!model.isHiddenSectionCollapsed)
-                }
-                .disabled(
-                    model.accessibilityState != .granted ||
-                        model.menuBarState == .loading ||
-                        model.menuBarSnapshot?.hiddenSectionDivider == nil
-                )
-                Button("Refresh", systemImage: "arrow.clockwise") {
-                    model.refreshMenuBar()
-                }
-                .disabled(model.accessibilityState != .granted || model.menuBarState == .loading)
-                Menu {
-                    Button("Show Every Movable Item", systemImage: "arrow.uturn.backward") {
-                        isResetConfirmationPresented = true
+            PageHeader(
+                eyebrow: "Organization",
+                title: "Menu Bar",
+                message: "Move directly to any position in a section. Every action is checked " +
+                    "against a fresh macOS topology before it is reported as complete."
+            )
+
+            GlassCard {
+                HStack(spacing: 10) {
+                    Button(
+                        model.isHiddenSectionCollapsed ? "Reveal Hidden Items" : "Fold Hidden Items",
+                        systemImage: model.isHiddenSectionCollapsed ? "eye" : "eye.slash"
+                    ) {
+                        model.setHiddenSectionCollapsed(!model.isHiddenSectionCollapsed)
                     }
-                    .disabled(model.isMenuBarActionInProgress)
-                } label: {
-                    Label("Recovery", systemImage: "lifepreserver")
+                    .buttonStyle(.glassProminent)
+                    .disabled(
+                        model.accessibilityState != .granted ||
+                            model.menuBarState == .loading ||
+                            model.menuBarSnapshot?.hiddenSectionDivider == nil
+                    )
+
+                    Button("Refresh", systemImage: "arrow.clockwise") {
+                        model.refreshMenuBar()
+                    }
+                    .buttonStyle(.glass)
+                    .disabled(model.accessibilityState != .granted || model.menuBarState == .loading)
+
+                    Spacer()
+
+                    Menu {
+                        Button("Show Every Movable Item", systemImage: "arrow.uturn.backward") {
+                            isResetConfirmationPresented = true
+                        }
+                        .disabled(model.isMenuBarActionInProgress)
+                    } label: {
+                        Label("Recovery", systemImage: "lifepreserver")
+                    }
+                    .menuStyle(.button)
+                    .buttonStyle(.glass)
+                    .disabled(model.accessibilityState != .granted || model.menuBarState != .ready)
                 }
-                .disabled(model.accessibilityState != .granted || model.menuBarState != .ready)
             }
 
-            if let snapshot = model.menuBarSnapshot {
-                if snapshot.unavailableSourceCount > 0 {
-                    Label(
-                        "\(snapshot.unavailableSourceCount) menu bar source(s) did not respond. " +
-                            "Visible items remain available and every move is still verified.",
-                        systemImage: "exclamationmark.triangle"
-                    )
-                    .foregroundStyle(.orange)
-                }
+            VStack(alignment: .leading, spacing: 10) {
+                if let snapshot = model.menuBarSnapshot {
+                    if snapshot.unavailableSourceCount > 0 {
+                        Label(
+                            "\(snapshot.unavailableSourceCount) menu bar source(s) did not respond. " +
+                                "Visible items remain available and every move is still verified.",
+                            systemImage: "exclamationmark.triangle"
+                        )
+                        .foregroundStyle(.orange)
+                    }
 
-                List(snapshot.items.filter { $0.role == .item }) { item in
-                    MenuBarItemRow(
-                        item: item,
-                        itemCount: snapshot.items.count,
-                        section: snapshot.section(for: item.id)
-                    )
-                }
-                .listStyle(.inset)
+                    List {
+                        Section("Visible") {
+                            ForEach(items(in: .visible, snapshot: snapshot)) { item in
+                                MenuBarItemRow(
+                                    item: item,
+                                    destinations: items(in: .visible, snapshot: snapshot),
+                                    section: .visible
+                                )
+                            }
+                        }
 
-                if case let .result(message) = model.menuBarActionState {
-                    Text(message)
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .accessibilityIdentifier("menuBar.actionResult")
+                        Section("Hidden") {
+                            let hiddenItems = items(in: .hidden, snapshot: snapshot)
+                            if hiddenItems.isEmpty {
+                                Label("No hidden items", systemImage: "checkmark.circle")
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                ForEach(hiddenItems) { item in
+                                    MenuBarItemRow(
+                                        item: item,
+                                        destinations: hiddenItems,
+                                        section: .hidden
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    .listStyle(.inset)
+                    .scrollContentBackground(.hidden)
+                    .frame(minHeight: 220)
+
+                    if case let .result(message) = model.menuBarActionState {
+                        Text(message)
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                            .accessibilityIdentifier("menuBar.actionResult")
+                    }
+                } else {
+                    Spacer(minLength: 24)
+                    ContentUnavailableView(
+                        unavailableTitle,
+                        systemImage: "menubar.rectangle",
+                        description: Text(unavailableDescription)
+                    )
+                    .frame(maxWidth: .infinity)
+                    Spacer(minLength: 24)
                 }
-            } else {
-                ContentUnavailableView(
-                    unavailableTitle,
-                    systemImage: "menubar.rectangle",
-                    description: Text(unavailableDescription)
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+            .frame(maxWidth: .infinity, alignment: .topLeading)
         }
         .padding(28)
         .confirmationDialog(
@@ -90,6 +127,15 @@ struct MenuBarView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This preserves item order and leaves the hidden section unfolded.")
+        }
+    }
+
+    private func items(
+        in section: MenuBarSection,
+        snapshot: MenuBarSnapshot
+    ) -> [MenuBarItem] {
+        snapshot.items.filter { item in
+            item.role == .item && snapshot.section(for: item.id) == section
         }
     }
 
@@ -107,13 +153,13 @@ struct MenuBarView: View {
 private struct MenuBarItemRow: View {
     @Environment(AppModel.self) private var model
     let item: MenuBarItem
-    let itemCount: Int
+    let destinations: [MenuBarItem]
     let section: MenuBarSection?
     @State private var destinationIndex: Int
 
-    init(item: MenuBarItem, itemCount: Int, section: MenuBarSection?) {
+    init(item: MenuBarItem, destinations: [MenuBarItem], section: MenuBarSection?) {
         self.item = item
-        self.itemCount = itemCount
+        self.destinations = destinations
         self.section = section
         _destinationIndex = State(initialValue: item.position)
     }
@@ -151,8 +197,8 @@ private struct MenuBarItemRow: View {
             }
 
             Picker("Position", selection: $destinationIndex) {
-                ForEach(0 ..< itemCount, id: \.self) { index in
-                    Text("\(index + 1)").tag(index)
+                ForEach(Array(destinations.enumerated()), id: \.element.id) { offset, destination in
+                    Text("\(offset + 1)").tag(destination.position)
                 }
             }
             .labelsHidden()
