@@ -55,6 +55,24 @@ struct TopologyAssemblerTests {
         #expect(identifier.count == 64)
     }
 
+    @Test("recognizes the exact hidden section divider without exposing it as movable")
+    func recognizesHiddenDivider() {
+        let snapshot = TopologyAssembler().assemble(
+            generation: 1,
+            observations: [
+                observation(
+                    token: MenuBarControllerIdentity.hiddenSectionDividerLabel,
+                    horizontalPosition: 100,
+                    bundleIdentifier: "com.laclairtech.prismbar",
+                    isSelf: true
+                ),
+            ]
+        )
+
+        #expect(snapshot.items[0].role == .hiddenSectionDivider)
+        #expect(!snapshot.items[0].isMovable)
+    }
+
     @Test("keeps identifiers stable only within one private discovery session")
     func scopesIdentifiersToSession() {
         let observations = [observation(token: "fixture", horizontalPosition: 100)]

@@ -27,3 +27,6 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 - Privacy-safe topology identifiers that never contain observed menu labels.
 - Exact-position move planning with stale-plan rejection and post-action verification.
 - Main-window and menu-bar-popover controls backed by the same authoritative topology.
+- Public-AppKit status-item control with deterministic section anchors and a native command popover.
+- Verified hide, show, fold, reveal, arbitrary-position, and order-preserving recovery plans.
+- Safe section expansion before protected movement and automatic restoration after the action.

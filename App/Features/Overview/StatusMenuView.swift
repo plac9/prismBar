@@ -8,8 +8,13 @@ import SwiftUI
 
 struct StatusMenuView: View {
     @Environment(\.openSettings) private var openSettings
-    @Environment(AppModel.self) private var model
+    @Bindable private var model: AppModel
     @State private var isCalculatorExpanded = false
+    @State private var isResetConfirmationPresented = false
+
+    init(model: AppModel) {
+        self.model = model
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -38,8 +43,20 @@ struct StatusMenuView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
-                ForEach(Array(snapshot.items.prefix(6))) { item in
+                ForEach(Array(snapshot.items.filter { $0.role == .item }.prefix(6))) { item in
                     Menu(item.displayName) {
+                        if snapshot.section(for: item.id) == .hidden {
+                            Button("Show") {
+                                model.moveMenuBarItem(item.id, to: .visible)
+                            }
+                        } else if snapshot.section(for: item.id) == .visible {
+                            Button("Hide") {
+                                model.moveMenuBarItem(item.id, to: .hidden)
+                            }
+                        }
+
+                        Divider()
+
                         Button("Move Left") {
                             model.moveMenuBarItem(item.id, to: max(0, item.position - 1))
                         }
@@ -58,6 +75,19 @@ struct StatusMenuView: View {
                 Button("Refresh Menu Items", systemImage: "arrow.clockwise") {
                     model.refreshMenuBar()
                 }
+
+                Button(
+                    model.isHiddenSectionCollapsed ? "Reveal Hidden Items" : "Fold Hidden Items",
+                    systemImage: model.isHiddenSectionCollapsed ? "eye" : "eye.slash"
+                ) {
+                    model.setHiddenSectionCollapsed(!model.isHiddenSectionCollapsed)
+                }
+                .disabled(snapshot.hiddenSectionDivider == nil)
+
+                Button("Show Every Item", systemImage: "arrow.uturn.backward") {
+                    isResetConfirmationPresented = true
+                }
+                .disabled(model.isMenuBarActionInProgress)
             }
 
             if let pluginPanel = model.pluginPanel, model.pluginState == .ready {
@@ -91,8 +121,20 @@ struct StatusMenuView: View {
         }
         .padding(14)
         .frame(width: 280)
+        .environment(model)
         .task {
             model.loadPluginIfNeeded()
+        }
+        .confirmationDialog(
+            "Show every movable menu bar item?",
+            isPresented: $isResetConfirmationPresented
+        ) {
+            Button("Show Every Item") {
+                model.resetMenuBar()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This preserves item order and leaves the hidden section unfolded.")
         }
     }
 

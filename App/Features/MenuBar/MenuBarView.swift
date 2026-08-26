@@ -7,6 +7,7 @@ import SwiftUI
 
 struct MenuBarView: View {
     @Environment(AppModel.self) private var model
+    @State private var isResetConfirmationPresented = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -18,10 +19,30 @@ struct MenuBarView: View {
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
+                Button(
+                    model.isHiddenSectionCollapsed ? "Reveal Hidden Items" : "Fold Hidden Items",
+                    systemImage: model.isHiddenSectionCollapsed ? "eye" : "eye.slash"
+                ) {
+                    model.setHiddenSectionCollapsed(!model.isHiddenSectionCollapsed)
+                }
+                .disabled(
+                    model.accessibilityState != .granted ||
+                        model.menuBarState == .loading ||
+                        model.menuBarSnapshot?.hiddenSectionDivider == nil
+                )
                 Button("Refresh", systemImage: "arrow.clockwise") {
                     model.refreshMenuBar()
                 }
                 .disabled(model.accessibilityState != .granted || model.menuBarState == .loading)
+                Menu {
+                    Button("Show Every Movable Item", systemImage: "arrow.uturn.backward") {
+                        isResetConfirmationPresented = true
+                    }
+                    .disabled(model.isMenuBarActionInProgress)
+                } label: {
+                    Label("Recovery", systemImage: "lifepreserver")
+                }
+                .disabled(model.accessibilityState != .granted || model.menuBarState != .ready)
             }
 
             if let snapshot = model.menuBarSnapshot {
@@ -34,10 +55,11 @@ struct MenuBarView: View {
                     .foregroundStyle(.orange)
                 }
 
-                List(snapshot.items) { item in
+                List(snapshot.items.filter { $0.role == .item }) { item in
                     MenuBarItemRow(
                         item: item,
-                        itemCount: snapshot.items.count
+                        itemCount: snapshot.items.count,
+                        section: snapshot.section(for: item.id)
                     )
                 }
                 .listStyle(.inset)
@@ -58,6 +80,17 @@ struct MenuBarView: View {
             }
         }
         .padding(28)
+        .confirmationDialog(
+            "Show every movable menu bar item?",
+            isPresented: $isResetConfirmationPresented
+        ) {
+            Button("Show Every Item") {
+                model.resetMenuBar()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This preserves item order and leaves the hidden section unfolded.")
+        }
     }
 
     private var unavailableTitle: String {
@@ -75,11 +108,13 @@ private struct MenuBarItemRow: View {
     @Environment(AppModel.self) private var model
     let item: MenuBarItem
     let itemCount: Int
+    let section: MenuBarSection?
     @State private var destinationIndex: Int
 
-    init(item: MenuBarItem, itemCount: Int) {
+    init(item: MenuBarItem, itemCount: Int, section: MenuBarSection?) {
         self.item = item
         self.itemCount = itemCount
+        self.section = section
         _destinationIndex = State(initialValue: item.position)
     }
 
@@ -99,6 +134,22 @@ private struct MenuBarItemRow: View {
 
             Spacer()
 
+            Text(sectionLabel)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(section == .hidden ? .secondary : .primary)
+
+            if section == .hidden {
+                Button("Show", systemImage: "eye") {
+                    model.moveMenuBarItem(item.id, to: .visible)
+                }
+                .disabled(!canMove)
+            } else if section == .visible {
+                Button("Hide", systemImage: "eye.slash") {
+                    model.moveMenuBarItem(item.id, to: .hidden)
+                }
+                .disabled(!canMove)
+            }
+
             Picker("Position", selection: $destinationIndex) {
                 ForEach(0 ..< itemCount, id: \.self) { index in
                     Text("\(index + 1)").tag(index)
@@ -107,6 +158,9 @@ private struct MenuBarItemRow: View {
             .labelsHidden()
             .frame(width: 74)
             .disabled(!canMove)
+            .onChange(of: item.position) { _, newPosition in
+                destinationIndex = newPosition
+            }
 
             Button("Move") {
                 model.moveMenuBarItem(item.id, to: destinationIndex)
@@ -126,6 +180,15 @@ private struct MenuBarItemRow: View {
         case .application: "Application item"
         case .system: "macOS item"
         case .selfOwned: "prismBar item"
+        }
+    }
+
+    private var sectionLabel: String {
+        switch section {
+        case .hidden: "Hidden"
+        case .visible: "Visible"
+        case .controller: "prismBar"
+        case nil: "Unassigned"
         }
     }
 

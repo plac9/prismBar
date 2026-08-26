@@ -78,15 +78,17 @@ public struct TopologyAssembler: Sendable {
             let availability: MenuBarItemAvailability =
                 observation.frame == nil || !observation.isEnabled ? .unavailable : .controllable
             let ownership = ownership(for: observation.owner)
+            let role = role(for: observation, ownership: ownership)
 
             return MenuBarItem(
                 id: MenuBarItemID(rawValue: stableIdentifier(seed: identitySeed, occurrence: occurrence)),
                 position: position,
-                isMovable: availability == .controllable && ownership != .selfOwned,
+                isMovable: availability == .controllable && role == .item,
                 displayName: displayName(for: observation),
                 ownerBundleIdentifier: observation.owner.bundleIdentifier,
                 ownership: ownership,
                 availability: availability,
+                role: role,
                 frame: observation.frame
             )
         }
@@ -123,6 +125,20 @@ public struct TopologyAssembler: Sendable {
             return .system
         }
         return .application
+    }
+
+    private func role(
+        for observation: MenuBarObservation,
+        ownership: MenuBarItemOwnership
+    ) -> MenuBarItemRole {
+        guard ownership == .selfOwned else {
+            return .item
+        }
+        let candidates = [observation.stableToken, observation.displayName ?? ""]
+        if candidates.contains(MenuBarControllerIdentity.hiddenSectionDividerLabel) {
+            return .hiddenSectionDivider
+        }
+        return .primaryControl
     }
 
     private func displayName(for observation: MenuBarObservation) -> String {

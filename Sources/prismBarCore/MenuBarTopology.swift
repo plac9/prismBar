@@ -10,6 +10,11 @@ public struct MenuBarItemID: RawRepresentable, Hashable, Codable, Sendable {
     }
 }
 
+public enum MenuBarControllerIdentity {
+    public static let primaryControlLabel = "prismBar"
+    public static let hiddenSectionDividerLabel = "prismBar Hidden Section"
+}
+
 public struct MenuBarItemFrame: Equatable, Codable, Sendable {
     public let minX: Double
     public let minY: Double
@@ -35,6 +40,18 @@ public enum MenuBarItemAvailability: String, Equatable, Codable, Sendable {
     case unavailable
 }
 
+public enum MenuBarItemRole: String, Equatable, Codable, Sendable {
+    case item
+    case primaryControl
+    case hiddenSectionDivider
+}
+
+public enum MenuBarSection: String, Equatable, Codable, Sendable {
+    case hidden
+    case visible
+    case controller
+}
+
 public enum MenuBarInsertionEdge: String, Equatable, Codable, Sendable {
     case before
     case after
@@ -56,6 +73,7 @@ public struct MenuBarItem: Identifiable, Equatable, Codable, Sendable {
     public let ownerBundleIdentifier: String?
     public let ownership: MenuBarItemOwnership
     public let availability: MenuBarItemAvailability
+    public let role: MenuBarItemRole
     public let frame: MenuBarItemFrame?
 
     public init(
@@ -66,6 +84,7 @@ public struct MenuBarItem: Identifiable, Equatable, Codable, Sendable {
         ownerBundleIdentifier: String? = nil,
         ownership: MenuBarItemOwnership = .application,
         availability: MenuBarItemAvailability = .controllable,
+        role: MenuBarItemRole = .item,
         frame: MenuBarItemFrame? = nil
     ) {
         self.id = id
@@ -75,6 +94,7 @@ public struct MenuBarItem: Identifiable, Equatable, Codable, Sendable {
         self.ownerBundleIdentifier = ownerBundleIdentifier
         self.ownership = ownership
         self.availability = availability
+        self.role = role
         self.frame = frame
     }
 }
@@ -101,5 +121,21 @@ public struct MenuBarSnapshot: Equatable, Codable, Sendable {
 
     public var isComplete: Bool {
         unavailableSourceCount == 0
+    }
+
+    public var hiddenSectionDivider: MenuBarItem? {
+        items.first { $0.role == .hiddenSectionDivider }
+    }
+
+    public func section(for itemID: MenuBarItemID) -> MenuBarSection? {
+        guard let itemIndex = items.firstIndex(where: { $0.id == itemID }),
+              let dividerIndex = items.firstIndex(where: { $0.role == .hiddenSectionDivider })
+        else {
+            return nil
+        }
+        guard items[itemIndex].role == .item else {
+            return .controller
+        }
+        return itemIndex < dividerIndex ? .hidden : .visible
     }
 }

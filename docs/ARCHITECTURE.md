@@ -56,7 +56,7 @@ macOS owns permission state, menu bar processes, application lifecycle, code sig
 | `prismBarAccessibility` | Public AX wrappers, permission state, element discovery, action execution | UI, plugins, persistence |
 | `prismBarEngine` | Reconciliation, move planning, verification, retries, recovery | SwiftUI views, plugin implementation |
 | `prismPluginKit` | Manifest, capabilities, commands, declarative panel schema, XPC protocol values | Accessibility, application internals |
-| `prismBarApp` | Lifecycle, MenuBarExtra, windows, settings, navigation, host renderer | plugin implementation details |
+| `prismBarApp` | Lifecycle, public AppKit status items, windows, settings, navigation, host renderer | plugin implementation details |
 | `prismCalcPluginService` | Basic calculator reducer, bounded history, plugin protocol adapter | Accessibility, host engine, network, proprietary prismCalc app modules |
 
 ## Concurrency

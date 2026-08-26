@@ -7,19 +7,11 @@ import SwiftUI
 @main
 struct prismBarApp: App {
     init() {
+        MenuBarSectionStatusController.shared.installIfNeeded()
         AppWindowController.shared.startObservingLaunch()
     }
 
     var body: some Scene {
-        MenuBarExtra {
-            StatusMenuView()
-                .environment(AppModel.shared)
-        } label: {
-            Image(systemName: "triangle")
-                .accessibilityLabel("prismBar")
-        }
-        .menuBarExtraStyle(.window)
-
         Settings {
             SettingsRootView()
                 .environment(AppModel.shared)
