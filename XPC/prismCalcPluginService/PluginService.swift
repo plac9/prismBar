@@ -12,21 +12,31 @@ final class PluginService: NSObject, PluginXPCServiceProtocol {
     private var session = PrismCalcPluginSession()
 
     func process(
-        _ request: Data,
+        _ requestData: Data,
         withReply reply: @escaping (Data?, NSError?) -> Void
     ) {
+        let request: PluginRequest
         do {
-            let request = try codec.decode(PluginRequest.self, from: request)
-            let response = try sessionLock.withLock {
+            request = try codec.decode(PluginRequest.self, from: requestData)
+        } catch {
+            reply(nil, PluginServiceFailure.invalidRequest.error)
+            return
+        }
+
+        let response: PluginResponse
+        do {
+            response = try sessionLock.withLock {
                 try session.process(request)
             }
+        } catch {
+            reply(nil, PluginServiceFailure.requestRejected.error)
+            return
+        }
+
+        do {
             reply(try codec.encode(response), nil)
         } catch {
-            reply(nil, NSError(
-                domain: "com.laclairtech.prismbar.plugin",
-                code: 1,
-                userInfo: [NSLocalizedDescriptionKey: "The plugin request was rejected."]
-            ))
+            reply(nil, PluginServiceFailure.invalidResponse.error)
         }
     }
 }

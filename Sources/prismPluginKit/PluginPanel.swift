@@ -296,7 +296,8 @@ private struct PluginPanelValidator {
     }
 
     private func rejectControlCharacters(in value: String) throws {
-        guard !value.unicodeScalars.contains(where: CharacterSet.controlCharacters.contains) else {
+        let controlCharacters = CharacterSet.controlCharacters
+        for scalar in value.unicodeScalars where controlCharacters.contains(scalar) {
             throw PluginPanelValidationError.controlCharacters
         }
     }

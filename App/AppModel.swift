@@ -206,6 +206,10 @@ extension AppModel {
                 guard let self, revision == pluginRevision else { return }
                 pluginState = .disabled
                 pluginMessage = "prismCalc paused after repeated failures. Retry when ready."
+            } catch let error as PluginClientError {
+                guard let self, revision == pluginRevision else { return }
+                pluginState = .unavailable
+                pluginMessage = Self.pluginFailureMessage(error)
             } catch {
                 guard let self, revision == pluginRevision else { return }
                 pluginState = .unavailable
@@ -248,6 +252,10 @@ extension AppModel {
                 guard let self, revision == pluginRevision else { return }
                 pluginState = .disabled
                 pluginMessage = "prismCalc paused after repeated failures. Retry when ready."
+            } catch let error as PluginClientError {
+                guard let self, revision == pluginRevision else { return }
+                pluginState = .unavailable
+                pluginMessage = Self.pluginFailureMessage(error)
             } catch {
                 guard let self, revision == pluginRevision else { return }
                 pluginState = .unavailable
@@ -286,6 +294,57 @@ extension AppModel {
                     }
                 }
             }
+        }
+    }
+
+    private static func pluginFailureMessage(_ error: PluginClientError) -> String {
+        switch error {
+        case .busy:
+            "prismCalc is already completing another request."
+        case .cancelled:
+            "The prismCalc request was cancelled."
+        case .disabledForSession:
+            "prismCalc is paused for this session."
+        default:
+            pluginTransportFailureMessage(error)
+        }
+    }
+
+    private static func pluginTransportFailureMessage(_ error: PluginClientError) -> String {
+        switch error {
+        case .connectionInterrupted:
+            "The isolated prismCalc connection was interrupted."
+        case .invalidConnection:
+            "prismCalc could not open its bundled service connection."
+        case .invalidReply:
+            "prismCalc returned an invalid service reply."
+        case .invalidResponse:
+            "prismCalc returned a response that failed validation."
+        case .rejected:
+            "The isolated prismCalc service rejected the request."
+        case .timedOut:
+            "The isolated prismCalc service did not respond in time."
+        case .trustRejected:
+            "prismCalc could not verify the bundled service signature."
+        case .unavailable:
+            "prismCalc is temporarily unavailable."
+        case .busy, .cancelled, .disabledForSession:
+            "prismCalc is temporarily unavailable."
+        case .serviceInvalidRequest, .serviceInvalidResponse, .serviceRejectedRequest:
+            pluginServiceFailureMessage(error)
+        }
+    }
+
+    private static func pluginServiceFailureMessage(_ error: PluginClientError) -> String {
+        switch error {
+        case .serviceInvalidRequest:
+            "prismCalc could not decode the host request."
+        case .serviceInvalidResponse:
+            "prismCalc could not encode its response."
+        case .serviceRejectedRequest:
+            "prismCalc rejected the decoded request."
+        default:
+            "prismCalc is temporarily unavailable."
         }
     }
 }

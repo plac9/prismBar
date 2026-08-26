@@ -22,7 +22,6 @@
 		5BBE97F18265E328EA81844C /* SettingsRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0E9A57FF0B8B5227635A91 /* SettingsRootView.swift */; };
 		67A85AD65D85C6FCB202D08F /* LiveMenuBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574A6994BBFD030D13E09840 /* LiveMenuBarController.swift */; };
 		698BD64A25F31652EE03AC4E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 90B72451308C4BB744C489CA /* Assets.xcassets */; };
-		A11111111111111111111111 /* prismBar.icon in Resources */ = {isa = PBXBuildFile; fileRef = A11222222222222222222222 /* prismBar.icon */; };
 		6A1FFD8E601EBDC2E3D3999C /* ShortcutsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF2F6970047364DDA27C5F2C /* ShortcutsView.swift */; };
 		6FCAA17FB8363FE4F50EA426 /* prismPluginKit in Frameworks */ = {isa = PBXBuildFile; productRef = 906F3A6D0214AB93B52A0327 /* prismPluginKit */; };
 		774004B35A746E24A0FEBEF8 /* StatusMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 298F54AF53B0B08B5C294CF3 /* StatusMenuView.swift */; };
@@ -32,6 +31,7 @@
 		AE30068A1AE8D0EAB237F76A /* PrismVisuals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F750C30A67946F63A370161 /* PrismVisuals.swift */; };
 		AFC0E90FF2A6E8DF6D4BCFDC /* AppModel+MenuBarActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 797D62515E8C48EE5BF939F7 /* AppModel+MenuBarActions.swift */; };
 		B9A46C4C763328F81D998C81 /* PluginService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A119DE84BE83C7F3F0E19DF /* PluginService.swift */; };
+		BEB5DD3EE10E1A5DE98304FB /* prismBar.icon in Resources */ = {isa = PBXBuildFile; fileRef = 42DE507D28E83BE99B7CC5CE /* prismBar.icon */; };
 		CE3C57B543CBD6AECD63561D /* PluginPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0F54F091A7C16DF376F2 /* PluginPanelView.swift */; };
 		D9B7872CF4A511B07328CA42 /* prismBarEngine in Frameworks */ = {isa = PBXBuildFile; productRef = F163278A06D1EDC2E5F2385E /* prismBarEngine */; };
 		DD537356A91D55381A1A1A56 /* AppLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 315A0592B925D2DB82D37406 /* AppLifecycle.swift */; };
@@ -78,6 +78,7 @@
 		3A6F51D219AFA0CC326CFE1F /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		3BA0C421D62741B8383FEFA7 /* PrismBarCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismBarCommands.swift; sourceTree = "<group>"; };
 		3DA42353B48097F47E64CF57 /* prismBar */ = {isa = PBXFileReference; lastKnownFileType = folder; name = prismBar; path = .; sourceTree = SOURCE_ROOT; };
+		42DE507D28E83BE99B7CC5CE /* prismBar.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = prismBar.icon; sourceTree = "<group>"; };
 		574A6994BBFD030D13E09840 /* LiveMenuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveMenuBarController.swift; sourceTree = "<group>"; };
 		6A119DE84BE83C7F3F0E19DF /* PluginService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginService.swift; sourceTree = "<group>"; };
 		72367E88666AEFDC8C0C684C /* MainWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowView.swift; sourceTree = "<group>"; };
@@ -87,7 +88,6 @@
 		8B8C7BE0DF23129D943A0758 /* PluginClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginClient.swift; sourceTree = "<group>"; };
 		8FFF8A05443F8BB9B57C8CBC /* prismBarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = prismBarApp.swift; sourceTree = "<group>"; };
 		90B72451308C4BB744C489CA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		A11222222222222222222222 /* prismBar.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = prismBar.icon; sourceTree = "<group>"; };
 		965655B6F8C2B531AB8DB3CA /* ServiceMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceMain.swift; sourceTree = "<group>"; };
 		9D8BAE01F43F46DF5610002B /* MenuBarSectionStatusController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarSectionStatusController.swift; sourceTree = "<group>"; };
 		A756F325D68C0D906A6D4318 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
@@ -153,7 +153,7 @@
 			isa = PBXGroup;
 			children = (
 				90B72451308C4BB744C489CA /* Assets.xcassets */,
-				A11222222222222222222222 /* prismBar.icon */,
+				42DE507D28E83BE99B7CC5CE /* prismBar.icon */,
 				B99796874F6C0C859873DF49 /* PrivacyInfo.xcprivacy */,
 			);
 			path = Resources;
@@ -415,8 +415,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				698BD64A25F31652EE03AC4E /* Assets.xcassets in Resources */,
-				A11111111111111111111111 /* prismBar.icon in Resources */,
 				E5C70F149F116D0AE30145D2 /* PrivacyInfo.xcprivacy in Resources */,
+				BEB5DD3EE10E1A5DE98304FB /* prismBar.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -634,7 +634,6 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = arm64;
-				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -665,6 +664,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;

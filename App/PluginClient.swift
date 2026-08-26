@@ -9,10 +9,17 @@ import Synchronization
 enum PluginClientError: Error, Equatable {
     case busy
     case cancelled
+    case connectionInterrupted
     case disabledForSession
+    case invalidConnection
+    case invalidReply
     case invalidResponse
+    case serviceInvalidRequest
+    case serviceInvalidResponse
+    case serviceRejectedRequest
     case rejected
     case timedOut
+    case trustRejected
     case unavailable
 }
 
@@ -106,17 +113,18 @@ final class PrismCalcPluginClient {
             try await withCheckedThrowingContinuation { continuation in
                 gate.install(continuation)
 
-                let proxy = connection.remoteObjectProxyWithErrorHandler { _ in
-                    gate.resolve(.failure(.unavailable))
+                let proxy = connection.remoteObjectProxyWithErrorHandler { error in
+                    let failure = PluginTransportFailure.classify(error)
+                    gate.resolve(.failure(Self.clientError(for: failure)))
                 }
                 guard let service = proxy as? PluginXPCServiceProtocol else {
                     gate.resolve(.failure(.unavailable))
                     return
                 }
 
-                service.process(requestData) { data, _ in
+                service.process(requestData) { data, serviceError in
                     guard let data else {
-                        gate.resolve(.failure(.rejected))
+                        gate.resolve(.failure(Self.clientError(for: serviceError)))
                         return
                     }
                     gate.resolve(.success(data))
@@ -176,12 +184,49 @@ final class PrismCalcPluginClient {
         }
         return .invalidResponse
     }
+
+    private nonisolated static func clientError(
+        for failure: PluginTransportFailure
+    ) -> PluginClientError {
+        switch failure {
+        case .codeSigningRequirement:
+            .trustRejected
+        case .interrupted:
+            .connectionInterrupted
+        case .invalidConnection:
+            .invalidConnection
+        case .invalidReply:
+            .invalidReply
+        case .unknown:
+            .unavailable
+        }
+    }
+
+    private nonisolated static func clientError(for error: NSError?) -> PluginClientError {
+        guard let error,
+              let failure = PluginServiceFailure.classify(error)
+        else {
+            return .rejected
+        }
+
+        switch failure {
+        case .invalidRequest:
+            return .serviceInvalidRequest
+        case .requestRejected:
+            return .serviceRejectedRequest
+        case .invalidResponse:
+            return .serviceInvalidResponse
+        }
+    }
 }
 
 private extension PluginClientError {
     var countsTowardFailureLimit: Bool {
         switch self {
-        case .invalidResponse, .rejected, .timedOut, .unavailable:
+        case .connectionInterrupted, .invalidConnection, .invalidReply,
+             .invalidResponse, .rejected, .serviceInvalidRequest,
+             .serviceInvalidResponse, .serviceRejectedRequest, .timedOut,
+             .trustRejected, .unavailable:
             true
         case .busy, .cancelled, .disabledForSession:
             false

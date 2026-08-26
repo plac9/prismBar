@@ -2,10 +2,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
 @testable import prismPluginKit
 import Testing
 
@@ -87,6 +83,25 @@ struct PluginPanelValidationTests {
         )
 
         #expect(throws: PluginPanelValidationError.invalidIdentifier("../../calculator")) {
+            try update.validated(allowedApplicationIdentifiers: [])
+        }
+    }
+
+    @Test("rejects control characters while accepting ordinary text")
+    func validatesTextSafety() throws {
+        #expect(try fixtureUpdate().validated(
+            allowedApplicationIdentifiers: ["com.laclairtech.prismcalc"]
+        ) == fixtureUpdate())
+
+        let update = PluginPanelUpdate(
+            panel: PluginPanelDescriptor(
+                identifier: "calculator.panel",
+                title: "prismCalc\nInjected",
+                elements: []
+            ),
+            mutations: []
+        )
+        #expect(throws: PluginPanelValidationError.controlCharacters) {
             try update.validated(allowedApplicationIdentifiers: [])
         }
     }
