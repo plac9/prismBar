@@ -116,6 +116,8 @@ Panel descriptors support a bounded set of host-rendered elements: text, result 
 
 The host sets an exact code-signing requirement on every `NSXPCConnection`. The service applies a reciprocal host requirement before accepting requests. Protocol version and declared capabilities are checked during handshake before any panel data is requested.
 
+The host owns a bounded build-time registry of bundled plugin registrations. Each registration fixes the service identifier, display name, version, capability set, allowed application identifiers, default enabled state, and preference key before the app is signed. Duplicate or malformed registrations fail closed. A user can disable a plugin at any time, which invalidates its XPC connection and removes its panel without affecting menu bar control. Version 1 does not scan directories or accept downloaded plugin bundles.
+
 ## Failure behavior
 
 - Accessibility unavailable: keep Settings and privacy explanations functional; disable protected actions.

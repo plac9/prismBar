@@ -67,6 +67,7 @@ The project is complete only when every gate below has authoritative evidence fr
 ## Phase 6: Plugin platform
 
 - [x] Implement versioned `prismPluginKit` value and protocol contracts.
+- [x] Implement a bounded bundled-plugin registry and persistent user enable/disable lifecycle.
 - [x] Implement manifest and capability validation.
 - [x] Implement bounded declarative panel validation and native rendering.
 - [x] Implement reciprocal XPC code-signing requirements.

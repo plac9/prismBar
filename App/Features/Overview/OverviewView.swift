@@ -191,7 +191,7 @@ struct OverviewView: View {
         case .unavailable:
             "prismCalc unavailable"
         case .disabled:
-            "prismCalc paused"
+            model.isPluginEnabled ? "prismCalc paused" : "prismCalc disabled"
         }
     }
 }

@@ -73,7 +73,7 @@ public struct BundledPluginPolicy: Equatable, Sendable {
         )
     }
 
-    private static func isSafeBundleIdentifier(_ identifier: String) -> Bool {
+    static func isSafeBundleIdentifier(_ identifier: String) -> Bool {
         guard !identifier.isEmpty,
               identifier.utf8.count <= PluginPanelLimits.maximumIdentifierCharacters
         else {

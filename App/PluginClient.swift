@@ -24,7 +24,7 @@ enum PluginClientError: Error, Equatable {
 }
 
 @MainActor
-final class PrismCalcPluginClient {
+final class BundledPluginClient {
     private static let failureLimit = 3
     private static let requestTimeout = Duration.seconds(2)
     private static let panelRecoveryDelays: [Duration] = [
@@ -39,14 +39,8 @@ final class PrismCalcPluginClient {
     private var consecutiveFailures = 0
     private var isRequestInFlight = false
 
-    init() throws {
-        policy = try BundledPluginPolicy(
-            pluginIdentifier: "com.laclairtech.prismbar.plugin.prismcalc",
-            teamIdentifier: "N8A5T2PZY9",
-            expectedPluginVersion: .init(major: 0, minor: 1, patch: 0),
-            allowedCapabilities: [.panel, .commands, .openApplication],
-            allowedApplicationIdentifiers: ["com.laclairtech.prismcalc"]
-        )
+    init(registration: BundledPluginRegistration) throws {
+        policy = try registration.makePolicy(teamIdentifier: "N8A5T2PZY9")
     }
 
     func loadPanel() async throws -> PluginPanelUpdate {
@@ -66,6 +60,10 @@ final class PrismCalcPluginClient {
 
     func retryAfterFailure() {
         consecutiveFailures = 0
+        invalidateConnection()
+    }
+
+    func stop() {
         invalidateConnection()
     }
 
@@ -186,7 +184,6 @@ final class PrismCalcPluginClient {
         }
         return .invalidResponse
     }
-
 }
 
 private nonisolated enum PluginRequestBridge {
@@ -274,7 +271,7 @@ private extension PluginClientError {
     }
 }
 
-private nonisolated final class PluginRequestGate: Sendable {
+private final nonisolated class PluginRequestGate: Sendable {
     private struct State {
         var continuation: CheckedContinuation<Data, any Error>?
         var pendingResult: Result<Data, PluginClientError>?

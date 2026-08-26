@@ -14,11 +14,21 @@ struct PluginsView: View {
                 PageHeader(
                     eyebrow: "Extensions",
                     title: "Plugins",
-                    message: "Focused tools in isolated, signed services. Plugins never receive " +
-                        "Accessibility, file, or network access."
+                    message: "Focused tools in isolated, signed services. Every plugin is bundled, " +
+                        "capability-checked, and rendered by prismBar."
                 )
 
-                pluginContent
+                if let registration = model.bundledPluginRegistrations.first {
+                    pluginCard(registration)
+                    pluginContent
+                } else {
+                    ContentUnavailableView(
+                        "Plugin registry unavailable",
+                        systemImage: "exclamationmark.shield",
+                        description: Text("prismBar could not validate its bundled plugin catalog.")
+                    )
+                    .frame(maxWidth: .infinity, minHeight: 280)
+                }
             }
             .frame(maxWidth: 760, alignment: .leading)
             .padding(32)
@@ -28,29 +38,122 @@ struct PluginsView: View {
         }
     }
 
-    @ViewBuilder
-    private var pluginContent: some View {
-        switch model.pluginState {
-        case .idle, .loading:
-            ProgressView("Connecting to prismCalc…")
-                .controlSize(.large)
-                .frame(maxWidth: .infinity, minHeight: 280)
-        case .ready:
-            if let update = model.pluginPanel {
-                PluginPanelView(update: update, compact: false)
-            }
-        case .unavailable, .disabled:
-            ContentUnavailableView {
-                Label("prismCalc unavailable", systemImage: "puzzlepiece.extension")
-            } description: {
-                Text(model.pluginMessage ?? "The isolated plugin service did not respond.")
-            } actions: {
-                Button("Retry", systemImage: "arrow.clockwise") {
-                    model.retryPlugin()
+    private func pluginCard(_ registration: BundledPluginRegistration) -> some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(spacing: 12) {
+                    Image(systemName: "plus.forwardslash.minus")
+                        .font(.title2)
+                        .foregroundStyle(.tint)
+                        .frame(width: 38, height: 38)
+                        .glassEffect(.regular, in: .circle)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(registration.displayName)
+                            .font(.headline)
+                        Text("Bundled first-party plugin  •  v\(version(registration.version))")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    Toggle("Enable \(registration.displayName)", isOn: pluginEnabledBinding)
+                        .labelsHidden()
+                        .accessibilityIdentifier("plugin.enabled")
+                }
+
+                Text("Runs outside the prismBar process with no Accessibility, network, or file access. " +
+                    "Only validated panel controls and explicit local actions cross the connection.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+
+                HStack(spacing: 8) {
+                    ForEach(
+                        registration.capabilities.sorted { $0.rawValue < $1.rawValue },
+                        id: \.rawValue
+                    ) { capability in
+                        capabilityBadge(capability)
+                    }
+                    Spacer()
+                    Label(
+                        model.pluginState == .ready ? "Signature verified" : "Signature required",
+                        systemImage: model.pluginState == .ready ? "checkmark.shield" : "lock.shield"
+                    )
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
                 }
             }
-            .frame(maxWidth: .infinity, minHeight: 280)
         }
+    }
+
+    @ViewBuilder
+    private var pluginContent: some View {
+        if !model.isPluginEnabled {
+            ContentUnavailableView {
+                Label("prismCalc is off", systemImage: "puzzlepiece.extension")
+            } description: {
+                Text("Enable it above when you want the calculator in prismBar.")
+            }
+            .frame(maxWidth: .infinity, minHeight: 240)
+        } else {
+            switch model.pluginState {
+            case .idle, .loading:
+                ProgressView("Connecting to prismCalc…")
+                    .controlSize(.large)
+                    .frame(maxWidth: .infinity, minHeight: 280)
+            case .ready:
+                if let update = model.pluginPanel {
+                    PluginPanelView(update: update, compact: false)
+                }
+            case .unavailable, .disabled:
+                ContentUnavailableView {
+                    Label("prismCalc unavailable", systemImage: "puzzlepiece.extension")
+                } description: {
+                    Text(model.pluginMessage ?? "The isolated plugin service did not respond.")
+                } actions: {
+                    Button("Retry", systemImage: "arrow.clockwise") {
+                        model.retryPlugin()
+                    }
+                }
+                .frame(maxWidth: .infinity, minHeight: 280)
+            }
+        }
+    }
+
+    private var pluginEnabledBinding: Binding<Bool> {
+        Binding(
+            get: { model.isPluginEnabled },
+            set: { model.setPluginEnabled($0) }
+        )
+    }
+
+    private func capabilityBadge(_ capability: PluginCapability) -> some View {
+        Label(capabilityTitle(capability), systemImage: capabilitySymbol(capability))
+            .font(.caption.weight(.medium))
+            .padding(.horizontal, 9)
+            .padding(.vertical, 5)
+            .glassEffect(.regular, in: .capsule)
+    }
+
+    private func capabilityTitle(_ capability: PluginCapability) -> String {
+        switch capability {
+        case .panel: "Panel"
+        case .commands: "Commands"
+        case .openApplication: "Open app"
+        }
+    }
+
+    private func capabilitySymbol(_ capability: PluginCapability) -> String {
+        switch capability {
+        case .panel: "rectangle.on.rectangle"
+        case .commands: "command"
+        case .openApplication: "arrow.up.forward.app"
+        }
+    }
+
+    private func version(_ version: SemanticVersion) -> String {
+        "\(version.major).\(version.minor).\(version.patch)"
     }
 }
 

@@ -134,6 +134,10 @@ struct StatusMenuView: View {
                     PluginPanelView(update: pluginPanel, compact: true)
                         .padding(.top, 6)
                 }
+            } else if model.pluginState == .disabled, !model.isPluginEnabled {
+                Button("Enable prismCalc", systemImage: "puzzlepiece.extension") {
+                    model.setPluginEnabled(true)
+                }
             } else if model.pluginState == .unavailable || model.pluginState == .disabled {
                 Button("Retry prismCalc", systemImage: "arrow.clockwise") {
                     model.retryPlugin()

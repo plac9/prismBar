@@ -45,6 +45,7 @@ final class AppModel {
     private(set) var pluginPanel: PluginPanelUpdate?
     private(set) var pluginMessage: String?
     private(set) var isPluginActionInProgress = false
+    private(set) var isPluginEnabled = false
 
     private static let requestHistoryKey = "accessibility.hasRequested"
     private let defaults: UserDefaults
@@ -52,7 +53,9 @@ final class AppModel {
     private var permissionRevision = 0
     private var topologyRevision = 0
     let menuBarController = LiveMenuBarController()
-    private let pluginClient: PrismCalcPluginClient?
+    private let pluginRegistry: BundledPluginRegistry?
+    private let pluginRegistration: BundledPluginRegistration?
+    private let pluginClient: BundledPluginClient?
     private var pluginRevision = 0
 
     var isMenuBarActionInProgress: Bool {
@@ -64,7 +67,15 @@ final class AppModel {
 
     private init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        pluginClient = try? PrismCalcPluginClient()
+        let registry = try? PluginCatalog.makeRegistry()
+        let registration = registry?.registration(identifier: PluginCatalog.prismCalcIdentifier)
+        pluginRegistry = registry
+        pluginRegistration = registration
+        pluginClient = registration.flatMap { try? BundledPluginClient(registration: $0) }
+        if let registration {
+            isPluginEnabled = defaults.object(forKey: registration.preferenceKey) as? Bool
+                ?? registration.isEnabledByDefault
+        }
         permissionSession = AccessibilityPermissionSession(
             evaluator: AccessibilityPermissionEvaluator(
                 expectedBundleIdentifier: "com.laclairtech.prismbar",
@@ -188,7 +199,17 @@ final class AppModel {
 }
 
 extension AppModel {
+    var bundledPluginRegistrations: [BundledPluginRegistration] {
+        pluginRegistry?.registrations ?? []
+    }
+
     func refreshPlugin() {
+        guard isPluginEnabled else {
+            pluginState = .disabled
+            pluginPanel = nil
+            pluginMessage = "prismCalc is disabled."
+            return
+        }
         guard let pluginClient else {
             pluginState = .unavailable
             pluginMessage = "The bundled plugin could not be configured."
@@ -227,13 +248,34 @@ extension AppModel {
         refreshPlugin()
     }
 
+    func setPluginEnabled(_ enabled: Bool) {
+        guard let pluginRegistration else { return }
+        isPluginEnabled = enabled
+        defaults.set(enabled, forKey: pluginRegistration.preferenceKey)
+        pluginRevision += 1
+        pluginClient?.stop()
+        pluginPanel = nil
+        isPluginActionInProgress = false
+
+        if enabled {
+            pluginClient?.retryAfterFailure()
+            pluginState = .idle
+            pluginMessage = nil
+            refreshPlugin()
+        } else {
+            pluginState = .disabled
+            pluginMessage = "\(pluginRegistration.displayName) is disabled."
+        }
+    }
+
     func retryPlugin() {
+        guard isPluginEnabled else { return }
         pluginClient?.retryAfterFailure()
         refreshPlugin()
     }
 
     func invokePluginCommand(_ commandIdentifier: String) {
-        guard let pluginClient, !isPluginActionInProgress else { return }
+        guard isPluginEnabled, let pluginClient, !isPluginActionInProgress else { return }
 
         pluginRevision += 1
         let revision = pluginRevision
@@ -280,7 +322,7 @@ extension AppModel {
                     pluginMessage = "The result could not be copied."
                 }
             case let .openApplication(bundleIdentifier):
-                guard bundleIdentifier == "com.laclairtech.prismcalc",
+                guard pluginRegistration?.allowedApplicationIdentifiers.contains(bundleIdentifier) == true,
                       let applicationURL = NSWorkspace.shared.urlForApplication(
                           withBundleIdentifier: bundleIdentifier
                       )

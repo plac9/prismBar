@@ -30,6 +30,7 @@
 		9B5641B47C612060B2C3E9A7 /* MainWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72367E88666AEFDC8C0C684C /* MainWindowView.swift */; };
 		AE30068A1AE8D0EAB237F76A /* PrismVisuals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F750C30A67946F63A370161 /* PrismVisuals.swift */; };
 		AFC0E90FF2A6E8DF6D4BCFDC /* AppModel+MenuBarActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 797D62515E8C48EE5BF939F7 /* AppModel+MenuBarActions.swift */; };
+		B893244D0DA9D213D378BBA4 /* PluginCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48726DBAAF06DD0B61BFD0CE /* PluginCatalog.swift */; };
 		B9A46C4C763328F81D998C81 /* PluginService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A119DE84BE83C7F3F0E19DF /* PluginService.swift */; };
 		BEB5DD3EE10E1A5DE98304FB /* prismBar.icon in Resources */ = {isa = PBXBuildFile; fileRef = 42DE507D28E83BE99B7CC5CE /* prismBar.icon */; };
 		CE3C57B543CBD6AECD63561D /* PluginPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0F54F091A7C16DF376F2 /* PluginPanelView.swift */; };
@@ -79,6 +80,7 @@
 		3BA0C421D62741B8383FEFA7 /* PrismBarCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismBarCommands.swift; sourceTree = "<group>"; };
 		3DA42353B48097F47E64CF57 /* prismBar */ = {isa = PBXFileReference; lastKnownFileType = folder; name = prismBar; path = .; sourceTree = SOURCE_ROOT; };
 		42DE507D28E83BE99B7CC5CE /* prismBar.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = prismBar.icon; sourceTree = "<group>"; };
+		48726DBAAF06DD0B61BFD0CE /* PluginCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginCatalog.swift; sourceTree = "<group>"; };
 		574A6994BBFD030D13E09840 /* LiveMenuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveMenuBarController.swift; sourceTree = "<group>"; };
 		6A119DE84BE83C7F3F0E19DF /* PluginService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginService.swift; sourceTree = "<group>"; };
 		72367E88666AEFDC8C0C684C /* MainWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowView.swift; sourceTree = "<group>"; };
@@ -246,6 +248,7 @@
 				797D62515E8C48EE5BF939F7 /* AppModel+MenuBarActions.swift */,
 				574A6994BBFD030D13E09840 /* LiveMenuBarController.swift */,
 				9D8BAE01F43F46DF5610002B /* MenuBarSectionStatusController.swift */,
+				48726DBAAF06DD0B61BFD0CE /* PluginCatalog.swift */,
 				8B8C7BE0DF23129D943A0758 /* PluginClient.swift */,
 				8FFF8A05443F8BB9B57C8CBC /* prismBarApp.swift */,
 			);
@@ -445,6 +448,7 @@
 				E64955DB63E19420FC76CC0C /* MenuBarSectionStatusController.swift in Sources */,
 				24D6BDA4F82765035F4809EF /* MenuBarView.swift in Sources */,
 				2BC33F74613199D3C60E4162 /* OverviewView.swift in Sources */,
+				B893244D0DA9D213D378BBA4 /* PluginCatalog.swift in Sources */,
 				2623DA0ED73E0705859DE3DD /* PluginClient.swift in Sources */,
 				CE3C57B543CBD6AECD63561D /* PluginPanelView.swift in Sources */,
 				48F49065677526FB180F5344 /* PrismBarCommands.swift in Sources */,
