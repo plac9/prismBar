@@ -7,7 +7,7 @@ import prismBarCore
 import SwiftUI
 
 @MainActor
-final class MenuBarSectionStatusController {
+final class MenuBarSectionStatusController: NSObject {
     static let shared = MenuBarSectionStatusController()
 
     private static let expandedSpacerLength: CGFloat = 6
@@ -20,15 +20,23 @@ final class MenuBarSectionStatusController {
         popover.behavior = .transient
         popover.animates = true
         popover.contentSize = NSSize(width: 320, height: 560)
+        popover.delegate = self
         popover.contentViewController = NSHostingController(
-            rootView: StatusMenuView(model: AppModel.shared)
+            rootView: StatusMenuView(
+                model: AppModel.shared,
+                dismissCommandCenter: { [weak self] in
+                    self?.dismissCommandCenter()
+                }
+            )
         )
         return popover
     }()
 
     private(set) var isCollapsed = false
 
-    private init() {}
+    override private init() {
+        super.init()
+    }
 
     func installIfNeeded() {
         guard primaryItem == nil, anchorItem == nil, spacerItem == nil else { return }
@@ -37,8 +45,8 @@ final class MenuBarSectionStatusController {
         primary.autosaveName = "com.laclairtech.prismbar.primary-control"
         primary.button?.image = Self.makePrimaryControlImage()
         primary.button?.setAccessibilityLabel(MenuBarControllerIdentity.primaryControlLabel)
-        primary.button?.target = self
-        primary.button?.action = #selector(toggleCommandPopover(_:))
+        primary.button?.toolTip = "Open prismBar"
+        primary.expandedInterfaceDelegate = self
         primaryItem = primary
 
         let anchor = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
@@ -89,12 +97,8 @@ final class MenuBarSectionStatusController {
         return image
     }
 
-    @objc private func toggleCommandPopover(_ sender: NSStatusBarButton) {
-        if commandPopover.isShown {
-            commandPopover.performClose(sender)
-        } else {
-            commandPopover.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
-        }
+    func dismissCommandCenter() {
+        primaryItem?.expandedInterfaceSession?.cancel()
     }
 
     @discardableResult
@@ -132,5 +136,42 @@ final class MenuBarSectionStatusController {
             y: primaryScreen.frame.maxY - accessibilityPoint.y
         )
         return NSScreen.screens.first { NSMouseInRect(appKitPoint, $0.frame, false) }
+    }
+}
+
+extension MenuBarSectionStatusController: NSStatusItemExpandedInterfaceDelegate {
+    func statusItem(
+        _ statusItem: NSStatusItem,
+        didBegin _: NSStatusItemExpandedInterfaceSession
+    ) {
+        guard statusItem === primaryItem,
+              let button = statusItem.button
+        else {
+            statusItem.expandedInterfaceSession?.cancel()
+            return
+        }
+
+        commandPopover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+    }
+
+    func statusItemDidEndExpandedInterfaceSession(_ statusItem: NSStatusItem, animated _: Bool) {
+        guard statusItem === primaryItem, commandPopover.isShown else { return }
+        commandPopover.performClose(statusItem.button)
+    }
+}
+
+extension MenuBarSectionStatusController: NSPopoverDelegate {
+    func popoverDidShow(_ notification: Notification) {
+        guard notification.object as? NSPopover === commandPopover,
+              let window = commandPopover.contentViewController?.view.window
+        else { return }
+
+        window.autorecalculatesKeyViewLoop = true
+        window.recalculateKeyViewLoop()
+    }
+
+    func popoverDidClose(_ notification: Notification) {
+        guard notification.object as? NSPopover === commandPopover else { return }
+        primaryItem?.expandedInterfaceSession?.cancel()
     }
 }

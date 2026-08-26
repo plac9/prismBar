@@ -9,11 +9,13 @@ import SwiftUI
 struct StatusMenuView: View {
     @Environment(\.openSettings) private var openSettings
     @Bindable private var model: AppModel
+    let dismissCommandCenter: () -> Void
     @State private var isCalculatorExpanded = false
     @State private var isResetConfirmationPresented = false
 
-    init(model: AppModel) {
+    init(model: AppModel, dismissCommandCenter: @escaping () -> Void) {
         self.model = model
+        self.dismissCommandCenter = dismissCommandCenter
     }
 
     var body: some View {
@@ -147,10 +149,12 @@ struct StatusMenuView: View {
             Divider()
 
             Button("Open prismBar", systemImage: "rectangle.on.rectangle") {
+                dismissCommandCenter()
                 AppWindowController.shared.show()
             }
 
             Button("Settings", systemImage: "gearshape") {
+                dismissCommandCenter()
                 openSettings()
                 NSApplication.shared.activate()
             }
@@ -158,6 +162,7 @@ struct StatusMenuView: View {
             Divider()
 
             Button("Quit prismBar", systemImage: "power") {
+                dismissCommandCenter()
                 NSApplication.shared.terminate(nil)
             }
             .keyboardShortcut("q")

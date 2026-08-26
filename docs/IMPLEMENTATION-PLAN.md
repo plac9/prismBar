@@ -59,7 +59,8 @@ The project is complete only when every gate below has authoritative evidence fr
 ## Phase 5: Status item and daily workflow
 
 - [x] Implement a template-rendered prism status icon.
-- [x] Ensure normal click opens the command center and exposes its primary controls.
+- [x] Use the native macOS 27 expanded-interface session for the command center.
+- [x] Ensure normal click opens the command center, Escape dismisses it, and the same item reopens it.
 - [x] Add primary section actions, current state, plugin panels, Settings, and Quit.
 - [ ] Add shortcut discovery and conflict detection.
 - [x] Prove menu operation with no main window open through a native XCUITest.
