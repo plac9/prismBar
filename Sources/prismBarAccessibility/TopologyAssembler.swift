@@ -31,19 +31,22 @@ public struct MenuBarObservation: Equatable, Sendable {
     public let displayName: String?
     public let frame: MenuBarItemFrame?
     public let isEnabled: Bool
+    public let surfaceToken: String?
 
     public init(
         owner: RunningApplicationDescriptor,
         stableToken: String,
         displayName: String?,
         frame: MenuBarItemFrame?,
-        isEnabled: Bool
+        isEnabled: Bool,
+        surfaceToken: String? = nil
     ) {
         self.owner = owner
         self.stableToken = stableToken
         self.displayName = displayName
         self.frame = frame
         self.isEnabled = isEnabled
+        self.surfaceToken = surfaceToken
     }
 }
 
@@ -68,9 +71,11 @@ public struct TopologyAssembler: Sendable {
         var occurrenceCounts: [String: Int] = [:]
 
         let items = ordered.enumerated().map { position, observation in
+            let surfaceID = surfaceIdentifier(for: observation.surfaceToken)
             let identitySeed = [
                 observation.owner.bundleIdentifier ?? "unknown-owner",
                 observation.stableToken,
+                observation.surfaceToken ?? "unknown-surface",
             ].joined(separator: "\u{0}")
             let occurrence = occurrenceCounts[identitySeed, default: 0]
             occurrenceCounts[identitySeed] = occurrence + 1
@@ -89,7 +94,8 @@ public struct TopologyAssembler: Sendable {
                 ownership: ownership,
                 availability: availability,
                 role: role,
-                frame: observation.frame
+                frame: observation.frame,
+                surfaceID: surfaceID
             )
         }
 
@@ -101,6 +107,11 @@ public struct TopologyAssembler: Sendable {
     }
 
     private func observationOrder(_ lhs: MenuBarObservation, _ rhs: MenuBarObservation) -> Bool {
+        let lhsSurface = lhs.surfaceToken ?? ""
+        let rhsSurface = rhs.surfaceToken ?? ""
+        if lhsSurface != rhsSurface {
+            return lhsSurface < rhsSurface
+        }
         switch (lhs.frame, rhs.frame) {
         case let (.some(lhsFrame), .some(rhsFrame)):
             if lhsFrame.minX == rhsFrame.minX {
@@ -166,5 +177,14 @@ public struct TopologyAssembler: Sendable {
             using: identifierKey
         )
         return digest.map { String(format: "%02x", $0) }.joined()
+    }
+
+    private func surfaceIdentifier(for token: String?) -> MenuBarSurfaceID {
+        guard let token else { return .unknown }
+        let digest = HMAC<SHA256>.authenticationCode(
+            for: Data("surface\u{0}\(token)".utf8),
+            using: identifierKey
+        )
+        return MenuBarSurfaceID(rawValue: digest.map { String(format: "%02x", $0) }.joined())
     }
 }

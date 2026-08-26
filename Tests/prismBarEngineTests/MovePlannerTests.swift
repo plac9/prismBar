@@ -48,4 +48,27 @@ struct MovePlannerTests {
             try MovePlanner().plan(item: item.id, to: 4, in: snapshot)
         }
     }
+
+    @Test("rejects a destination on another display")
+    func rejectsCrossDisplayMove() {
+        let firstSurface = MenuBarSurfaceID(rawValue: "first")
+        let secondSurface = MenuBarSurfaceID(rawValue: "second")
+        let first = MenuBarItem(
+            id: .init(rawValue: "one"),
+            position: 0,
+            isMovable: true,
+            surfaceID: firstSurface
+        )
+        let second = MenuBarItem(
+            id: .init(rawValue: "two"),
+            position: 1,
+            isMovable: true,
+            surfaceID: secondSurface
+        )
+        let snapshot = MenuBarSnapshot(generation: 1, items: [first, second])
+
+        #expect(throws: MovePlanningError.differentSurface) {
+            try MovePlanner().plan(item: first.id, to: 1, in: snapshot)
+        }
+    }
 }

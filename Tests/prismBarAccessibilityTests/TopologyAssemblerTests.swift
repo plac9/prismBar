@@ -23,6 +23,29 @@ struct TopologyAssemblerTests {
         #expect(snapshot.items.map(\.position) == [0, 1, 2])
     }
 
+    @Test("keeps menu bars on separate displays in independent surfaces")
+    func separatesDisplaySurfaces() {
+        let observations = [
+            observation(token: "right-a", horizontalPosition: 100, surfaceToken: "right-display"),
+            observation(token: "left-b", horizontalPosition: 200, surfaceToken: "left-display"),
+            observation(token: "left-a", horizontalPosition: 100, surfaceToken: "left-display"),
+            observation(token: "right-b", horizontalPosition: 200, surfaceToken: "right-display"),
+        ]
+        let assembler = TopologyAssembler()
+
+        let first = assembler.assemble(generation: 1, observations: observations)
+        let second = assembler.assemble(generation: 2, observations: observations.reversed())
+
+        #expect(Set(first.items.map(\.surfaceID)).count == 2)
+        #expect(first.items.map(\.surfaceID) == second.items.map(\.surfaceID))
+        #expect(first.items.map(\.id) == second.items.map(\.id))
+        let groupedPositions = Dictionary(grouping: first.items, by: \.surfaceID)
+            .values
+            .map { $0.map(\.position) }
+            .sorted { $0[0] < $1[0] }
+        #expect(groupedPositions == [[0, 1], [2, 3]])
+    }
+
     @Test("classifies application, system, and self-owned items")
     func classifiesOwnership() {
         let observations = [
@@ -107,14 +130,16 @@ struct TopologyAssemblerTests {
         token: String,
         horizontalPosition: Double,
         bundleIdentifier: String = "com.example.utility",
-        isSelf: Bool = false
+        isSelf: Bool = false,
+        surfaceToken: String? = nil
     ) -> MenuBarObservation {
         MenuBarObservation(
             owner: owner(bundleIdentifier: bundleIdentifier, isSelf: isSelf),
             stableToken: token,
             displayName: token,
             frame: MenuBarItemFrame(minX: horizontalPosition, minY: 0, width: 24, height: 24),
-            isEnabled: true
+            isEnabled: true,
+            surfaceToken: surfaceToken
         )
     }
 
@@ -127,6 +152,37 @@ struct TopologyAssemblerTests {
             bundleIdentifier: bundleIdentifier,
             displayName: "Fixture App",
             isSelf: isSelf
+        )
+    }
+}
+
+@Suite("Display surface resolution")
+struct DisplaySurfaceResolverTests {
+    @Test("maps menu items to side-by-side and stacked displays")
+    func resolvesDisplayGeometry() {
+        let resolver = DisplaySurfaceResolver(surfaces: [
+            .init(token: "left", frame: frame(x: -1_920, y: 0, width: 1_920, height: 1_080)),
+            .init(token: "main", frame: frame(x: 0, y: 0, width: 2_560, height: 1_440)),
+            .init(token: "upper", frame: frame(x: 0, y: -900, width: 1_600, height: 900)),
+        ])
+
+        #expect(resolver.surfaceToken(for: frame(x: -200, y: 0, width: 24, height: 24)) == "left")
+        #expect(resolver.surfaceToken(for: frame(x: 2_000, y: 0, width: 24, height: 24)) == "main")
+        #expect(resolver.surfaceToken(for: frame(x: 600, y: -900, width: 24, height: 24)) == "upper")
+        #expect(resolver.surfaceToken(for: frame(x: 4_000, y: 0, width: 24, height: 24)) == nil)
+    }
+
+    private func frame(
+        x horizontalPosition: Double,
+        y verticalPosition: Double,
+        width: Double,
+        height: Double
+    ) -> MenuBarItemFrame {
+        MenuBarItemFrame(
+            minX: horizontalPosition,
+            minY: verticalPosition,
+            width: width,
+            height: height
         )
     }
 }

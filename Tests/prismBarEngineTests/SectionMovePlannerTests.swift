@@ -77,6 +77,40 @@ struct SectionMovePlannerTests {
         }
     }
 
+    @Test("uses the divider on the item's display")
+    func targetsSameDisplayDivider() throws {
+        let firstSurface = MenuBarSurfaceID(rawValue: "first")
+        let secondSurface = MenuBarSurfaceID(rawValue: "second")
+        let secondVisibleID = MenuBarItemID(rawValue: "second-visible")
+        let snapshot = MenuBarSnapshot(
+            generation: 1,
+            items: [
+                item(
+                    "first-divider",
+                    position: 0,
+                    role: .hiddenSectionDivider,
+                    surfaceID: firstSurface
+                ),
+                item("first-visible", position: 1, surfaceID: firstSurface),
+                item(
+                    "second-divider",
+                    position: 2,
+                    role: .hiddenSectionDivider,
+                    surfaceID: secondSurface
+                ),
+                item("second-visible", position: 3, surfaceID: secondSurface),
+            ]
+        )
+
+        let plan = try SectionMovePlanner().plan(
+            item: secondVisibleID,
+            to: .hidden,
+            in: snapshot
+        )
+
+        #expect(plan.destinationIndex == 2)
+    }
+
     @Test("classifies items on either side of the divider")
     func classifiesSections() {
         let snapshot = fixtureSnapshot()
@@ -103,7 +137,8 @@ struct SectionMovePlannerTests {
     private func item(
         _ identifier: String,
         position: Int,
-        role: MenuBarItemRole = .item
+        role: MenuBarItemRole = .item,
+        surfaceID: MenuBarSurfaceID = .unknown
     ) -> MenuBarItem {
         MenuBarItem(
             id: MenuBarItemID(rawValue: identifier),
@@ -113,7 +148,8 @@ struct SectionMovePlannerTests {
             ownership: role == .item ? .application : .selfOwned,
             availability: .controllable,
             role: role,
-            frame: MenuBarItemFrame(minX: Double(position * 30), minY: 0, width: 24, height: 24)
+            frame: MenuBarItemFrame(minX: Double(position * 30), minY: 0, width: 24, height: 24),
+            surfaceID: surfaceID
         )
     }
 }

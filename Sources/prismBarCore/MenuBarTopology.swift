@@ -10,6 +10,16 @@ public struct MenuBarItemID: RawRepresentable, Hashable, Codable, Sendable {
     }
 }
 
+public struct MenuBarSurfaceID: RawRepresentable, Hashable, Codable, Sendable {
+    public static let unknown = Self(rawValue: "unknown")
+
+    public let rawValue: String
+
+    public init(rawValue: String) {
+        self.rawValue = rawValue
+    }
+}
+
 public enum MenuBarControllerIdentity {
     public static let primaryControlLabel = "prismBar"
     public static let hiddenSectionDividerLabel = "prismBar Hidden Section"
@@ -83,6 +93,7 @@ public struct MenuBarItem: Identifiable, Equatable, Codable, Sendable {
     public let availability: MenuBarItemAvailability
     public let role: MenuBarItemRole
     public let frame: MenuBarItemFrame?
+    public let surfaceID: MenuBarSurfaceID
 
     public init(
         id: MenuBarItemID,
@@ -93,7 +104,8 @@ public struct MenuBarItem: Identifiable, Equatable, Codable, Sendable {
         ownership: MenuBarItemOwnership = .application,
         availability: MenuBarItemAvailability = .controllable,
         role: MenuBarItemRole = .item,
-        frame: MenuBarItemFrame? = nil
+        frame: MenuBarItemFrame? = nil,
+        surfaceID: MenuBarSurfaceID = .unknown
     ) {
         self.id = id
         self.position = position
@@ -104,6 +116,7 @@ public struct MenuBarItem: Identifiable, Equatable, Codable, Sendable {
         self.availability = availability
         self.role = role
         self.frame = frame
+        self.surfaceID = surfaceID
     }
 }
 
@@ -135,13 +148,26 @@ public struct MenuBarSnapshot: Equatable, Codable, Sendable {
         items.first { $0.role == .hiddenSectionDivider }
     }
 
+    public var surfaceIDs: [MenuBarSurfaceID] {
+        let knownSurfaceIDs = Set(
+            items.lazy.map(\.surfaceID).filter { $0 != .unknown }
+        )
+        let surfaceIDs = knownSurfaceIDs.isEmpty ? Set([.unknown]) : knownSurfaceIDs
+        return surfaceIDs.sorted { $0.rawValue < $1.rawValue }
+    }
+
     public func section(for itemID: MenuBarItemID) -> MenuBarSection? {
-        guard let itemIndex = items.firstIndex(where: { $0.id == itemID }),
-              let dividerIndex = items.firstIndex(where: { $0.role == .hiddenSectionDivider })
+        guard let itemIndex = items.firstIndex(where: { $0.id == itemID }) else {
+            return nil
+        }
+        let item = items[itemIndex]
+        guard let dividerIndex = items.firstIndex(where: {
+            $0.role == .hiddenSectionDivider && $0.surfaceID == item.surfaceID
+        })
         else {
             return nil
         }
-        guard items[itemIndex].role == .item else {
+        guard item.role == .item else {
             return .controller
         }
         return itemIndex < dividerIndex ? .hidden : .visible

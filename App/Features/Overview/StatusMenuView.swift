@@ -169,7 +169,9 @@ struct StatusMenuView: View {
     ) -> Int? {
         guard let section = snapshot.section(for: item.id) else { return nil }
         let sectionItems = snapshot.items.filter { candidate in
-            candidate.role == .item && snapshot.section(for: candidate.id) == section
+            candidate.role == .item &&
+                candidate.surfaceID == item.surfaceID &&
+                snapshot.section(for: candidate.id) == section
         }
         guard let index = sectionItems.firstIndex(where: { $0.id == item.id }) else { return nil }
         let destination = index + offset

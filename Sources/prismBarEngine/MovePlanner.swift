@@ -17,6 +17,7 @@ public enum MovePlanningError: Error, Equatable, Sendable {
     case itemNotFound(MenuBarItemID)
     case itemIsNotMovable(MenuBarItemID)
     case invalidDestination(Int)
+    case differentSurface
 }
 
 public struct MovePlanner: Sendable {
@@ -37,6 +38,9 @@ public struct MovePlanner: Sendable {
 
         guard snapshot.items.indices.contains(destinationIndex) else {
             throw MovePlanningError.invalidDestination(destinationIndex)
+        }
+        guard snapshot.items[sourceIndex].surfaceID == snapshot.items[destinationIndex].surfaceID else {
+            throw MovePlanningError.differentSurface
         }
 
         var expectedOrder = snapshot.items.map(\.id)

@@ -22,7 +22,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Add the application, unit-test, UI-test, and sandboxed XPC service targets.
 - [x] Add explicit host and sandboxed-service entitlements.
 - [x] Add privacy manifest and generated Info.plists.
-- [ ] Add deterministic fixtures containing synthetic menu items only.
+- [x] Add deterministic fixtures containing synthetic menu items only.
 - [ ] Add self-hosted macOS CI with no signing secrets in pull-request jobs.
 - [x] Prove package tests and unsigned app builds with Xcode 27.
 
@@ -42,7 +42,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Define immutable topology models and synthetic fixtures.
 - [x] Implement public Accessibility discovery behind a dedicated actor.
 - [x] Identify controllable, system-owned, unavailable, and self-owned items.
-- [ ] Implement multi-display, full-screen, space, and topology-generation handling.
+- [x] Implement multi-display, full-screen, space, and topology-generation handling.
 - [ ] Write property tests for ordering, grouping, and plan validity.
 - [x] Ensure production logs never include observed values.
 
@@ -50,7 +50,7 @@ The project is complete only when every gate below has authoritative evidence fr
 
 - [ ] Write failing tests for arbitrary-position moves, group moves, stale targets, revocation, rejection, partial movement, and timeout.
 - [x] Implement direct multi-position movement in one action.
-- [ ] Implement hide, show, section visibility, and reset semantics.
+- [x] Implement hide, show, section visibility, and reset semantics.
 - [x] Verify every operation against a fresh topology snapshot before reporting success.
 - [ ] Add equivalent keyboard and accessibility actions.
 - [ ] Prove pointer and modifier cleanup on cancellation and failure.

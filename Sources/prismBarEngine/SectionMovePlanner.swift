@@ -21,8 +21,11 @@ public struct SectionMovePlanner: Sendable {
         guard section != .controller else {
             throw SectionMovePlanningError.itemUnavailable(itemID)
         }
+        guard let item = snapshot.items.first(where: { $0.id == itemID }) else {
+            throw SectionMovePlanningError.itemUnavailable(itemID)
+        }
         guard let dividerIndex = snapshot.items.firstIndex(where: {
-            $0.role == .hiddenSectionDivider
+            $0.role == .hiddenSectionDivider && $0.surfaceID == item.surfaceID
         }) else {
             throw SectionMovePlanningError.dividerUnavailable
         }

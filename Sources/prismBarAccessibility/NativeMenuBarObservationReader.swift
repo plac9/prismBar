@@ -7,6 +7,77 @@ import AppKit
 import Foundation
 import prismBarCore
 
+struct DisplaySurfaceDescriptor: Equatable, Sendable {
+    let token: String
+    let frame: MenuBarItemFrame
+}
+
+struct DisplaySurfaceResolver: Sendable {
+    let surfaces: [DisplaySurfaceDescriptor]
+
+    func surfaceToken(for itemFrame: MenuBarItemFrame) -> String? {
+        let midpointX = itemFrame.minX + itemFrame.width / 2
+        let midpointY = itemFrame.minY + itemFrame.height / 2
+        return surfaces.first { surface in
+            midpointX >= surface.frame.minX &&
+                midpointX < surface.frame.minX + surface.frame.width &&
+                midpointY >= surface.frame.minY &&
+                midpointY < surface.frame.minY + surface.frame.height
+        }?.token
+    }
+}
+
+private enum ActiveDisplaySurfaceCatalog {
+    static func current() -> DisplaySurfaceResolver {
+        var displayCount: UInt32 = 0
+        guard CGGetActiveDisplayList(0, nil, &displayCount) == .success,
+              displayCount > 0
+        else {
+            return DisplaySurfaceResolver(surfaces: [])
+        }
+
+        var displayIdentifiers = [CGDirectDisplayID](
+            repeating: CGDirectDisplayID(),
+            count: Int(displayCount)
+        )
+        guard CGGetActiveDisplayList(
+            displayCount,
+            &displayIdentifiers,
+            &displayCount
+        ) == .success else {
+            return DisplaySurfaceResolver(surfaces: [])
+        }
+
+        let uniqueFrames = displayIdentifiers
+            .prefix(Int(displayCount))
+            .map(CGDisplayBounds)
+            .filter { !$0.isNull && !$0.isInfinite && $0.width > 0 && $0.height > 0 }
+            .reduce(into: [CGRect]()) { frames, frame in
+                if !frames.contains(frame) {
+                    frames.append(frame)
+                }
+            }
+            .sorted { lhs, rhs in
+                if lhs.minY == rhs.minY {
+                    return lhs.minX < rhs.minX
+                }
+                return lhs.minY < rhs.minY
+            }
+
+        return DisplaySurfaceResolver(surfaces: uniqueFrames.enumerated().map { index, frame in
+            DisplaySurfaceDescriptor(
+                token: "display.\(index)",
+                frame: MenuBarItemFrame(
+                    minX: frame.minX,
+                    minY: frame.minY,
+                    width: frame.width,
+                    height: frame.height
+                )
+            )
+        })
+    }
+}
+
 @MainActor
 public enum RunningApplicationCatalog {
     public static func current() -> [RunningApplicationDescriptor] {
@@ -47,11 +118,15 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
 
         var observations: [MenuBarObservation] = []
         var unavailableSourceCount = 0
+        let surfaceResolver = ActiveDisplaySurfaceCatalog.current()
         observations.reserveCapacity(applications.count)
 
         for application in applications {
             do {
-                try observations.append(contentsOf: readObservations(for: application))
+                try observations.append(contentsOf: readObservations(
+                    for: application,
+                    surfaceResolver: surfaceResolver
+                ))
             } catch MenuBarAuthorizationError.permissionRevoked {
                 throw MenuBarAuthorizationError.permissionRevoked
             } catch {
@@ -70,7 +145,8 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
     }
 
     private func readObservations(
-        for application: RunningApplicationDescriptor
+        for application: RunningApplicationDescriptor,
+        surfaceResolver: DisplaySurfaceResolver
     ) throws -> [MenuBarObservation] {
         let applicationElement = AXUIElementCreateApplication(application.processIdentifier)
         let timeoutResult = AXUIElementSetMessagingTimeout(
@@ -104,13 +180,15 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
             let description = stringAttribute(kAXDescriptionAttribute as CFString, from: element)
             let title = stringAttribute(kAXTitleAttribute as CFString, from: element)
             let stableToken = identifier ?? description ?? title ?? "\(role ?? "item"):\(index)"
+            let itemFrame = frame(of: element)
 
             return MenuBarObservation(
                 owner: application,
                 stableToken: stableToken,
                 displayName: description ?? title,
-                frame: frame(of: element),
-                isEnabled: boolAttribute(kAXEnabledAttribute as CFString, from: element) ?? true
+                frame: itemFrame,
+                isEnabled: boolAttribute(kAXEnabledAttribute as CFString, from: element) ?? true,
+                surfaceToken: itemFrame.flatMap { surfaceResolver.surfaceToken(for: $0) }
             )
         }
     }

@@ -71,7 +71,10 @@ struct MenuBarView: View {
                             ForEach(items(in: .visible, snapshot: snapshot)) { item in
                                 MenuBarItemRow(
                                     item: item,
-                                    destinations: items(in: .visible, snapshot: snapshot),
+                                    destinations: items(in: .visible, snapshot: snapshot).filter {
+                                        $0.surfaceID == item.surfaceID
+                                    },
+                                    surfaceLabel: surfaceLabel(for: item, snapshot: snapshot),
                                     section: .visible
                                 )
                             }
@@ -86,7 +89,10 @@ struct MenuBarView: View {
                                 ForEach(hiddenItems) { item in
                                     MenuBarItemRow(
                                         item: item,
-                                        destinations: hiddenItems,
+                                        destinations: hiddenItems.filter {
+                                            $0.surfaceID == item.surfaceID
+                                        },
+                                        surfaceLabel: surfaceLabel(for: item, snapshot: snapshot),
                                         section: .hidden
                                     )
                                 }
@@ -139,6 +145,18 @@ struct MenuBarView: View {
         }
     }
 
+    private func surfaceLabel(
+        for item: MenuBarItem,
+        snapshot: MenuBarSnapshot
+    ) -> String {
+        guard snapshot.surfaceIDs.count > 1,
+              let index = snapshot.surfaceIDs.firstIndex(of: item.surfaceID)
+        else {
+            return "Menu bar"
+        }
+        return "Display \(index + 1)"
+    }
+
     private var unavailableTitle: String {
         model.accessibilityState == .granted ? "Checking the menu bar" : "Accessibility required"
     }
@@ -154,12 +172,19 @@ private struct MenuBarItemRow: View {
     @Environment(AppModel.self) private var model
     let item: MenuBarItem
     let destinations: [MenuBarItem]
+    let surfaceLabel: String
     let section: MenuBarSection?
     @State private var destinationIndex: Int
 
-    init(item: MenuBarItem, destinations: [MenuBarItem], section: MenuBarSection?) {
+    init(
+        item: MenuBarItem,
+        destinations: [MenuBarItem],
+        surfaceLabel: String,
+        section: MenuBarSection?
+    ) {
         self.item = item
         self.destinations = destinations
+        self.surfaceLabel = surfaceLabel
         self.section = section
         _destinationIndex = State(initialValue: item.position)
     }
@@ -173,7 +198,7 @@ private struct MenuBarItemRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.displayName)
                     .lineLimit(1)
-                Text(ownershipLabel)
+                Text("\(ownershipLabel), \(surfaceLabel)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
