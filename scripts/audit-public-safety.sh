@@ -70,6 +70,18 @@ if ! rg -q 'does not capture the screen or upload menu titles' App; then
   fail 'privacy copy does not state the capture and upload boundary'
 fi
 
+actual_product_urls="$(
+  rg -o --no-filename 'https://[^[:space:]\")"]+' App Sources |
+    sed 's/[.,;:]$//' |
+    LC_ALL=C sort -u
+)"
+expected_product_urls="$(printf '%s\n%s\n' \
+  'https://github.com/plac9/prismBar' \
+  'https://mozilla.org/MPL/2.0/' | LC_ALL=C sort)"
+if [ "$actual_product_urls" != "$expected_product_urls" ]; then
+  fail 'application source contains a URL outside the source and license allowlist'
+fi
+
 remote_urls="$(git remote -v | awk '{print $2}' | LC_ALL=C sort -u)"
 if [ -n "$remote_urls" ] && printf '%s\n' "$remote_urls" | \
   rg -v -q '^(https://github\.com/plac9/prismBar(\.git)?|git@github\.com:plac9/prismBar\.git)$'; then

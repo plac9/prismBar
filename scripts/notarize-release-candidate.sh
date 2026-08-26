@@ -65,6 +65,10 @@ plugin_path="$application_path/Contents/XPCServices/prismCalcPluginService.xpc"
 [ "$(jq -r '.sourceState' "$evidence_path")" = 'clean local commit' ] || \
   fail 'candidate evidence does not describe a clean source state'
 [ -d "$application_path" ] && [ -d "$plugin_path" ] || fail 'candidate application is incomplete'
+bundle_source_revision="$(/usr/libexec/PlistBuddy -c 'Print :PrismSourceRevision' \
+  "$application_path/Contents/Info.plist")"
+[ "$bundle_source_revision" = "$source_revision" ] || \
+  fail 'candidate application does not embed the current source revision'
 
 codesign --verify --deep --strict --verbose=4 "$application_path"
 ./scripts/audit-release-bundle.sh "$application_path"

@@ -30,6 +30,7 @@ settings:
     CLANG_ANALYZER_NONNULL: YES
     GCC_TREAT_WARNINGS_AS_ERRORS: YES
     SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+    PRISM_SOURCE_REVISION: local-development
   configs:
     Debug:
       ONLY_ACTIVE_ARCH: YES
@@ -48,6 +49,10 @@ targets:
     sources:
       - path: App
       - path: Resources
+      - path: LICENSE
+        buildPhase: resources
+      - path: NOTICE
+        buildPhase: resources
     dependencies:
       - package: prismBarModules
         product: prismBarCore
@@ -72,6 +77,8 @@ targets:
         NSHighResolutionCapable: true
         NSSupportsAutomaticGraphicsSwitching: true
         NSHumanReadableCopyright: Copyright 2026 Patrick LaClair and LaClair Technologies
+        PrismSourceRepositoryURL: https://github.com/plac9/prismBar
+        PrismSourceRevision: "$(PRISM_SOURCE_REVISION)"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.laclairtech.prismbar

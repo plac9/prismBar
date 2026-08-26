@@ -52,7 +52,8 @@ xcodebuild archive \
   -archivePath "$archive_path" \
   CODE_SIGN_STYLE=Manual \
   DEVELOPMENT_TEAM=N8A5T2PZY9 \
-  CODE_SIGN_IDENTITY='Developer ID Application: Patrick LaClair (N8A5T2PZY9)'
+  CODE_SIGN_IDENTITY='Developer ID Application: Patrick LaClair (N8A5T2PZY9)' \
+  PRISM_SOURCE_REVISION="$source_revision"
 
 codesign --verify --deep --strict --verbose=4 "$application_path"
 ./scripts/audit-release-bundle.sh "$application_path"
@@ -62,11 +63,14 @@ host_identifier="$(codesign -d --verbose=4 "$application_path" 2>&1 | awk -F= '$
 host_team="$(codesign -d --verbose=4 "$application_path" 2>&1 | awk -F= '$1 == "TeamIdentifier" {print $2}')"
 plugin_identifier="$(codesign -d --verbose=4 "$plugin_path" 2>&1 | awk -F= '$1 == "Identifier" {print $2}')"
 plugin_team="$(codesign -d --verbose=4 "$plugin_path" 2>&1 | awk -F= '$1 == "TeamIdentifier" {print $2}')"
+bundle_source_revision="$(/usr/libexec/PlistBuddy -c 'Print :PrismSourceRevision' \
+  "$application_path/Contents/Info.plist")"
 
 [ "$host_identifier" = 'com.laclairtech.prismbar' ] || fail 'host identifier differs from the release contract'
 [ "$plugin_identifier" = 'com.laclairtech.prismbar.plugin.prismcalc' ] || fail 'plugin identifier differs from the release contract'
 [ "$host_team" = 'N8A5T2PZY9' ] || fail 'host team differs from the release contract'
 [ "$plugin_team" = 'N8A5T2PZY9' ] || fail 'plugin team differs from the release contract'
+[ "$bundle_source_revision" = "$source_revision" ] || fail 'bundle source revision differs from Git'
 
 host_hash="$(shasum -a 256 "$application_path/Contents/MacOS/prismBar" | awk '{print $1}')"
 plugin_hash="$(shasum -a 256 "$plugin_path/Contents/MacOS/prismCalcPluginService" | awk '{print $1}')"

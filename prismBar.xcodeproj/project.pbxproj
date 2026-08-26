@@ -20,6 +20,7 @@
 		4C4F9058AA0DC0F2C69F0EF0 /* ServiceMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965655B6F8C2B531AB8DB3CA /* ServiceMain.swift */; };
 		53A67AB1D743C9191CAD41ED /* LaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75ABFACBE8B5FA2F47CAF31F /* LaunchTests.swift */; };
 		5BBE97F18265E328EA81844C /* SettingsRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0E9A57FF0B8B5227635A91 /* SettingsRootView.swift */; };
+		62F6DD3471485B61A72949C4 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 11CF65631A1A62948D2CAF8A /* LICENSE */; };
 		67A85AD65D85C6FCB202D08F /* LiveMenuBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574A6994BBFD030D13E09840 /* LiveMenuBarController.swift */; };
 		698BD64A25F31652EE03AC4E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 90B72451308C4BB744C489CA /* Assets.xcassets */; };
 		6A1FFD8E601EBDC2E3D3999C /* ShortcutsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF2F6970047364DDA27C5F2C /* ShortcutsView.swift */; };
@@ -27,12 +28,14 @@
 		774004B35A746E24A0FEBEF8 /* StatusMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 298F54AF53B0B08B5C294CF3 /* StatusMenuView.swift */; };
 		82E7646A073F9D58353FADF1 /* prismCalcPluginService.xpc in CopyFiles */ = {isa = PBXBuildFile; fileRef = F277020FA698706F25C0B310 /* prismCalcPluginService.xpc */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		8813B1CB9A5D8575906A510B /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A6F51D219AFA0CC326CFE1F /* AppModel.swift */; };
+		985AA29341450BF46056E6B3 /* NOTICE in Resources */ = {isa = PBXBuildFile; fileRef = 6419CB2641AFB03C2890E55D /* NOTICE */; };
 		9B5641B47C612060B2C3E9A7 /* MainWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72367E88666AEFDC8C0C684C /* MainWindowView.swift */; };
 		AE30068A1AE8D0EAB237F76A /* PrismVisuals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F750C30A67946F63A370161 /* PrismVisuals.swift */; };
 		AFC0E90FF2A6E8DF6D4BCFDC /* AppModel+MenuBarActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 797D62515E8C48EE5BF939F7 /* AppModel+MenuBarActions.swift */; };
 		B893244D0DA9D213D378BBA4 /* PluginCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48726DBAAF06DD0B61BFD0CE /* PluginCatalog.swift */; };
 		B9A46C4C763328F81D998C81 /* PluginService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A119DE84BE83C7F3F0E19DF /* PluginService.swift */; };
 		BEB5DD3EE10E1A5DE98304FB /* prismBar.icon in Resources */ = {isa = PBXBuildFile; fileRef = 42DE507D28E83BE99B7CC5CE /* prismBar.icon */; };
+		C53909CC424B09D0C2210692 /* AboutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4AFC1F58957D7941D311EC5 /* AboutTests.swift */; };
 		CE3C57B543CBD6AECD63561D /* PluginPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0F54F091A7C16DF376F2 /* PluginPanelView.swift */; };
 		D9B7872CF4A511B07328CA42 /* prismBarEngine in Frameworks */ = {isa = PBXBuildFile; productRef = F163278A06D1EDC2E5F2385E /* prismBarEngine */; };
 		DD537356A91D55381A1A1A56 /* AppLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 315A0592B925D2DB82D37406 /* AppLifecycle.swift */; };
@@ -74,6 +77,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		11CF65631A1A62948D2CAF8A /* LICENSE */ = {isa = PBXFileReference; path = LICENSE; sourceTree = "<group>"; };
 		132DB0E7D319E4672B6E1A58 /* prismBarUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = prismBarUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		298F54AF53B0B08B5C294CF3 /* StatusMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusMenuView.swift; sourceTree = "<group>"; };
 		2CAE72ACFC08C1C6F47C155D /* PrivacyCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyCopy.swift; sourceTree = "<group>"; };
@@ -85,6 +89,7 @@
 		42DE507D28E83BE99B7CC5CE /* prismBar.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = prismBar.icon; sourceTree = "<group>"; };
 		48726DBAAF06DD0B61BFD0CE /* PluginCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginCatalog.swift; sourceTree = "<group>"; };
 		574A6994BBFD030D13E09840 /* LiveMenuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveMenuBarController.swift; sourceTree = "<group>"; };
+		6419CB2641AFB03C2890E55D /* NOTICE */ = {isa = PBXFileReference; path = NOTICE; sourceTree = "<group>"; };
 		6A119DE84BE83C7F3F0E19DF /* PluginService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginService.swift; sourceTree = "<group>"; };
 		72367E88666AEFDC8C0C684C /* MainWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowView.swift; sourceTree = "<group>"; };
 		75ABFACBE8B5FA2F47CAF31F /* LaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchTests.swift; sourceTree = "<group>"; };
@@ -96,6 +101,7 @@
 		965655B6F8C2B531AB8DB3CA /* ServiceMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceMain.swift; sourceTree = "<group>"; };
 		9D8BAE01F43F46DF5610002B /* MenuBarSectionStatusController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarSectionStatusController.swift; sourceTree = "<group>"; };
 		A756F325D68C0D906A6D4318 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
+		B4AFC1F58957D7941D311EC5 /* AboutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutTests.swift; sourceTree = "<group>"; };
 		B99796874F6C0C859873DF49 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		BB0E9A57FF0B8B5227635A91 /* SettingsRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRootView.swift; sourceTree = "<group>"; };
 		BE01E333B738C28E2DD3D464 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
@@ -182,6 +188,8 @@
 				1E53933C487B79AD2D8D7D25 /* Resources */,
 				79B5390E0207009FEC8E19E6 /* Tests */,
 				410F735A97B1286055A8EE52 /* XPC */,
+				11CF65631A1A62948D2CAF8A /* LICENSE */,
+				6419CB2641AFB03C2890E55D /* NOTICE */,
 				B2E8D8E972B867334863B2BB /* Products */,
 			);
 			sourceTree = "<group>";
@@ -238,6 +246,7 @@
 		9D37D4AA5D5AB1544CE4903A /* prismBarUITests */ = {
 			isa = PBXGroup;
 			children = (
+				B4AFC1F58957D7941D311EC5 /* AboutTests.swift */,
 				75ABFACBE8B5FA2F47CAF31F /* LaunchTests.swift */,
 			);
 			path = prismBarUITests;
@@ -424,6 +433,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				698BD64A25F31652EE03AC4E /* Assets.xcassets in Resources */,
+				62F6DD3471485B61A72949C4 /* LICENSE in Resources */,
+				985AA29341450BF46056E6B3 /* NOTICE in Resources */,
 				E5C70F149F116D0AE30145D2 /* PrivacyInfo.xcprivacy in Resources */,
 				BEB5DD3EE10E1A5DE98304FB /* prismBar.icon in Resources */,
 			);
@@ -473,6 +484,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C53909CC424B09D0C2210692 /* AboutTests.swift in Sources */,
 				53A67AB1D743C9191CAD41ED /* LaunchTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -631,6 +643,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				PRISM_SOURCE_REVISION = "local-development";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -700,6 +713,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = NO;
+				PRISM_SOURCE_REVISION = "local-development";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;

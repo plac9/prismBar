@@ -21,7 +21,7 @@ Out of scope:
 Validated operating assumptions:
 
 - prismBar is a local, single-user utility distributed as a Developer ID application for macOS 27 on Apple silicon.
-- It exposes no network service, remote API, dynamic plugin loader, telemetry path, updater, or content upload.
+- It exposes no network service, remote API, dynamic plugin loader, telemetry path, updater, or content upload. An explicit About action may ask the default browser to open the fixed public source URL.
 - Only bundled, same-team plugins are allowed. User-installed and downloaded plugins are not accepted.
 - Source is intended to remain public under MPL-2.0 and must match distributed covered binaries.
 - Menu item labels are user-sensitive local data and must remain memory-only.
@@ -55,6 +55,7 @@ Current reconciliation evidence:
 - **Host to macOS input:** A verified move plan becomes one Command-drag through Core Graphics. Fresh source order, same-display geometry, visible reserved menu bar space, cancellation cleanup, and post-action observation constrain the side effect.
 - **Host to plugin service:** A maximum 64 KiB JSON request crosses named XPC. The host requires the exact plugin bundle identifier and team; the service requires the exact host identifier and team. Protocol, version, capability, identifier, label, URL, collection, and mutation allowlists validate replies.
 - **Plugin response to local side effect:** A validated response may copy a bounded result to the pasteboard or open only an allowlisted, same-team prismCalc application. Both require an explicit user command.
+- **About to default browser:** An explicit View Source command may open only the compile-time `https://github.com/plac9/prismBar` repository, optionally scoped to the embedded 40-character source revision. No user or plugin input contributes to the URL.
 - **Developer source to distributed application:** Xcode 27 produces an arm64 Developer ID application. CI audits tools, history, licenses, entitlements, linked libraries, executables, privacy declarations, and credential-shaped strings. Signing, notarization, and source-to-binary revision proof remain mandatory release steps.
 
 #### Diagram
@@ -110,6 +111,7 @@ flowchart LR
 | XPC response renderer | Signed bundled service | Service to host | Schema and capability validation before native rendering | `Sources/prismPluginKit/PluginPanel.swift`, `Sources/prismPluginKit/BundledPluginPolicy.swift` |
 | Pasteboard mutation | Explicit Copy command | Host to shared pasteboard | Bounded calculator result only | `App/AppModel.swift` / `applyPluginMutations` |
 | App launch mutation | Explicit Open prismCalc command | Host to Launch Services | Exact allowlisted bundle identifier and exact LaClair Technologies team signature | `App/AppModel.swift` / `applyPluginMutations`, `Sources/prismBarEngine/SystemPermissionClients.swift` / `SignedApplicationCode` |
+| Public source action | Explicit View Source command | Host to default browser | One compile-time HTTPS repository URL and validated 40-character revision | `App/Features/About/AboutView.swift`, `Sources/prismBarCore/ProductIdentity.swift` |
 | Local preferences | App lifecycle and plugin toggle | User profile to host | Request history is not treated as permission truth | `App/AppModel.swift`, `Sources/prismBarEngine/AccessibilityPermission.swift` |
 | Source and build inputs | Developer or CI changes | Repository to artifact | No external Swift packages, pinned tools, secret and bundle audits | `scripts/ci-verify.sh`, `scripts/audit-licensing.sh`, `scripts/audit-public-safety.sh` |
 

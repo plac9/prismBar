@@ -28,6 +28,8 @@ Both remotes in that tree are push-disabled. It is a behavioral and provenance r
 
 prismBar and prismPluginKit are licensed under the Mozilla Public License 2.0. This permits commercial distribution while requiring distributed modifications to covered source files to remain available under the same license.
 
+Every application bundle includes the exact MPL-2.0 text, the project NOTICE, and its complete Git source revision. About provides local legal-document access and an explicit link to the matching public source tree.
+
 The independently developed prismCalc application retains its own license. The open-source prismCalc plugin in this repository is an integration surface and compact calculator, not a copy of the prismCalc application.
 
 See [LICENSE](LICENSE), [NOTICE](NOTICE), [dependency and license inventory](docs/DEPENDENCIES.md), [SPDX SBOM](sbom.spdx.json), and [CONTRIBUTING.md](CONTRIBUTING.md).

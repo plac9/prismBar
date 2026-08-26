@@ -30,5 +30,9 @@
 	<string>Copyright 2026 Patrick LaClair and LaClair Technologies</string>
 	<key>NSSupportsAutomaticGraphicsSwitching</key>
 	<true/>
+	<key>PrismSourceRepositoryURL</key>
+	<string>https://github.com/plac9/prismBar</string>
+	<key>PrismSourceRevision</key>
+	<string>$(PRISM_SOURCE_REVISION)</string>
 </dict>
 </plist>

@@ -11,11 +11,23 @@ struct ProductIdentityTests {
     func exactIdentity() {
         #expect(ProductIdentity.displayName == "prismBar")
         #expect(ProductIdentity.bundleIdentifier == "com.laclairtech.prismbar")
+        #expect(ProductIdentity.sourceRepositoryURL.absoluteString == "https://github.com/plac9/prismBar")
     }
 
     @Test("supports only the intentional platform baseline")
     func platformBaseline() {
         #expect(ProductIdentity.minimumSystemMajorVersion == 27)
         #expect(ProductIdentity.supportedArchitectures == [.arm64])
+    }
+
+    @Test("maps only a complete Git revision to an immutable public source tree")
+    func immutableSourceURL() {
+        let revision = "0123456789abcdef0123456789abcdef01234567"
+        #expect(
+            ProductIdentity.sourceURL(for: revision).absoluteString ==
+                "https://github.com/plac9/prismBar/tree/\(revision)"
+        )
+        #expect(ProductIdentity.sourceURL(for: "local-development") == ProductIdentity.sourceRepositoryURL)
+        #expect(ProductIdentity.sourceURL(for: "0123456") == ProductIdentity.sourceRepositoryURL)
     }
 }

@@ -57,6 +57,7 @@ common_build_arguments=(
   -derivedDataPath "$derived_data_directory"
   CODE_SIGNING_ALLOWED=NO
   CODE_SIGNING_REQUIRED=NO
+  "PRISM_SOURCE_REVISION=$(git rev-parse HEAD)"
 )
 
 xcodebuild "${common_build_arguments[@]}" -configuration Debug build
