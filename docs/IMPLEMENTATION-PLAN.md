@@ -114,6 +114,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [ ] Confirm the public source revision exactly matches every distributed MPL-covered binary.
 - [x] Exercise plugin decoding and calculator commands with deterministic hostile-input corpora.
 - [x] Run static analysis plus Address Sanitizer and Thread Sanitizer across the Swift modules.
+- [x] Reconcile the current source controls against the threat model and verify reciprocal signing on the preserved Developer ID archive.
 - [ ] Run long-duration host, permission, movement, and plugin lifecycle stress tests.
 - [x] Produce and inspect the required revision-bound dark HTML assurance report.
 
