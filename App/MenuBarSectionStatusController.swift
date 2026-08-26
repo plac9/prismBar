@@ -35,11 +35,7 @@ final class MenuBarSectionStatusController {
 
         let primary = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         primary.autosaveName = "com.laclairtech.prismbar.primary-control"
-        primary.button?.image = NSImage(
-            systemSymbolName: "triangle",
-            accessibilityDescription: MenuBarControllerIdentity.primaryControlLabel
-        )
-        primary.button?.image?.isTemplate = true
+        primary.button?.image = Self.makePrimaryControlImage()
         primary.button?.setAccessibilityLabel(MenuBarControllerIdentity.primaryControlLabel)
         primary.button?.target = self
         primary.button?.action = #selector(toggleCommandPopover(_:))
@@ -60,6 +56,52 @@ final class MenuBarSectionStatusController {
         spacer.button?.title = ""
         spacer.button?.setAccessibilityLabel(MenuBarControllerIdentity.hiddenSectionDividerLabel)
         spacerItem = spacer
+    }
+
+    private static func makePrimaryControlImage() -> NSImage {
+        let size = NSSize(width: 18, height: 18)
+        let image = NSImage(size: size, flipped: false) { bounds in
+            let strokeColor = NSColor.labelColor
+            strokeColor.setStroke()
+
+            let cube = NSBezierPath()
+            cube.lineWidth = 1.35
+            cube.lineJoinStyle = .round
+            cube.lineCapStyle = .round
+            cube.move(to: NSPoint(x: 3.1, y: 12.2))
+            cube.line(to: NSPoint(x: 9, y: 15.5))
+            cube.line(to: NSPoint(x: 14.9, y: 12.2))
+            cube.line(to: NSPoint(x: 14.9, y: 6.3))
+            cube.line(to: NSPoint(x: 9, y: 3.1))
+            cube.line(to: NSPoint(x: 3.1, y: 6.3))
+            cube.close()
+            cube.move(to: NSPoint(x: 3.3, y: 12.1))
+            cube.line(to: NSPoint(x: 9, y: 8.9))
+            cube.line(to: NSPoint(x: 14.7, y: 12.1))
+            cube.move(to: NSPoint(x: 9, y: 8.9))
+            cube.line(to: NSPoint(x: 9, y: 3.3))
+            cube.stroke()
+
+            let drip = NSBezierPath()
+            drip.lineWidth = 1.25
+            drip.lineJoinStyle = .round
+            drip.move(to: NSPoint(x: 11.2, y: 4.1))
+            drip.curve(
+                to: NSPoint(x: 12.8, y: 0.9),
+                controlPoint1: NSPoint(x: 11.2, y: 2.8),
+                controlPoint2: NSPoint(x: 11.7, y: 0.9)
+            )
+            drip.curve(
+                to: NSPoint(x: 14.4, y: 4.1),
+                controlPoint1: NSPoint(x: 13.9, y: 0.9),
+                controlPoint2: NSPoint(x: 14.4, y: 2.8)
+            )
+            drip.stroke()
+            return bounds.width > 0
+        }
+        image.isTemplate = true
+        image.accessibilityDescription = MenuBarControllerIdentity.primaryControlLabel
+        return image
     }
 
     @objc private func toggleCommandPopover(_ sender: NSStatusBarButton) {

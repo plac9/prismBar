@@ -1,0 +1,53 @@
+{
+  "fill" : {
+    "linear-gradient" : [
+      "extended-srgb:0.01569,0.03137,0.06275,1.00000",
+      "extended-srgb:0.00000,0.23922,0.52157,1.00000"
+    ],
+    "orientation" : {
+      "start" : {
+        "x" : 0.18,
+        "y" : 0.12
+      },
+      "stop" : {
+        "x" : 0.82,
+        "y" : 0.92
+      }
+    }
+  },
+  "groups" : [
+    {
+      "blur-material" : 0.34,
+      "layers" : [
+        {
+          "glass" : false,
+          "image-name" : "MeltingPrism.png",
+          "name" : "Melting prism",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "lighting" : "combined",
+      "name" : "prismBar mark",
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 0.42
+      },
+      "specular" : true,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.16
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "squares" : [
+      "macOS"
+    ]
+  }
+}

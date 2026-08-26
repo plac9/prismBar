@@ -42,20 +42,9 @@ struct PrismMark: View {
     var size: CGFloat = 44
 
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: size * 0.28, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [.cyan, .blue, .indigo],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-
-            Image(systemName: "triangle")
-                .font(.system(size: size * 0.47, weight: .semibold))
-                .foregroundStyle(.white)
-        }
+        Image("PrismMark")
+            .resizable()
+            .scaledToFit()
         .frame(width: size, height: size)
         .shadow(color: .blue.opacity(0.20), radius: size * 0.16, y: size * 0.08)
         .accessibilityHidden(true)
