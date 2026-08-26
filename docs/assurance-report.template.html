@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>prismBar UI and assurance audit</title>
+  <style>
+    :root { color-scheme: dark; --ink:#eef7ff; --muted:#9bb0c8; --line:#203653;
+      --panel:rgba(8,20,39,.82); --blue:#4fa8ff; --cyan:#58e4ff; --good:#70e6ad;
+      --wait:#ffc66d; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; color:var(--ink); background:
+      radial-gradient(circle at 10% 0%,rgba(38,147,255,.24),transparent 36rem),
+      radial-gradient(circle at 90% 35%,rgba(0,220,255,.13),transparent 34rem),#030812; }
+    main { width:min(1120px,calc(100% - 40px)); margin:auto; padding:56px 0 80px; }
+    header,.card { border:1px solid var(--line); background:var(--panel); backdrop-filter:blur(22px);
+      box-shadow:0 24px 80px rgba(0,0,0,.34); }
+    header { padding:34px; border-radius:28px; display:grid; grid-template-columns:auto 1fr; gap:24px; }
+    .prism { width:86px; aspect-ratio:1; clip-path:polygon(50% 4%,96% 88%,4% 88%);
+      background:linear-gradient(140deg,#62f0ff 0 28%,#2478ff 29% 64%,#101e42 65%);
+      filter:drop-shadow(0 10px 24px rgba(66,178,255,.35)); }
+    h1,h2,h3,p { margin-top:0; } h1 { font-size:42px; letter-spacing:-.04em; margin-bottom:8px; }
+    h2 { margin-top:38px; font-size:24px; } h3 { font-size:17px; margin-bottom:7px; }
+    p,li,td,th { line-height:1.5; } .muted { color:var(--muted); } code { color:var(--cyan); }
+    .badges { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+    .badge { padding:6px 10px; border:1px solid var(--line); border-radius:999px; font-size:13px; }
+    .pass { color:var(--good); } .pending { color:var(--wait); }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
+    .card { border-radius:20px; padding:20px; } .card p:last-child { margin-bottom:0; }
+    table { width:100%; border-collapse:collapse; overflow:hidden; border-radius:18px; background:var(--panel); }
+    th,td { padding:13px 15px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+    th { color:var(--muted); font-size:12px; letter-spacing:.06em; text-transform:uppercase; }
+    tr:last-child td { border-bottom:0; } footer { margin-top:32px; color:var(--muted); font-size:13px; }
+    @media (max-width:640px) { header { grid-template-columns:1fr; } .prism { width:66px; } h1 { font-size:34px; } }
+    @media (prefers-reduced-motion:no-preference) { .prism { animation:breathe 5s ease-in-out infinite; }
+      @keyframes breathe { 50% { filter:drop-shadow(0 14px 34px rgba(66,178,255,.58)); } } }
+  </style>
+</head>
+<body><main>
+  <header><div class="prism" aria-hidden="true"></div><div>
+    <p class="muted">macOS 27 clean-room implementation</p>
+    <h1>prismBar assurance audit</h1>
+    <p>Exact shipping surfaces, native interaction, privacy boundaries, and release gates for revision <code>{{REVISION}}</code>.</p>
+    <div class="badges"><span class="badge pass">Native SwiftUI</span><span class="badge pass">Liquid Glass</span>
+      <span class="badge pass">Local only</span><span class="badge pass">MPL-2.0</span>
+      <span class="badge pending">Physical release proof pending</span></div>
+  </div></header>
+
+  <h2>Shipping surface audit</h2>
+  <div class="grid">
+    <section class="card"><h3>Overview</h3><p class="muted"><code>OverviewView.swift</code></p>
+      <p>Live permission, menu topology, plugin readiness, stable-install recovery, and explicit recheck actions.</p></section>
+    <section class="card"><h3>Menu Bar</h3><p class="muted"><code>MenuBarView.swift</code></p>
+      <p>Direct arbitrary-position moves, order-preserving batch actions, recovery, visible progress, and verified results.</p></section>
+    <section class="card"><h3>Plugins</h3><p class="muted"><code>PluginPanelView.swift</code></p>
+      <p>Native rendering of bounded declarative controls, health, enablement, retry, and isolated prismCalc execution.</p></section>
+    <section class="card"><h3>Shortcuts</h3><p class="muted"><code>ShortcutsView.swift</code></p>
+      <p>Discoverable application commands with conflict checks and no global keyboard monitoring.</p></section>
+    <section class="card"><h3>Privacy</h3><p class="muted"><code>PrivacyView.swift</code></p>
+      <p>Plain-language disclosure of local processing, memory-only menu metadata, and explicit side effects.</p></section>
+    <section class="card"><h3>About</h3><p class="muted"><code>AboutView.swift</code></p>
+      <p>Exact product identity, source and license access, version information, and original attribution boundaries.</p></section>
+  </div>
+
+  <h2>macOS adaptation matrix</h2>
+  <table><thead><tr><th>Condition</th><th>Shipping response</th><th>Evidence</th></tr></thead><tbody>
+    <tr><td>Light and dark</td><td>Semantic system colors plus adaptive prism field</td><td><code>PrismBackdrop</code> and UI launch variants</td></tr>
+    <tr><td>Increased contrast</td><td>Reduced tint, stronger separators, semantic status color plus text</td><td><code>GlassCard</code></td></tr>
+    <tr><td>Reduced transparency</td><td>Opaque system background replaces glass and blurred light field</td><td><code>PrismBackdrop</code>, <code>GlassCard</code></td></tr>
+    <tr><td>Reduced motion</td><td>Calculator result transitions become identity transitions</td><td><code>PluginPanelView</code></td></tr>
+    <tr><td>Keyboard and accessibility semantics</td><td>Native focus loop, command shortcuts, labeled controls, help, and item actions</td><td><code>AppLifecycle</code>, <code>PrismBarCommands</code>, <code>MenuBarItemRow</code></td></tr>
+  </tbody></table>
+
+  <h2>Security and privacy result</h2>
+  <div class="grid">
+    <section class="card"><h3 class="pass">No network surface</h3><p>No listener, telemetry, updater, remote API, downloaded plugin, or cloud storage.</p></section>
+    <section class="card"><h3 class="pass">Bounded Accessibility</h3><p>Live trust, 250 ms source timeout, bounded traversal and strings, and 2,048 observations total.</p></section>
+    <section class="card"><h3 class="pass">Reciprocal plugin trust</h3><p>Exact host and XPC identifier plus team requirements, sandbox-only service, bounded wire schema.</p></section>
+    <section class="card"><h3 class="pass">Safe local mutations</h3><p>Bounded pasteboard text and an explicit launch of only a same-team, allowlisted prismCalc app.</p></section>
+  </div>
+
+  <h2>Release truth</h2>
+  <table><thead><tr><th>Gate</th><th>Automated status</th></tr></thead><tbody>
+    <tr><td>Exact product identity, macOS 27 arm64 baseline, licensing, privacy manifest</td><td class="pass">Implemented and automated</td></tr>
+    <tr><td>Core, sanitizer, analyzer, release-bundle, UI, plugin crash and hang tests</td><td class="pass">Automated in project verification</td></tr>
+    <tr><td>VoiceOver, larger text, installed Accessibility grant, movement, displays, spaces, sleep, wake, logout, reboot</td><td class="pending">Requires physical signed-app matrix</td></tr>
+    <tr><td>Public revision match, notarization, staple, clean-account Gatekeeper, publication</td><td class="pending">Owner-gated release work</td></tr>
+  </tbody></table>
+
+  <footer>Generated {{GENERATED_AT}} from a clean Git revision. This report contains no observed menu labels, screenshots, environment values, credentials, or personal filesystem paths.</footer>
+</main></body></html>

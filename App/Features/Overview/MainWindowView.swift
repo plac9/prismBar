@@ -69,6 +69,7 @@ struct MainWindowView: View {
                     model.refreshAccessibility()
                 }
                 .disabled(model.menuBarState == .loading)
+                .help("Recheck Accessibility and refresh the local menu bar state")
                 .accessibilityIdentifier("toolbar.refresh")
             }
         }

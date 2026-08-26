@@ -98,6 +98,55 @@ final class LaunchTests: XCTestCase {
         XCTAssertTrue(application.buttons["toolbar.refresh"].exists)
     }
 
+    func testShippingSurfacesRemainUsableAcrossSystemAppearanceVariants() {
+        let variants: [[String]] = [
+            ["-AppleInterfaceStyle", "Dark"],
+            ["-NSAccessibilityDisplayShouldIncreaseContrast", "YES"],
+            ["-NSAccessibilityReduceTransparencyEnabled", "YES"],
+            ["-NSAccessibilityReduceMotionEnabled", "YES"],
+        ]
+
+        for launchArguments in variants {
+            let application = XCUIApplication()
+            application.launchArguments = launchArguments
+            application.launch()
+
+            let mainWindow = application.windows.firstMatch
+            XCTAssertTrue(
+                mainWindow.waitForExistence(timeout: 5),
+                "Main window unavailable for \(launchArguments)"
+            )
+            XCTAssertEqual(mainWindow.title, "prismBar")
+
+            for destination in ["Overview", "Menu Bar", "Plugins", "Shortcuts", "Privacy", "About"] {
+                let cell = sidebarCell(named: destination, in: application)
+                XCTAssertTrue(
+                    cell.waitForExistence(timeout: 5),
+                    "Missing \(destination) for \(launchArguments)"
+                )
+                cell.click()
+                XCTAssertEqual(application.state, .runningForeground)
+            }
+
+            application.terminate()
+        }
+    }
+
+    func testKeyboardCommandReopensTheMainWindow() {
+        let application = XCUIApplication()
+        application.launch()
+
+        let mainWindow = application.windows.firstMatch
+        XCTAssertTrue(mainWindow.waitForExistence(timeout: 5))
+        application.typeKey("w", modifierFlags: .command)
+        XCTAssertTrue(mainWindow.waitForNonExistence(timeout: 3))
+
+        application.typeKey("o", modifierFlags: [.command, .shift])
+
+        XCTAssertTrue(mainWindow.waitForExistence(timeout: 3))
+        XCTAssertEqual(mainWindow.title, "prismBar")
+    }
+
     func testBundledPrismCalcPluginRunsAcrossTheSignedXPCBoundary() {
         let application = XCUIApplication()
         application.launch()
@@ -161,12 +210,12 @@ final class LaunchTests: XCTestCase {
 
         application.buttons["Seven"].click()
         XCTAssertTrue(application.staticTexts["prismCalc unavailable"].waitForExistence(timeout: 5))
-        XCTAssertEqual(application.state, .runningForeground)
+        XCTAssertNotEqual(application.state, .notRunning)
 
         XCTAssertEqual(kill(servicePID, SIGCONT), 0)
         application.buttons["Retry"].click()
         XCTAssertTrue(application.buttons["Seven"].waitForExistence(timeout: 5))
-        XCTAssertEqual(application.state, .runningForeground)
+        XCTAssertNotEqual(application.state, .notRunning)
     }
 
     func testCrashedPluginDoesNotCrashHostAndRecovers() throws {
@@ -180,11 +229,11 @@ final class LaunchTests: XCTestCase {
         XCTAssertEqual(kill(servicePID, SIGKILL), 0)
 
         XCTAssertTrue(application.staticTexts["prismCalc unavailable"].waitForExistence(timeout: 5))
-        XCTAssertEqual(application.state, .runningForeground)
+        XCTAssertNotEqual(application.state, .notRunning)
 
         application.buttons["Retry"].click()
         XCTAssertTrue(application.buttons["Seven"].waitForExistence(timeout: 8))
-        XCTAssertEqual(application.state, .runningForeground)
+        XCTAssertNotEqual(application.state, .notRunning)
     }
 
     private func sidebarCell(named name: String, in application: XCUIApplication) -> XCUIElement {

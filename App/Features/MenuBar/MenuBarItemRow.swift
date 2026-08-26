@@ -19,6 +19,7 @@ struct MenuBarItemRow: View {
                 .labelsHidden()
                 .toggleStyle(.checkbox)
                 .disabled(!canMove)
+                .help("Include this item in a verified batch move")
 
             Image(systemName: ownershipSymbol)
                 .frame(width: 22)
@@ -57,6 +58,7 @@ struct MenuBarItemRow: View {
             .buttonStyle(.glass)
             .controlSize(.small)
             .disabled(!canMove)
+            .help("Move this item into the visible section")
         } else if section == .visible {
             Button("Hide", systemImage: "eye.slash") {
                 model.moveMenuBarItem(item.id, to: .hidden)
@@ -64,6 +66,7 @@ struct MenuBarItemRow: View {
             .buttonStyle(.glass)
             .controlSize(.small)
             .disabled(!canMove)
+            .help("Move this item into the hidden section")
         }
     }
 
@@ -88,6 +91,7 @@ struct MenuBarItemRow: View {
         .buttonStyle(.glass)
         .controlSize(.small)
         .disabled(!canMove)
+        .help("Move directly to another position in this section")
     }
 
     @ViewBuilder

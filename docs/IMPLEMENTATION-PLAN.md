@@ -54,7 +54,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Implement hide, show, section visibility, and reset semantics.
 - [x] Verify every operation against a fresh topology snapshot before reporting success.
 - [x] Reject input when the target display has no reserved menu bar area or geometry crosses displays.
-- [ ] Add equivalent keyboard and accessibility actions.
+- [x] Add equivalent keyboard and accessibility actions.
 - [x] Prove mouse-up and pointer restoration on cancellation and failure; use per-event Command flags without synthesizing modifier key state.
 
 ## Phase 5: Status item and daily workflow
@@ -95,8 +95,9 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Build onboarding, empty, unavailable, revoked, error, and recovery surfaces.
 - [x] Integrate the system window background, sidebar extension, glass containers, and glass controls.
 - [x] Adopt system Liquid Glass components and remove decorative legacy styling.
-- [ ] Implement full keyboard navigation, VoiceOver, help, focus, and accessibility actions.
-- [ ] Verify light, dark, increased contrast, reduced transparency, reduced motion, and text-size variants.
+- [x] Implement keyboard navigation, help, focus, and accessibility actions.
+- [x] Verify every shipping destination remains operational in light, dark, increased contrast, reduced transparency, and reduced motion launch variants.
+- [ ] Complete physical VoiceOver, text-size, and visual accessibility verification.
 - [x] Implement original application and template menu bar icons with no thaw imagery.
 - [ ] Generate the required HTML UI audit from exact shipping surfaces.
 

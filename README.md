@@ -34,6 +34,13 @@ See [LICENSE](LICENSE), [NOTICE](NOTICE), [dependency and license inventory](doc
 
 The repository-grounded [security threat model](prismBar-threat-model.md) covers Accessibility authority, menu movement, XPC isolation, local privacy, and release provenance.
 
+Generate a self-contained dark UI and security assurance report from a clean revision with
+`./scripts/generate-assurance-report.sh`. The report is written to ignored `build/` evidence and
+contains no screenshots or observed menu metadata.
+
+Run the native UI suite through `./scripts/test-ui.sh`. The wrapper preserves whether the exact
+installed `/Applications/prismBar.app` process was running and restores it after XCUITest exits.
+
 ## Status
 
 Architecture is locked and the clean-room implementation is in progress. No release claim should be inferred until the physical macOS 27, signing, notarization, security, privacy, and accessibility gates in `docs/IMPLEMENTATION-PLAN.md` pass.

@@ -322,9 +322,14 @@ extension AppModel {
                 guard pluginRegistration?.allowedApplicationIdentifiers.contains(bundleIdentifier) == true,
                       let applicationURL = NSWorkspace.shared.urlForApplication(
                           withBundleIdentifier: bundleIdentifier
+                      ),
+                      SignedApplicationCode.isValid(
+                          at: applicationURL,
+                          bundleIdentifier: bundleIdentifier,
+                          teamIdentifier: "N8A5T2PZY9"
                       )
                 else {
-                    pluginMessage = "prismCalc is not installed."
+                    pluginMessage = "A verified LaClair Technologies copy of prismCalc is not installed."
                     continue
                 }
                 NSWorkspace.shared.openApplication(

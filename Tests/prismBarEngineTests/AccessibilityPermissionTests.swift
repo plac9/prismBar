@@ -108,6 +108,25 @@ struct AccessibilityPermissionTests {
         #expect(session.refreshTrust(isStableInstall: false, isTrusted: true) == .requiresStableInstall)
     }
 
+    @Test("builds only exact safe requirements for external applications")
+    func boundsExternalApplicationRequirements() {
+        #expect(
+            SignedApplicationCode.requirement(
+                bundleIdentifier: "com.laclairtech.prismcalc",
+                teamIdentifier: "N8A5T2PZY9"
+            ) == "identifier \"com.laclairtech.prismcalc\" and anchor apple generic " +
+                "and certificate leaf[subject.OU] = \"N8A5T2PZY9\""
+        )
+        #expect(SignedApplicationCode.requirement(
+            bundleIdentifier: "com.example.unsafe\" or true",
+            teamIdentifier: "N8A5T2PZY9"
+        ) == nil)
+        #expect(SignedApplicationCode.requirement(
+            bundleIdentifier: "com.laclairtech.prismcalc",
+            teamIdentifier: "bad-team"
+        ) == nil)
+    }
+
     private func permissionSnapshot(
         isStableInstall: Bool = true,
         identity: CodeIdentity = CodeIdentity(
