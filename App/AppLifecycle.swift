@@ -9,6 +9,12 @@ import SwiftUI
 final class AppWindowController: NSObject, NSWindowDelegate {
     static let shared = AppWindowController()
 
+    private static let windowIdentifier = NSUserInterfaceItemIdentifier(
+        "com.laclairtech.prismbar.main-window"
+    )
+    private static let frameAutosaveName = NSWindow.FrameAutosaveName(
+        "com.laclairtech.prismbar.main-window-frame"
+    )
     private var isObservingLaunch = false
 
     private lazy var window: NSWindow = {
@@ -18,6 +24,7 @@ final class AppWindowController: NSObject, NSWindowDelegate {
             backing: .buffered,
             defer: false
         )
+        window.identifier = Self.windowIdentifier
         window.title = "prismBar"
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
@@ -28,8 +35,14 @@ final class AppWindowController: NSObject, NSWindowDelegate {
         window.contentViewController = NSHostingController(rootView: MainWindowRootView())
         window.setContentSize(NSSize(width: 920, height: 640))
         window.isReleasedWhenClosed = false
+        window.isRestorable = true
+        window.autorecalculatesKeyViewLoop = true
         window.delegate = self
-        window.center()
+        if !window.setFrameUsingName(Self.frameAutosaveName) {
+            window.center()
+        }
+        window.setFrameAutosaveName(Self.frameAutosaveName)
+        window.recalculateKeyViewLoop()
         return window
     }()
 

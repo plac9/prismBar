@@ -111,6 +111,10 @@ final class LaunchTests: XCTestCase {
 
         statusItem.click()
         XCTAssertTrue(application.buttons["Open prismBar"].waitForExistence(timeout: 3))
+
+        application.buttons["Open prismBar"].click()
+        XCTAssertTrue(mainWindow.waitForExistence(timeout: 3))
+        XCTAssertEqual(mainWindow.title, "prismBar")
     }
 
     func testHungPluginTimesOutWithoutHangingHostAndRecovers() throws {

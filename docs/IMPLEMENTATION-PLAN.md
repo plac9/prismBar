@@ -90,6 +90,7 @@ The project is complete only when every gate below has authoritative evidence fr
 ## Phase 8: Complete macOS 27 experience
 
 - [ ] Build Overview, Menu Bar, Plugins, Shortcuts, Privacy, and About destinations.
+- [x] Preserve the main-window frame and restore its native keyboard focus loop.
 - [ ] Build onboarding, empty, unavailable, revoked, error, and recovery surfaces.
 - [ ] Adopt system Liquid Glass components and remove decorative legacy styling.
 - [ ] Implement full keyboard navigation, VoiceOver, help, focus, and accessibility actions.
