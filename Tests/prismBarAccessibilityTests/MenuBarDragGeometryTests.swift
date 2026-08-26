@@ -34,4 +34,27 @@ struct MenuBarDragGeometryTests {
 
         #expect(gesture.end.horizontal == 129)
     }
+
+    @Test("narrow divider targets remain strictly inside both insertion edges")
+    func supportsNarrowDividerTargets() {
+        let divider = MenuBarItemFrame(minX: 100, minY: 0, width: 1, height: 24)
+        let geometry = MenuBarDragGeometry()
+
+        let before = geometry.gesture(
+            source: source,
+            destination: divider,
+            insertionEdge: .before
+        )
+        let after = geometry.gesture(
+            source: source,
+            destination: divider,
+            insertionEdge: .after
+        )
+
+        #expect(before.end.horizontal > divider.minX)
+        #expect(before.end.horizontal < divider.minX + divider.width)
+        #expect(after.end.horizontal > divider.minX)
+        #expect(after.end.horizontal < divider.minX + divider.width)
+        #expect(before.end.horizontal < after.end.horizontal)
+    }
 }

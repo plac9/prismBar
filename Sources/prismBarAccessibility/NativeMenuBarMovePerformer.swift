@@ -25,11 +25,12 @@ public struct MenuBarDragGeometry: Sendable {
         destination: MenuBarItemFrame,
         insertionEdge: MenuBarInsertionEdge
     ) -> MenuBarDragGesture {
+        let edgeInset = min(1, destination.width / 4)
         let endX = switch insertionEdge {
         case .before:
-            destination.minX + 1
+            destination.minX + edgeInset
         case .after:
-            destination.minX + destination.width - 1
+            destination.minX + destination.width - edgeInset
         }
 
         return MenuBarDragGesture(

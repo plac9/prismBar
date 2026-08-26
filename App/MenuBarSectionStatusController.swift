@@ -10,7 +10,7 @@ import SwiftUI
 final class MenuBarSectionStatusController {
     static let shared = MenuBarSectionStatusController()
 
-    private static let expandedSpacerLength: CGFloat = 1
+    private static let expandedSpacerLength: CGFloat = 6
     private var primaryItem: NSStatusItem?
     private var anchorItem: NSStatusItem?
     private var spacerItem: NSStatusItem?
