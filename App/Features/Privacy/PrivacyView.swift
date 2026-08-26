@@ -9,13 +9,15 @@ struct PrivacyView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 PageHeader(
+                    symbol: "hand.raised",
                     eyebrow: "Private by construction",
                     title: "Your menu bar stays on your Mac.",
                     message: "prismBar observes only the accessibility structure needed to organize items. " +
                         "It never captures, recognizes, uploads, or profiles what is on screen."
                 )
+                .accessibilityIdentifier("privacy.header.hand.raised")
 
-                GlassCard {
+                ContentCard {
                     VStack(alignment: .leading, spacing: 16) {
                         Label("One permission, one purpose", systemImage: "checkmark.shield")
                             .font(.title2.bold())
@@ -90,7 +92,7 @@ private struct PrivacyPrinciple: View {
     let symbol: String
 
     var body: some View {
-        GlassCard {
+        ContentCard {
             VStack(alignment: .leading, spacing: 10) {
                 Image(systemName: symbol)
                     .font(.title2)

@@ -12,13 +12,15 @@ struct ShortcutsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 PageHeader(
+                    symbol: "keyboard",
                     eyebrow: "Commands",
                     title: "Shortcuts",
                     message: "Fast, discoverable controls while prismBar is frontmost. " +
                         "Every command is also available from the menu bar popover."
                 )
+                .accessibilityIdentifier("shortcuts.header.keyboard")
 
-                GlassCard {
+                ContentCard {
                     VStack(alignment: .leading, spacing: 0) {
                         Label("prismBar commands", systemImage: "command")
                             .font(.title2.bold())
@@ -40,7 +42,7 @@ struct ShortcutsView: View {
                                     .font(.system(.body, design: .rounded, weight: .semibold))
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 7)
-                                    .glassEffect(.regular, in: .capsule)
+                                    .background(.background.secondary, in: .capsule)
                                     .accessibilityLabel(shortcut.gesture.accessibilityValue)
                             }
                             .padding(.vertical, 11)
@@ -52,7 +54,7 @@ struct ShortcutsView: View {
                     }
                 }
 
-                GlassCard {
+                ContentCard {
                     Label {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("No global keyboard monitoring")

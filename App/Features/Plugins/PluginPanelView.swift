@@ -12,11 +12,13 @@ struct PluginsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 PageHeader(
+                    symbol: "puzzlepiece.extension",
                     eyebrow: "Extensions",
                     title: "Plugins",
                     message: "Focused tools in isolated, signed services. Every plugin is bundled, " +
                         "capability-checked, and rendered by prismBar."
                 )
+                .accessibilityIdentifier("plugins.header.puzzlepiece.extension")
 
                 if let registration = model.bundledPluginRegistrations.first {
                     pluginCard(registration)
@@ -39,14 +41,14 @@ struct PluginsView: View {
     }
 
     private func pluginCard(_ registration: BundledPluginRegistration) -> some View {
-        GlassCard {
+        ContentCard {
             VStack(alignment: .leading, spacing: 14) {
                 HStack(spacing: 12) {
                     Image(systemName: "plus.forwardslash.minus")
                         .font(.title2)
                         .foregroundStyle(.tint)
                         .frame(width: 38, height: 38)
-                        .glassEffect(.regular, in: .circle)
+                        .background(.background.secondary, in: .circle)
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text(registration.displayName)
@@ -174,7 +176,7 @@ struct PluginsView: View {
             .font(.caption.weight(.medium))
             .padding(.horizontal, 9)
             .padding(.vertical, 5)
-            .glassEffect(.regular, in: .capsule)
+            .background(.background.secondary, in: .capsule)
     }
 
     private func capabilityTitle(_ capability: PluginCapability) -> String {
@@ -230,7 +232,11 @@ struct PluginPanelView: View {
             }
         }
         .padding(compact ? 10 : 20)
-        .glassEffect(.regular, in: .rect(cornerRadius: compact ? 14 : 22))
+        .background(.background.secondary, in: .rect(cornerRadius: compact ? 14 : 16))
+        .overlay {
+            RoundedRectangle(cornerRadius: compact ? 14 : 16)
+                .stroke(.separator, lineWidth: 0.5)
+        }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("plugin.panel")
     }

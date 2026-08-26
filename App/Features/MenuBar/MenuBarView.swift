@@ -13,14 +13,16 @@ struct MenuBarView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             PageHeader(
+                symbol: "menubar.rectangle",
                 eyebrow: "Organization",
                 title: "Menu Bar",
                 message: "Move directly to any position in a section. Every action is checked " +
                     "against a fresh macOS topology before it is reported as complete."
             )
+            .accessibilityIdentifier("menuBar.header.menubar.rectangle")
 
             if model.accessibilityState == .granted {
-                GlassCard {
+                ContentCard {
                     VStack(spacing: 12) {
                         HStack(spacing: 10) {
                             Button(
@@ -195,7 +197,7 @@ struct MenuBarView: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .glassEffect(.regular.tint(.blue.opacity(0.10)), in: .rect(cornerRadius: 14))
+            .background(.background.secondary, in: .rect(cornerRadius: 14))
             .accessibilityIdentifier("menuBar.actionProgress")
         case let .result(message):
             Label(message, systemImage: resultSymbol(for: message))
@@ -204,10 +206,7 @@ struct MenuBarView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .glassEffect(
-                    .regular.tint(resultColor(for: message).opacity(0.08)),
-                    in: .rect(cornerRadius: 14)
-                )
+                .background(.background.secondary, in: .rect(cornerRadius: 14))
                 .accessibilityIdentifier("menuBar.actionResult")
         }
     }

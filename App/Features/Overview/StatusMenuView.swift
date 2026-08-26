@@ -21,7 +21,10 @@ struct StatusMenuView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
-                PrismMark(size: 32)
+                Image(systemName: "triangle")
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(.tint)
+                    .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("prismBar")

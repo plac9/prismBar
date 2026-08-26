@@ -6,6 +6,16 @@ repository_root="$(git rev-parse --show-toplevel)"
 cd "$repository_root"
 test_selection="${1:-prismBarUITests}"
 
+if [ "$test_selection" = "--source-audit" ]; then
+  if rg -n 'PrismBackdrop|PrismLightField|PrismRay|PrismMark|GlassCard|GlassEffectContainer|\.glassEffect\(' \
+      App/Features App/Design/PrismVisuals.swift; then
+    echo "Decorative content glass or obsolete page artwork remains." >&2
+    exit 1
+  fi
+  echo "UI source audit passed: content uses semantic surfaces and native interactive glass only."
+  exit 0
+fi
+
 installed_executable='/Applications/prismBar.app/Contents/MacOS/prismBar'
 installed_was_running=false
 if pgrep -f "^$installed_executable$" >/dev/null 2>&1; then

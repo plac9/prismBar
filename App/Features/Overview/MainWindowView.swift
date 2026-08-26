@@ -30,7 +30,10 @@ struct MainWindowView: View {
             .scrollContentBackground(.hidden)
             .safeAreaInset(edge: .top) {
                 HStack(spacing: 10) {
-                    PrismMark(size: 34)
+                    Image(systemName: "triangle")
+                        .font(.title2.weight(.semibold))
+                        .foregroundStyle(.tint)
+                        .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 0) {
                         Text("prismBar")
                             .font(.headline)
@@ -46,14 +49,9 @@ struct MainWindowView: View {
             .navigationSplitViewColumnWidth(min: 190, ideal: 220, max: 260)
         } detail: {
             detailView
-                .background {
-                    PrismBackdrop()
-                }
-                .backgroundExtensionEffect()
         }
-        .background(.clear)
         .containerBackground(for: .window) {
-            PrismBackdrop()
+            Color(nsColor: .windowBackgroundColor)
         }
         .navigationTitle("prismBar")
         .toolbar {

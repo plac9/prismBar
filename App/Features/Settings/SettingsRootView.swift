@@ -17,7 +17,7 @@ struct SettingsRootView: View {
         }
         .padding(12)
         .containerBackground(for: .window) {
-            PrismBackdrop()
+            Color(nsColor: .windowBackgroundColor)
         }
     }
 }
@@ -32,7 +32,7 @@ private struct GeneralSettingsView: View {
                 message: "One permission, checked against the current signed app every time."
             )
 
-            GlassCard {
+            ContentCard {
                 VStack(alignment: .leading, spacing: 14) {
                     HStack(alignment: .top, spacing: 12) {
                         Image(systemName: accessibilitySymbol)
@@ -128,7 +128,7 @@ private struct PrivacySettingsView: View {
                 message: "No capture pipeline, analytics SDK, telemetry client, or remote service."
             )
 
-            GlassCard {
+            ContentCard {
                 VStack(spacing: 12) {
                     PrivacySetting(label: "Screen capture and OCR", value: "Never", symbol: "eye.slash")
                     Divider()
@@ -156,8 +156,11 @@ private struct SettingsHeader: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            PrismMark(size: 38)
-                .fixedSize()
+            Image(systemName: "gearshape")
+                .font(.title2.weight(.semibold))
+                .foregroundStyle(.tint)
+                .frame(width: 38, height: 38)
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.title2.bold())

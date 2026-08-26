@@ -9,12 +9,14 @@ struct AboutView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 PageHeader(
+                    symbol: "info.circle",
                     eyebrow: "LaClair Technologies",
                     title: "prismBar",
                     message: "A clean-room, public-source menu bar organizer built exclusively for macOS 27."
                 )
+                .accessibilityIdentifier("about.header.info.circle")
 
-                GlassCard {
+                ContentCard {
                     VStack(alignment: .leading, spacing: 18) {
                         HStack(alignment: .firstTextBaseline) {
                             Text("Build")
@@ -35,7 +37,7 @@ struct AboutView: View {
                 }
 
                 HStack(alignment: .top, spacing: 16) {
-                    GlassCard {
+                    ContentCard {
                         Label {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Public source")
@@ -51,7 +53,7 @@ struct AboutView: View {
                         }
                     }
 
-                    GlassCard {
+                    ContentCard {
                         Label {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Independent work")

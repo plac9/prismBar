@@ -13,38 +13,38 @@ struct OverviewView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 PageHeader(
+                    symbol: "sparkles",
                     eyebrow: "Local control",
                     title: "Your menu bar, in focus.",
                     message: "Organize once, move directly, and recover confidently. " +
                         "Every change is checked against the menu bar macOS actually presents."
                 )
+                .accessibilityIdentifier("overview.header.sparkles")
 
-                GlassEffectContainer(spacing: 14) {
-                    HStack(spacing: 14) {
-                        StatusTile(
-                            title: "Accessibility",
-                            value: accessibilityLabel,
-                            symbol: accessibilitySymbol,
-                            isReady: model.accessibilityState == .granted
-                        )
-                        StatusTile(
-                            title: "Menu items",
-                            value: menuBarLabel,
-                            symbol: "menubar.rectangle",
-                            isReady: model.menuBarState == .ready
-                        )
-                        StatusTile(
-                            title: "Plugin",
-                            value: pluginLabel,
-                            symbol: "puzzlepiece.extension",
-                            isReady: model.pluginState == .ready
-                        )
-                    }
+                HStack(spacing: 14) {
+                    StatusTile(
+                        title: "Accessibility",
+                        value: accessibilityLabel,
+                        symbol: accessibilitySymbol,
+                        isReady: model.accessibilityState == .granted
+                    )
+                    StatusTile(
+                        title: "Menu items",
+                        value: menuBarLabel,
+                        symbol: "menubar.rectangle",
+                        isReady: model.menuBarState == .ready
+                    )
+                    StatusTile(
+                        title: "Plugin",
+                        value: pluginLabel,
+                        symbol: "puzzlepiece.extension",
+                        isReady: model.pluginState == .ready
+                    )
                 }
 
                 permissionSurface
 
-                GlassCard {
+                ContentCard {
                     HStack(spacing: 24) {
                         LocalPromise(title: "No screen capture", symbol: "eye.slash")
                         Divider()
@@ -63,7 +63,7 @@ struct OverviewView: View {
     }
 
     private var permissionSurface: some View {
-        GlassCard {
+        ContentCard {
             VStack(alignment: .leading, spacing: 18) {
                 SectionHeading(actionTitle, message: actionMessage, systemImage: actionSymbol)
 
@@ -231,7 +231,7 @@ private struct RecoveryStep: View {
             Text("\(number)")
                 .font(.caption.bold())
                 .frame(width: 24, height: 24)
-                .glassEffect(.regular.tint(.cyan.opacity(0.12)), in: .circle)
+                .background(.background.secondary, in: .circle)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
@@ -266,7 +266,7 @@ private struct StatusTile: View {
     let isReady: Bool
 
     var body: some View {
-        GlassCard {
+        ContentCard {
             VStack(alignment: .leading, spacing: 10) {
                 Image(systemName: symbol)
                     .font(.title2)

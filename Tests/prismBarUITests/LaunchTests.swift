@@ -98,6 +98,31 @@ final class LaunchTests: XCTestCase {
         XCTAssertTrue(application.buttons["toolbar.refresh"].exists)
     }
 
+    func testEveryDestinationHasAContextualHeader() {
+        let application = XCUIApplication()
+        application.launch()
+
+        let destinations = [
+            ("Overview", "overview.header.sparkles"),
+            ("Menu Bar", "menuBar.header.menubar.rectangle"),
+            ("Plugins", "plugins.header.puzzlepiece.extension"),
+            ("Shortcuts", "shortcuts.header.keyboard"),
+            ("Privacy", "privacy.header.hand.raised"),
+            ("About", "about.header.info.circle"),
+        ]
+
+        for (destination, headerIdentifier) in destinations {
+            let cell = sidebarCell(named: destination, in: application)
+            XCTAssertTrue(cell.waitForExistence(timeout: 5))
+            cell.click()
+            XCTAssertTrue(
+                application.descendants(matching: .any)[headerIdentifier]
+                    .waitForExistence(timeout: 5),
+                "Missing contextual header for \(destination)"
+            )
+        }
+    }
+
     func testShippingSurfacesRemainUsableAcrossSystemAppearanceVariants() {
         let variants: [[String]] = [
             ["-AppleInterfaceStyle", "Dark"],
