@@ -56,6 +56,7 @@ xcodebuild archive \
 
 codesign --verify --deep --strict --verbose=4 "$application_path"
 ./scripts/audit-release-bundle.sh "$application_path"
+./scripts/audit-live-signing-boundaries.sh "$application_path"
 
 host_identifier="$(codesign -d --verbose=4 "$application_path" 2>&1 | awk -F= '$1 == "Identifier" {print $2}')"
 host_team="$(codesign -d --verbose=4 "$application_path" 2>&1 | awk -F= '$1 == "TeamIdentifier" {print $2}')"

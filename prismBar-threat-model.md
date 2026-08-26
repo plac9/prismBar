@@ -2,7 +2,7 @@
 
 ## Executive summary
 
-prismBar is a single-user, local-only macOS 27 utility with one intentionally powerful authority: Accessibility access to observe and move menu bar items. The highest-risk areas are the signed host boundary, the reciprocal XPC signing boundary, stale menu bar geometry, and release provenance. The code currently limits these risks with live permission checks, exact signing requirements, bounded parsing and execution, fresh topology verification, a sandboxed plugin service, no network stack, and public-safety release audits. No critical or high residual threat was identified in the current source. Developer ID signing, notarization, live wrong-signature rejection, and physical Accessibility testing remain release gates.
+prismBar is a single-user, local-only macOS 27 utility with one intentionally powerful authority: Accessibility access to observe and move menu bar items. The highest-risk areas are the signed host boundary, the reciprocal XPC signing boundary, stale menu bar geometry, and release provenance. The code currently limits these risks with live permission checks, exact signing requirements, bounded parsing and execution, fresh topology verification, a sandboxed plugin service, no network stack, and public-safety release audits. No critical or high residual threat was identified in the current source. Developer ID signing, notarization, final shipping-artifact reconciliation, and physical Accessibility testing remain release gates.
 
 ## Scope and assumptions
 
