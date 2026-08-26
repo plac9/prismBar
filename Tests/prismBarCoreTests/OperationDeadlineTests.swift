@@ -62,4 +62,21 @@ struct OperationDeadlineTests {
             )
         }
     }
+
+    @Test("sub-millisecond Accessibility budget is not rounded above remaining time")
+    func preservesSubMillisecondBudget() throws {
+        let clock = ContinuousClock()
+        let start = clock.now
+        let deadline = OperationDeadline(
+            expiresAt: start.advanced(by: .microseconds(500))
+        )
+
+        let timeout = try deadline.accessibilityTimeout(
+            at: start,
+            maximum: .milliseconds(250)
+        )
+
+        #expect(timeout > 0)
+        #expect(timeout <= 0.000_5)
+    }
 }

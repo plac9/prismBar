@@ -10,9 +10,12 @@ actor LiveMenuBarController: MenuBarSnapshotReading {
     private let discovery = MenuBarTopologyDiscovery(reader: NativeMenuBarObservationReader())
     private let performer = NativeMenuBarMovePerformer()
 
-    func snapshot() async throws -> MenuBarSnapshot {
+    func snapshot(deadline: OperationDeadline) async throws -> MenuBarSnapshot {
+        try deadline.check()
         let applications = await RunningApplicationCatalog.current()
-        return try await discovery.snapshot(applications: applications)
+        let snapshot = try await discovery.snapshot(applications: applications)
+        try deadline.check()
+        return snapshot
     }
 
     func execute(_ plan: MovePlan) async -> MoveExecutionOutcome {

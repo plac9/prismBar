@@ -5,7 +5,7 @@
 import prismBarCore
 
 public protocol MenuBarSnapshotReading: Sendable {
-    func snapshot() async throws -> MenuBarSnapshot
+    func snapshot(deadline: OperationDeadline) async throws -> MenuBarSnapshot
 }
 
 public enum VerifiedMoveError: Error, Equatable, Sendable {
@@ -49,8 +49,9 @@ public actor VerifiedMoveCoordinator<
     }
 
     public func execute(_ plan: MovePlan) async -> MoveExecutionOutcome {
+        let deadline = OperationDeadline(timeout: operationTimeout)
         let current: MenuBarSnapshot
-        switch await readSnapshot() {
+        switch await readSnapshot(deadline: deadline) {
         case let .success(snapshot):
             current = snapshot
         case let .failure(outcome):
@@ -72,13 +73,14 @@ public actor VerifiedMoveCoordinator<
             if let failure = await performMove(
                 plan: plan,
                 sourceFrame: sourceFrame,
-                destinationFrame: destinationFrame
+                destinationFrame: destinationFrame,
+                deadline: deadline
             ) {
                 return failure
             }
         }
 
-        switch await readSnapshot() {
+        switch await readSnapshot(deadline: deadline) {
         case let .success(observed):
             return verificationOutcome(for: plan, observed: observed)
         case let .failure(outcome):
@@ -86,72 +88,51 @@ public actor VerifiedMoveCoordinator<
         }
     }
 
-    private func readSnapshot() async -> SnapshotReadResult {
-        await withTaskGroup(of: SnapshotReadResult.self) { group in
-            group.addTask { [reader] in
-                do {
-                    return .success(try await reader.snapshot())
-                } catch MenuBarAuthorizationError.permissionRevoked {
-                    return .failure(.permissionRevoked)
-                } catch is CancellationError {
-                    return .failure(.timedOut)
-                } catch {
-                    return .failure(.observationFailed)
-                }
-            }
-            group.addTask { [operationTimeout] in
-                do {
-                    try await Task.sleep(for: operationTimeout)
-                    return .failure(.timedOut)
-                } catch {
-                    return .failure(.timedOut)
-                }
-            }
-
-            let result = await group.next() ?? .failure(.observationFailed)
-            group.cancelAll()
-            return result
+    private func readSnapshot(deadline: OperationDeadline) async -> SnapshotReadResult {
+        do {
+            try deadline.check()
+            let snapshot = try await reader.snapshot(deadline: deadline)
+            try deadline.check()
+            return .success(snapshot)
+        } catch MenuBarAuthorizationError.permissionRevoked {
+            return .failure(.permissionRevoked)
+        } catch is OperationDeadlineError {
+            return .failure(.timedOut)
+        } catch is CancellationError {
+            return .failure(.timedOut)
+        } catch {
+            return .failure(.observationFailed)
         }
     }
 
     private func performMove(
         plan: MovePlan,
         sourceFrame: MenuBarItemFrame,
-        destinationFrame: MenuBarItemFrame
+        destinationFrame: MenuBarItemFrame,
+        deadline: OperationDeadline
     ) async -> MoveExecutionOutcome? {
         let insertionEdge: MenuBarInsertionEdge =
             plan.sourceIndex < plan.destinationIndex ? .after : .before
-        return await withTaskGroup(of: MoveExecutionOutcome?.self) { group in
-            group.addTask { [performer] in
-                do {
-                    try await performer.move(
-                        source: sourceFrame,
-                        destination: destinationFrame,
-                        insertionEdge: insertionEdge
-                    )
-                    return nil
-                } catch MenuBarAuthorizationError.permissionRevoked {
-                    return .permissionRevoked
-                } catch MenuBarInputError.menuBarUnavailable {
-                    return .menuBarUnavailable
-                } catch is CancellationError {
-                    return .timedOut
-                } catch {
-                    return .inputFailed
-                }
-            }
-            group.addTask { [operationTimeout] in
-                do {
-                    try await Task.sleep(for: operationTimeout)
-                    return .timedOut
-                } catch {
-                    return .timedOut
-                }
-            }
-
-            let result = await group.next() ?? .inputFailed
-            group.cancelAll()
-            return result
+        do {
+            try deadline.check()
+            try await performer.move(
+                source: sourceFrame,
+                destination: destinationFrame,
+                insertionEdge: insertionEdge,
+                deadline: deadline
+            )
+            try deadline.check()
+            return nil
+        } catch MenuBarAuthorizationError.permissionRevoked {
+            return .permissionRevoked
+        } catch MenuBarInputError.menuBarUnavailable {
+            return .menuBarUnavailable
+        } catch is OperationDeadlineError {
+            return .timedOut
+        } catch is CancellationError {
+            return .timedOut
+        } catch {
+            return .inputFailed
         }
     }
 

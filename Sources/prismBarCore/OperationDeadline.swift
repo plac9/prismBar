@@ -45,6 +45,6 @@ public struct OperationDeadline: Sendable {
         let components = bounded.components
         let seconds = Double(components.seconds) +
             Double(components.attoseconds) / 1_000_000_000_000_000_000
-        return Float(max(0.001, seconds))
+        return Float(seconds)
     }
 }

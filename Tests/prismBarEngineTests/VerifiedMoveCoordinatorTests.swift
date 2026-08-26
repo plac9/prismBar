@@ -23,6 +23,28 @@ struct VerifiedMoveCoordinatorTests {
         #expect(await performer.executionCount == 1)
     }
 
+    @Test("shares one absolute deadline across observation input and verification")
+    func sharesOneAbsoluteDeadline() async throws {
+        let initial = snapshot(names: ["one", "two", "three"], generation: 1)
+        let expected = snapshot(names: ["three", "one", "two"], generation: 2)
+        let plan = try MovePlanner().plan(item: id("three"), to: 0, in: initial)
+        let reader = SnapshotSequenceReader(snapshots: [initial, expected])
+        let performer = RecordingMovePerformer()
+        let coordinator = VerifiedMoveCoordinator(
+            reader: reader,
+            performer: performer,
+            operationTimeout: .seconds(3)
+        )
+
+        #expect(await coordinator.execute(plan) == .success)
+        let readDeadlines = await reader.deadlines
+        let moveDeadline = await performer.deadline
+
+        #expect(readDeadlines.count == 2)
+        #expect(readDeadlines[0] == readDeadlines[1])
+        #expect(moveDeadline == readDeadlines[0])
+    }
+
     @Test("rejects a stale plan before producing input")
     func rejectsStalePlan() async throws {
         let planned = snapshot(names: ["one", "two", "three"], generation: 1)
@@ -260,12 +282,14 @@ struct VerifiedMoveCoordinatorTests {
 
 private actor SnapshotSequenceReader: MenuBarSnapshotReading {
     private var snapshots: [MenuBarSnapshot]
+    private(set) var deadlines: [ContinuousClock.Instant] = []
 
     init(snapshots: [MenuBarSnapshot]) {
         self.snapshots = snapshots
     }
 
-    func snapshot() throws -> MenuBarSnapshot {
+    func snapshot(deadline: OperationDeadline) throws -> MenuBarSnapshot {
+        deadlines.append(deadline.expiresAt)
         guard !snapshots.isEmpty else {
             throw VerifiedMoveError.observationFailed
         }
@@ -278,28 +302,31 @@ private actor SnapshotSequenceReader: MenuBarSnapshotReading {
 }
 
 private struct StalledSnapshotReader: MenuBarSnapshotReading {
-    func snapshot() async throws -> MenuBarSnapshot {
-        try await Task.sleep(for: .seconds(30))
-        throw VerifiedMoveError.observationFailed
+    func snapshot(deadline: OperationDeadline) async throws -> MenuBarSnapshot {
+        try await Task.sleep(for: deadline.remaining())
+        throw OperationDeadlineError.expired
     }
 }
 
 private actor RecordingMovePerformer: MenuBarMovePerforming {
     private(set) var executionCount = 0
+    private(set) var deadline: ContinuousClock.Instant?
 
     func move(
         source _: MenuBarItemFrame,
         destination _: MenuBarItemFrame,
-        insertionEdge _: MenuBarInsertionEdge
+        insertionEdge _: MenuBarInsertionEdge,
+        deadline: OperationDeadline
     ) {
         executionCount += 1
+        self.deadline = deadline.expiresAt
     }
 }
 
 private struct FailingSnapshotReader: MenuBarSnapshotReading {
     let error: any Error & Sendable
 
-    func snapshot() throws -> MenuBarSnapshot {
+    func snapshot(deadline _: OperationDeadline) throws -> MenuBarSnapshot {
         throw error
     }
 }
@@ -313,7 +340,7 @@ private actor SnapshotThenFailureReader: MenuBarSnapshotReading {
         self.error = error
     }
 
-    func snapshot() throws -> MenuBarSnapshot {
+    func snapshot(deadline _: OperationDeadline) throws -> MenuBarSnapshot {
         guard let snapshotValue else { throw error }
         self.snapshotValue = nil
         return snapshotValue
@@ -326,7 +353,8 @@ private struct FailingMovePerformer: MenuBarMovePerforming {
     func move(
         source _: MenuBarItemFrame,
         destination _: MenuBarItemFrame,
-        insertionEdge _: MenuBarInsertionEdge
+        insertionEdge _: MenuBarInsertionEdge,
+        deadline _: OperationDeadline
     ) throws {
         throw error
     }
@@ -343,7 +371,8 @@ private actor CountingFailingMovePerformer: MenuBarMovePerforming {
     func move(
         source _: MenuBarItemFrame,
         destination _: MenuBarItemFrame,
-        insertionEdge _: MenuBarInsertionEdge
+        insertionEdge _: MenuBarInsertionEdge,
+        deadline _: OperationDeadline
     ) throws {
         executionCount += 1
         throw error
@@ -356,9 +385,11 @@ private actor StalledMovePerformer: MenuBarMovePerforming {
     func move(
         source _: MenuBarItemFrame,
         destination _: MenuBarItemFrame,
-        insertionEdge _: MenuBarInsertionEdge
+        insertionEdge _: MenuBarInsertionEdge,
+        deadline: OperationDeadline
     ) async throws {
         executionCount += 1
-        try await Task.sleep(for: .seconds(30))
+        try await Task.sleep(for: deadline.remaining())
+        throw OperationDeadlineError.expired
     }
 }

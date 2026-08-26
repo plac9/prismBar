@@ -83,7 +83,8 @@ public protocol MenuBarMovePerforming: Sendable {
     func move(
         source: MenuBarItemFrame,
         destination: MenuBarItemFrame,
-        insertionEdge: MenuBarInsertionEdge
+        insertionEdge: MenuBarInsertionEdge,
+        deadline: OperationDeadline
     ) async throws
 }
 
