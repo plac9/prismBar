@@ -2,3 +2,5 @@ type_name:
   excluded:
     - prismBarApp
     - prismCalcPluginServiceMain
+trailing_comma:
+  mandatory_comma: true

@@ -3,6 +3,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import AppKit
+import prismBarCore
 import SwiftUI
 
 struct StatusMenuView: View {
@@ -30,6 +31,33 @@ struct StatusMenuView: View {
 
             Label(accessibilityLabel, systemImage: accessibilitySymbol)
                 .foregroundStyle(model.accessibilityState == .granted ? .green : .secondary)
+
+            if let snapshot = model.menuBarSnapshot {
+                Text("\(snapshot.items.count) menu items")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                ForEach(Array(snapshot.items.prefix(6))) { item in
+                    Menu(item.displayName) {
+                        Button("Move Left") {
+                            model.moveMenuBarItem(item.id, to: max(0, item.position - 1))
+                        }
+                        .disabled(!canMove(item) || item.position == 0)
+
+                        Button("Move Right") {
+                            model.moveMenuBarItem(
+                                item.id,
+                                to: min(snapshot.items.count - 1, item.position + 1)
+                            )
+                        }
+                        .disabled(!canMove(item) || item.position == snapshot.items.count - 1)
+                    }
+                }
+
+                Button("Refresh Menu Items", systemImage: "arrow.clockwise") {
+                    model.refreshMenuBar()
+                }
+            }
 
             Divider()
 
@@ -59,5 +87,9 @@ struct StatusMenuView: View {
 
     private var accessibilitySymbol: String {
         model.accessibilityState == .granted ? "checkmark.shield" : "exclamationmark.shield"
+    }
+
+    private func canMove(_ item: MenuBarItem) -> Bool {
+        item.isMovable && !model.isMenuBarActionInProgress
     }
 }

@@ -20,11 +20,7 @@ struct MainWindowView: View {
             case .overview:
                 OverviewView()
             case .menuBar:
-                PlaceholderDestination(
-                    title: "Menu Bar",
-                    message: "Detected items and verified movement controls will appear here.",
-                    symbol: "menubar.rectangle"
-                )
+                MenuBarView()
             case .plugins:
                 PlaceholderDestination(
                     title: "Plugins",

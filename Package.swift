@@ -9,12 +9,17 @@ let package = Package(
     ],
     products: [
         .library(name: "prismBarCore", targets: ["prismBarCore"]),
+        .library(name: "prismBarAccessibility", targets: ["prismBarAccessibility"]),
         .library(name: "prismBarEngine", targets: ["prismBarEngine"]),
         .library(name: "prismPluginKit", targets: ["prismPluginKit"]),
         .library(name: "prismCalcPlugin", targets: ["prismCalcPlugin"])
     ],
     targets: [
         .target(name: "prismBarCore"),
+        .target(
+            name: "prismBarAccessibility",
+            dependencies: ["prismBarCore"]
+        ),
         .target(
             name: "prismBarEngine",
             dependencies: ["prismBarCore"]
@@ -27,6 +32,10 @@ let package = Package(
         .testTarget(
             name: "prismBarCoreTests",
             dependencies: ["prismBarCore"]
+        ),
+        .testTarget(
+            name: "prismBarAccessibilityTests",
+            dependencies: ["prismBarAccessibility", "prismBarCore"]
         ),
         .testTarget(
             name: "prismBarEngineTests",

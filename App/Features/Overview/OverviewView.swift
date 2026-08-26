@@ -25,7 +25,7 @@ struct OverviewView: View {
 
                 GroupBox("Current state") {
                     LabeledContent("Accessibility", value: accessibilityLabel)
-                    LabeledContent("Menu items", value: "Waiting for permission")
+                    LabeledContent("Menu items", value: menuBarLabel)
                     LabeledContent("Plugins", value: "prismCalc available")
 
                     HStack {
@@ -43,6 +43,13 @@ struct OverviewView: View {
                         }
                         .accessibilityLabel("Check Again")
                         .accessibilityIdentifier("accessibility.refresh")
+
+                        if model.accessibilityState == .granted {
+                            Button("Refresh Menu Bar") {
+                                model.refreshMenuBar()
+                            }
+                            .accessibilityIdentifier("menuBar.refresh")
+                        }
                     }
                 }
 
@@ -69,5 +76,22 @@ struct OverviewView: View {
 
     private var needsPermissionAction: Bool {
         model.accessibilityState == .notRequested || model.accessibilityState == .denied
+    }
+
+    private var menuBarLabel: String {
+        switch model.menuBarState {
+        case .waitingForPermission:
+            "Waiting for permission"
+        case .loading:
+            "Checking"
+        case .ready:
+            if let snapshot = model.menuBarSnapshot, snapshot.unavailableSourceCount > 0 {
+                "\(snapshot.items.count) found, \(snapshot.unavailableSourceCount) unavailable"
+            } else {
+                "\(model.menuBarSnapshot?.items.count ?? 0) found"
+            }
+        case .unavailable:
+            "Refresh needed"
+        }
     }
 }

@@ -9,6 +9,7 @@ public struct MovePlan: Equatable, Sendable {
     public let sourceIndex: Int
     public let destinationIndex: Int
     public let snapshotGeneration: UInt64
+    public let sourceOrder: [MenuBarItemID]
     public let expectedOrder: [MenuBarItemID]
 }
 
@@ -47,6 +48,7 @@ public struct MovePlanner: Sendable {
             sourceIndex: sourceIndex,
             destinationIndex: destinationIndex,
             snapshotGeneration: snapshot.generation,
+            sourceOrder: snapshot.items.map(\.id),
             expectedOrder: expectedOrder
         )
     }

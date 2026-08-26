@@ -19,3 +19,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 - Live Accessibility authorization state based on a fresh macOS trust check.
 - Stable `/Applications/prismBar.app` and exact signing identity validation before requesting Accessibility access.
 - Accessible permission recovery controls with foreground refresh behavior.
+- Serialized, timeout-bounded menu bar discovery using public Accessibility APIs.
+- Privacy-safe topology identifiers that never contain observed menu labels.
+- Exact-position move planning with stale-plan rejection and post-action verification.
+- Main-window and menu-bar-popover controls backed by the same authoritative topology.

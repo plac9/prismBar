@@ -39,19 +39,19 @@ The project is complete only when every gate below has authoritative evidence fr
 
 ## Phase 3: Menu bar topology engine
 
-- [ ] Define immutable topology models and synthetic fixtures.
-- [ ] Implement public Accessibility discovery behind a dedicated actor.
-- [ ] Identify controllable, system-owned, unavailable, and self-owned items.
+- [x] Define immutable topology models and synthetic fixtures.
+- [x] Implement public Accessibility discovery behind a dedicated actor.
+- [x] Identify controllable, system-owned, unavailable, and self-owned items.
 - [ ] Implement multi-display, full-screen, space, and topology-generation handling.
 - [ ] Write property tests for ordering, grouping, and plan validity.
-- [ ] Ensure production logs never include observed values.
+- [x] Ensure production logs never include observed values.
 
 ## Phase 4: Verified actions and recovery
 
 - [ ] Write failing tests for arbitrary-position moves, group moves, stale targets, revocation, rejection, partial movement, and timeout.
-- [ ] Implement direct multi-position movement in one action.
+- [x] Implement direct multi-position movement in one action.
 - [ ] Implement hide, show, section visibility, and reset semantics.
-- [ ] Verify every operation against a fresh topology snapshot before reporting success.
+- [x] Verify every operation against a fresh topology snapshot before reporting success.
 - [ ] Add equivalent keyboard and accessibility actions.
 - [ ] Prove pointer and modifier cleanup on cancellation and failure.
 

@@ -22,4 +22,15 @@ final class LaunchTests: XCTestCase {
         XCTAssertTrue(refreshButton.waitForExistence(timeout: 5))
         XCTAssertEqual(refreshButton.label, "Check Again")
     }
+
+    func testMenuBarDestinationHasARecoveryStateWithoutPermission() {
+        let application = XCUIApplication()
+        application.launch()
+
+        let menuBarDestination = application.staticTexts["Menu Bar"].firstMatch
+        XCTAssertTrue(menuBarDestination.waitForExistence(timeout: 5))
+        menuBarDestination.click()
+
+        XCTAssertTrue(application.staticTexts["Accessibility required"].waitForExistence(timeout: 5))
+    }
 }
