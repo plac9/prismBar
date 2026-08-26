@@ -13,18 +13,18 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Add the complete MPL-2.0 license and validate its checksum against the published text.
 - [x] Register the new repository in workspace metadata.
 - [x] Produce and open the interactive execution plan.
-- [ ] Commit the contract-only foundation as a signed atomic commit.
+- [x] Commit the contract-only foundation as a signed atomic commit.
 
 ## Phase 1: Test-first project scaffold
 
-- [ ] Define XcodeGen project for macOS 27 and arm64 only.
-- [ ] Define Swift 6.4 package modules with complete strict concurrency.
-- [ ] Add the application, unit-test, UI-test, and sandboxed XPC service targets.
-- [ ] Add explicit development and release entitlements.
-- [ ] Add privacy manifest and generated Info.plists.
+- [x] Define XcodeGen project for macOS 27 and arm64 only.
+- [x] Define Swift 6.4 package modules with complete strict concurrency.
+- [x] Add the application, unit-test, UI-test, and sandboxed XPC service targets.
+- [x] Add explicit host and sandboxed-service entitlements.
+- [x] Add privacy manifest and generated Info.plists.
 - [ ] Add deterministic fixtures containing synthetic menu items only.
 - [ ] Add self-hosted macOS CI with no signing secrets in pull-request jobs.
-- [ ] Prove package tests and unsigned app builds with Xcode 27.
+- [x] Prove package tests and unsigned app builds with Xcode 27.
 
 ## Phase 2: Permission and identity foundation
 
