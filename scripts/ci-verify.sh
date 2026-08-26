@@ -5,12 +5,15 @@ set -euo pipefail
 repository_root="$(git rev-parse --show-toplevel)"
 cd "$repository_root"
 
-for dependency in actionlint xcodebuild xcodegen swift swiftlint gitleaks rg; do
+for dependency in actionlint gitleaks jq rg swift swiftlint xcodebuild xcodegen; do
   if ! command -v "$dependency" >/dev/null 2>&1; then
     printf 'CI dependency is unavailable: %s\n' "$dependency" >&2
     exit 1
   fi
 done
+
+./scripts/audit-tool-versions.sh
+./scripts/audit-licensing.sh
 
 if [ "$(uname -m)" != "arm64" ] || [[ "$(xcrun --sdk macosx --show-sdk-version)" != 27.* ]]; then
   printf 'CI requires the Apple silicon Xcode 27 runner.\n' >&2

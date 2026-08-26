@@ -34,7 +34,7 @@ jobs:
 
       - name: Install verification tools
         shell: bash
-        run: brew install actionlint gitleaks ripgrep swiftlint xcodegen
+        run: brew install actionlint gitleaks jq ripgrep swiftlint xcodegen
 
       - name: Verify public-safe source and unsigned builds
         shell: bash

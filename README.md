@@ -30,7 +30,7 @@ prismBar and prismPluginKit are licensed under the Mozilla Public License 2.0. T
 
 The independently developed prismCalc application retains its own license. The open-source prismCalc plugin in this repository is an integration surface and compact calculator, not a copy of the prismCalc application.
 
-See [LICENSE](LICENSE), [NOTICE](NOTICE), and [CONTRIBUTING.md](CONTRIBUTING.md).
+See [LICENSE](LICENSE), [NOTICE](NOTICE), [dependency and license inventory](docs/DEPENDENCIES.md), [SPDX SBOM](sbom.spdx.json), and [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Status
 

@@ -1,0 +1,46 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "creationInfo": {
+    "created": "2026-08-26T00:00:00Z",
+    "creators": [
+      "Person: Patrick LaClair",
+      "Organization: LaClair Technologies"
+    ]
+  },
+  "dataLicense": "CC0-1.0",
+  "documentDescribes": [
+    "SPDXRef-Package-prismBar"
+  ],
+  "documentNamespace": "https://github.com/plac9/prismBar/sbom/0.1.0-source",
+  "name": "prismBar-0.1.0-source",
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Package-prismBar",
+      "copyrightText": "Copyright 2026 Patrick LaClair and LaClair Technologies",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:github/plac9/prismBar@0.1.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MPL-2.0",
+      "licenseDeclared": "MPL-2.0",
+      "name": "prismBar",
+      "primaryPackagePurpose": "APPLICATION",
+      "summary": "Native macOS 27 menu bar workspace with a bundled sandboxed prismCalc XPC plugin",
+      "supplier": "Organization: LaClair Technologies",
+      "versionInfo": "0.1.0"
+    }
+  ],
+  "relationships": [
+    {
+      "relatedSpdxElement": "SPDXRef-Package-prismBar",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    }
+  ],
+  "spdxVersion": "SPDX-2.3"
+}
