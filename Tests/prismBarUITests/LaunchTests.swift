@@ -87,9 +87,29 @@ final class LaunchTests: XCTestCase {
         XCTAssertEqual(result.value as? String, "12")
     }
 
+    func testStatusItemOpensCommandCenterWithMainWindowClosed() {
+        let application = XCUIApplication()
+        application.launch()
+
+        let mainWindow = application.windows.firstMatch
+        XCTAssertTrue(mainWindow.waitForExistence(timeout: 5))
+        application.typeKey("w", modifierFlags: .command)
+        XCTAssertTrue(mainWindow.waitForNonExistence(timeout: 3))
+
+        let statusItem = application.descendants(matching: .statusItem)
+            .matching(identifier: "prismBar")
+            .firstMatch
+        XCTAssertTrue(statusItem.waitForExistence(timeout: 5), application.debugDescription)
+        statusItem.click()
+
+        XCTAssertTrue(application.buttons["Open prismBar"].waitForExistence(timeout: 3))
+        XCTAssertTrue(application.buttons["Quit prismBar"].exists)
+    }
+
     private func sidebarCell(named name: String, in application: XCUIApplication) -> XCUIElement {
         application.outlines["Sidebar"].cells
             .containing(.staticText, identifier: name)
             .element
     }
+
 }

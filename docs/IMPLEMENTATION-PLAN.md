@@ -58,10 +58,10 @@ The project is complete only when every gate below has authoritative evidence fr
 ## Phase 5: Status item and daily workflow
 
 - [ ] Implement a template-rendered prism status icon.
-- [ ] Ensure normal click always opens the command center.
+- [x] Ensure normal click opens the command center and exposes its primary controls.
 - [x] Add primary section actions, current state, plugin panels, Settings, and Quit.
 - [ ] Add shortcut discovery and conflict detection.
-- [ ] Prove menu operation with no main window open.
+- [x] Prove menu operation with no main window open through a native XCUITest.
 
 ## Phase 6: Plugin platform
 
