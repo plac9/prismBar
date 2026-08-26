@@ -18,6 +18,7 @@ public enum MoveExecutionOutcome: Equatable, Sendable {
     case partial(observedIndex: Int)
     case topologyChanged
     case itemUnavailable
+    case permissionRevoked
     case observationFailed
     case inputFailed
 }
@@ -26,6 +27,11 @@ public actor VerifiedMoveCoordinator<
     Reader: MenuBarSnapshotReading,
     Performer: MenuBarMovePerforming
 > {
+    private enum SnapshotReadResult {
+        case success(MenuBarSnapshot)
+        case failure(MoveExecutionOutcome)
+    }
+
     private let reader: Reader
     private let performer: Performer
 
@@ -36,10 +42,11 @@ public actor VerifiedMoveCoordinator<
 
     public func execute(_ plan: MovePlan) async -> MoveExecutionOutcome {
         let current: MenuBarSnapshot
-        do {
-            current = try await reader.snapshot()
-        } catch {
-            return .observationFailed
+        switch await readSnapshot() {
+        case let .success(snapshot):
+            current = snapshot
+        case let .failure(outcome):
+            return outcome
         }
 
         guard current.items.map(\.id) == plan.sourceOrder else {
@@ -54,26 +61,58 @@ public actor VerifiedMoveCoordinator<
         }
 
         if plan.sourceIndex != plan.destinationIndex {
-            do {
-                let insertionEdge: MenuBarInsertionEdge =
-                    plan.sourceIndex < plan.destinationIndex ? .after : .before
-                try await performer.move(
-                    source: sourceFrame,
-                    destination: destinationFrame,
-                    insertionEdge: insertionEdge
-                )
-            } catch {
-                return .inputFailed
+            if let failure = await performMove(
+                plan: plan,
+                sourceFrame: sourceFrame,
+                destinationFrame: destinationFrame
+            ) {
+                return failure
             }
         }
 
-        let observed: MenuBarSnapshot
-        do {
-            observed = try await reader.snapshot()
-        } catch {
-            return .observationFailed
+        switch await readSnapshot() {
+        case let .success(observed):
+            return verificationOutcome(for: plan, observed: observed)
+        case let .failure(outcome):
+            return outcome
         }
+    }
 
+    private func readSnapshot() async -> SnapshotReadResult {
+        do {
+            return .success(try await reader.snapshot())
+        } catch MenuBarAuthorizationError.permissionRevoked {
+            return .failure(.permissionRevoked)
+        } catch {
+            return .failure(.observationFailed)
+        }
+    }
+
+    private func performMove(
+        plan: MovePlan,
+        sourceFrame: MenuBarItemFrame,
+        destinationFrame: MenuBarItemFrame
+    ) async -> MoveExecutionOutcome? {
+        let insertionEdge: MenuBarInsertionEdge =
+            plan.sourceIndex < plan.destinationIndex ? .after : .before
+        do {
+            try await performer.move(
+                source: sourceFrame,
+                destination: destinationFrame,
+                insertionEdge: insertionEdge
+            )
+            return nil
+        } catch MenuBarAuthorizationError.permissionRevoked {
+            return .permissionRevoked
+        } catch {
+            return .inputFailed
+        }
+    }
+
+    private func verificationOutcome(
+        for plan: MovePlan,
+        observed: MenuBarSnapshot
+    ) -> MoveExecutionOutcome {
         if observed.items.map(\.id) == plan.expectedOrder {
             return .success
         }

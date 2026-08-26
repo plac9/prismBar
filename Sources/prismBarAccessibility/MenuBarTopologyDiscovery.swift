@@ -5,7 +5,6 @@
 import prismBarCore
 
 public enum MenuBarDiscoveryError: Error, Equatable, Sendable {
-    case notTrusted
     case communicationFailure
     case malformedAccessibilityValue
 }

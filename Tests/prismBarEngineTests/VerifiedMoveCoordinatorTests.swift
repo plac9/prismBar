@@ -80,6 +80,50 @@ struct VerifiedMoveCoordinatorTests {
         #expect(await performer.executionCount == 1)
     }
 
+    @Test("reports permission revocation before producing input")
+    func reportsRevocationBeforeInput() async throws {
+        let initial = snapshot(names: ["one", "two"], generation: 1)
+        let plan = try MovePlanner().plan(item: id("two"), to: 0, in: initial)
+        let performer = RecordingMovePerformer()
+        let coordinator = VerifiedMoveCoordinator(
+            reader: FailingSnapshotReader(error: MenuBarAuthorizationError.permissionRevoked),
+            performer: performer
+        )
+
+        let outcome = await coordinator.execute(plan)
+
+        #expect(outcome == .permissionRevoked)
+        #expect(await performer.executionCount == 0)
+    }
+
+    @Test("reports permission revocation while producing input")
+    func reportsRevocationDuringInput() async throws {
+        let initial = snapshot(names: ["one", "two"], generation: 1)
+        let plan = try MovePlanner().plan(item: id("two"), to: 0, in: initial)
+        let coordinator = VerifiedMoveCoordinator(
+            reader: SnapshotSequenceReader(snapshots: [initial]),
+            performer: FailingMovePerformer(error: MenuBarAuthorizationError.permissionRevoked)
+        )
+
+        #expect(await coordinator.execute(plan) == .permissionRevoked)
+    }
+
+    @Test("reports permission revocation during verification")
+    func reportsRevocationDuringVerification() async throws {
+        let initial = snapshot(names: ["one", "two"], generation: 1)
+        let plan = try MovePlanner().plan(item: id("two"), to: 0, in: initial)
+        let reader = SnapshotThenFailureReader(
+            snapshot: initial,
+            error: MenuBarAuthorizationError.permissionRevoked
+        )
+        let coordinator = VerifiedMoveCoordinator(
+            reader: reader,
+            performer: RecordingMovePerformer()
+        )
+
+        #expect(await coordinator.execute(plan) == .permissionRevoked)
+    }
+
     private func snapshot(names: [String], generation: UInt64) -> MenuBarSnapshot {
         MenuBarSnapshot(
             generation: generation,
@@ -129,5 +173,41 @@ private actor RecordingMovePerformer: MenuBarMovePerforming {
         insertionEdge _: MenuBarInsertionEdge
     ) {
         executionCount += 1
+    }
+}
+
+private struct FailingSnapshotReader: MenuBarSnapshotReading {
+    let error: any Error & Sendable
+
+    func snapshot() throws -> MenuBarSnapshot {
+        throw error
+    }
+}
+
+private actor SnapshotThenFailureReader: MenuBarSnapshotReading {
+    private var snapshotValue: MenuBarSnapshot?
+    private let error: any Error & Sendable
+
+    init(snapshot: MenuBarSnapshot, error: any Error & Sendable) {
+        snapshotValue = snapshot
+        self.error = error
+    }
+
+    func snapshot() throws -> MenuBarSnapshot {
+        guard let snapshotValue else { throw error }
+        self.snapshotValue = nil
+        return snapshotValue
+    }
+}
+
+private struct FailingMovePerformer: MenuBarMovePerforming {
+    let error: any Error & Sendable
+
+    func move(
+        source _: MenuBarItemFrame,
+        destination _: MenuBarItemFrame,
+        insertionEdge _: MenuBarInsertionEdge
+    ) throws {
+        throw error
     }
 }

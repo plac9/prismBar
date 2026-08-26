@@ -42,7 +42,7 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
         for applications: [RunningApplicationDescriptor]
     ) throws -> MenuBarObservationBatch {
         guard AXIsProcessTrusted() else {
-            throw MenuBarDiscoveryError.notTrusted
+            throw MenuBarAuthorizationError.permissionRevoked
         }
 
         var observations: [MenuBarObservation] = []
@@ -52,11 +52,15 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
         for application in applications {
             do {
                 try observations.append(contentsOf: readObservations(for: application))
-            } catch MenuBarDiscoveryError.notTrusted {
-                throw MenuBarDiscoveryError.notTrusted
+            } catch MenuBarAuthorizationError.permissionRevoked {
+                throw MenuBarAuthorizationError.permissionRevoked
             } catch {
                 unavailableSourceCount += 1
             }
+        }
+
+        guard AXIsProcessTrusted() else {
+            throw MenuBarAuthorizationError.permissionRevoked
         }
 
         return MenuBarObservationBatch(
@@ -74,7 +78,7 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
             Self.applicationTimeout
         )
         if timeoutResult == .apiDisabled {
-            throw MenuBarDiscoveryError.notTrusted
+            throw MenuBarAuthorizationError.permissionRevoked
         }
         guard timeoutResult == .success else {
             throw MenuBarDiscoveryError.communicationFailure
@@ -191,7 +195,7 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
         case .attributeUnsupported, .noValue, .invalidUIElement:
             return nil
         case .apiDisabled:
-            throw MenuBarDiscoveryError.notTrusted
+            throw MenuBarAuthorizationError.permissionRevoked
         case .actionUnsupported, .cannotComplete, .failure, .illegalArgument, .invalidUIElementObserver,
              .notificationAlreadyRegistered, .notificationNotRegistered,
              .notificationUnsupported, .notEnoughPrecision, .notImplemented,

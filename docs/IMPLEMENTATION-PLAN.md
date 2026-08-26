@@ -33,7 +33,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Implement live Accessibility trust checks without cached truth.
 - [x] Use Apple's documented Accessibility prompt and recheck whenever the app returns to the foreground.
 - [x] Reject undocumented System Settings URL schemes from the product.
-- [ ] Implement runtime revocation behavior.
+- [x] Implement runtime revocation behavior.
 - [ ] Render onboarding and recovery states using native macOS 27 components.
 - [ ] Prove grant, revoke, relaunch, and signed-upgrade behavior in `/Applications`.
 

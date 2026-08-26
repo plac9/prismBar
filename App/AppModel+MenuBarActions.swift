@@ -30,7 +30,14 @@ extension AppModel {
                 let plan = try MovePlanner().plan(item: itemID, to: destinationIndex, in: snapshot)
                 let outcome = await menuBarController.execute(plan)
                 menuBarActionState = .result(Self.message(for: outcome))
-                await restoreHiddenSectionIfNeeded(wasCollapsed)
+                if outcome == .permissionRevoked {
+                    handleAccessibilityRevocation()
+                } else {
+                    await restoreHiddenSectionIfNeeded(wasCollapsed)
+                }
+            } catch MenuBarAuthorizationError.permissionRevoked {
+                handleAccessibilityRevocation()
+                menuBarActionState = .result(Self.message(for: .permissionRevoked))
             } catch {
                 menuBarActionState = .result("That item cannot be moved to the requested position.")
                 await restoreHiddenSectionIfNeeded(wasCollapsed)
@@ -54,7 +61,9 @@ extension AppModel {
                 let outcome = await menuBarController.execute(plan)
                 menuBarActionState = .result(Self.message(for: outcome))
 
-                if outcome == .success, wasCollapsed || section == .hidden {
+                if outcome == .permissionRevoked {
+                    handleAccessibilityRevocation()
+                } else if outcome == .success, wasCollapsed || section == .hidden {
                     let observed = try? await menuBarController.snapshot()
                     isHiddenSectionCollapsed = MenuBarSectionStatusController.shared.setCollapsed(
                         true,
@@ -64,6 +73,10 @@ extension AppModel {
                 } else if outcome != .success {
                     await restoreHiddenSectionIfNeeded(wasCollapsed)
                 }
+                refreshMenuBar()
+            } catch MenuBarAuthorizationError.permissionRevoked {
+                handleAccessibilityRevocation()
+                menuBarActionState = .result(Self.message(for: .permissionRevoked))
                 refreshMenuBar()
             } catch {
                 menuBarActionState = .result(
@@ -100,6 +113,9 @@ extension AppModel {
                         in: snapshot
                     )
                     let outcome = await menuBarController.execute(plan)
+                    if outcome == .permissionRevoked {
+                        handleAccessibilityRevocation()
+                    }
                     guard outcome == .success else {
                         menuBarActionState = .result(
                             "Reset stopped safely. \(Self.message(for: outcome))"
@@ -110,6 +126,10 @@ extension AppModel {
                 }
 
                 menuBarActionState = .result("Reset verified. Every movable item is visible.")
+                refreshMenuBar()
+            } catch MenuBarAuthorizationError.permissionRevoked {
+                handleAccessibilityRevocation()
+                menuBarActionState = .result(Self.message(for: .permissionRevoked))
                 refreshMenuBar()
             } catch {
                 menuBarActionState = .result(
@@ -167,6 +187,8 @@ extension AppModel {
             "The menu bar changed before the move. Refresh and try again."
         case .itemUnavailable:
             "The selected item is no longer available."
+        case .permissionRevoked:
+            "Accessibility access was revoked. Re-enable prismBar before moving items."
         case .observationFailed:
             "The result could not be verified. Refresh before trying again."
         case .inputFailed:

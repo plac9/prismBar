@@ -46,7 +46,6 @@ public struct MenuBarDragGeometry: Sendable {
 }
 
 public enum NativeMenuBarMoveError: Error, Equatable, Sendable {
-    case notTrusted
     case eventCreationFailed
     case cancelled
 }
@@ -71,7 +70,7 @@ public actor NativeMenuBarMovePerformer: MenuBarMovePerforming {
         insertionEdge: MenuBarInsertionEdge
     ) throws {
         guard AXIsProcessTrusted() else {
-            throw NativeMenuBarMoveError.notTrusted
+            throw MenuBarAuthorizationError.permissionRevoked
         }
         guard !Task.isCancelled else {
             throw NativeMenuBarMoveError.cancelled

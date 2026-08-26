@@ -172,7 +172,7 @@ struct MenuBarTopologyDiscoveryTests {
     func preservesFailure() async {
         let discovery = MenuBarTopologyDiscovery(reader: FailingObservationReader())
 
-        await #expect(throws: MenuBarDiscoveryError.notTrusted) {
+        await #expect(throws: MenuBarAuthorizationError.permissionRevoked) {
             try await discovery.snapshot(applications: [])
         }
     }
@@ -192,6 +192,6 @@ private struct FixtureObservationReader: MenuBarObservationReading {
 
 private struct FailingObservationReader: MenuBarObservationReading {
     func observations(for _: [RunningApplicationDescriptor]) async throws -> MenuBarObservationBatch {
-        throw MenuBarDiscoveryError.notTrusted
+        throw MenuBarAuthorizationError.permissionRevoked
     }
 }

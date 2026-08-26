@@ -152,10 +152,9 @@ final class AppModel {
                 guard revision == topologyRevision else { return }
                 menuBarSnapshot = snapshot
                 menuBarState = .ready
-            } catch MenuBarDiscoveryError.notTrusted {
+            } catch MenuBarAuthorizationError.permissionRevoked {
                 guard revision == topologyRevision else { return }
-                accessibilityState = .denied
-                invalidateMenuBar()
+                handleAccessibilityRevocation()
             } catch {
                 guard revision == topologyRevision else { return }
                 menuBarSnapshot = nil
@@ -168,6 +167,11 @@ final class AppModel {
         topologyRevision += 1
         menuBarSnapshot = nil
         menuBarState = .waitingForPermission
+    }
+
+    func handleAccessibilityRevocation() {
+        accessibilityState = .denied
+        invalidateMenuBar()
     }
 
     private nonisolated static func readCodeIdentity() async -> CodeIdentity? {

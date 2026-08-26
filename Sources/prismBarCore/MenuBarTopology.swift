@@ -57,6 +57,14 @@ public enum MenuBarInsertionEdge: String, Equatable, Codable, Sendable {
     case after
 }
 
+/// A live authorization failure reported by a protected menu bar operation.
+///
+/// This value contains no Accessibility-derived content and lets the host
+/// immediately discard privileged state when macOS revokes consent.
+public enum MenuBarAuthorizationError: Error, Equatable, Sendable {
+    case permissionRevoked
+}
+
 public protocol MenuBarMovePerforming: Sendable {
     func move(
         source: MenuBarItemFrame,
