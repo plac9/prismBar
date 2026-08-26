@@ -4,6 +4,7 @@
 
 import AppKit
 import prismBarCore
+import prismBarEngine
 import SwiftUI
 
 struct StatusMenuView: View {
@@ -39,6 +40,8 @@ struct StatusMenuView: View {
 
             Label(accessibilityLabel, systemImage: accessibilitySymbol)
                 .foregroundStyle(model.accessibilityState == .granted ? .green : .secondary)
+
+            actionStatus
 
             if let snapshot = model.menuBarSnapshot {
                 Text("\(snapshot.items.filter { $0.role == .item }.count) menu items")
@@ -195,6 +198,51 @@ struct StatusMenuView: View {
 
     private var accessibilitySymbol: String {
         model.accessibilityState == .granted ? "checkmark.shield" : "exclamationmark.shield"
+    }
+
+    @ViewBuilder
+    private var actionStatus: some View {
+        switch model.menuBarActionState {
+        case .idle:
+            EmptyView()
+        case .moving:
+            Label("Moving and verifying", systemImage: "progress.indicator")
+                .font(.callout)
+                .accessibilityIdentifier("statusMenu.actionProgress")
+        case let .result(result):
+            VStack(alignment: .leading, spacing: 8) {
+                Label(result.message, systemImage: result.symbol)
+                    .font(.callout)
+                    .foregroundStyle(resultColor(for: result.kind))
+                recoveryButton(for: result.recovery)
+            }
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("statusMenu.actionResult")
+        }
+    }
+
+    @ViewBuilder
+    private func recoveryButton(for recovery: MenuBarRecoveryAction) -> some View {
+        switch recovery {
+        case .refresh:
+            Button("Refresh Menu Items", systemImage: "arrow.clockwise") {
+                model.refreshMenuBar()
+            }
+        case .recheckPermission:
+            Button("Check Accessibility", systemImage: "hand.raised") {
+                model.refreshAccessibility()
+            }
+        case .none:
+            EmptyView()
+        }
+    }
+
+    private func resultColor(for kind: MenuBarActionResultKind) -> Color {
+        switch kind {
+        case .success: .green
+        case .warning: .orange
+        case .failure: .red
+        }
     }
 
     private func canMove(_ item: MenuBarItem) -> Bool {

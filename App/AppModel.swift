@@ -19,8 +19,8 @@ enum MenuBarLoadingState: Equatable {
 
 enum MenuBarActionState: Equatable {
     case idle
-    case moving
-    case result(String)
+    case moving(itemID: MenuBarItemID?)
+    case result(MenuBarActionResult)
 }
 
 enum PluginLoadingState: Equatable {
@@ -60,7 +60,10 @@ final class AppModel {
     private var pluginRevision = 0
 
     var isMenuBarActionInProgress: Bool {
-        menuBarActionState == .moving
+        if case .moving = menuBarActionState {
+            return true
+        }
+        return false
     }
 
     private init(defaults: UserDefaults = .standard) {

@@ -12,7 +12,9 @@ extension AppModel {
               !isMenuBarActionInProgress
         else { return }
 
-        menuBarActionState = .moving
+        let itemName = displayedSnapshot.items.first(where: { $0.id == itemID })?.displayName
+            ?? "the selected item"
+        menuBarActionState = .moving(itemID: itemID)
         Task { [weak self] in
             guard let self else { return }
             let wasCollapsed = isHiddenSectionCollapsed
@@ -24,7 +26,9 @@ extension AppModel {
                 )
                 guard snapshot.items.map(\.id) == displayedSnapshot.items.map(\.id) else {
                     menuBarActionState = .result(
-                        "The menu bar changed before the move. Review the refreshed positions and try again."
+                        .warning(
+                            "The menu bar changed before the move. Review the refreshed positions and try again."
+                        )
                     )
                     await restoreHiddenSectionIfNeeded(wasCollapsed)
                     refreshMenuBar()
@@ -32,7 +36,7 @@ extension AppModel {
                 }
                 let plan = try MovePlanner().plan(item: itemID, to: destinationIndex, in: snapshot)
                 let outcome = await menuBarController.execute(plan)
-                menuBarActionState = .result(Self.message(for: outcome))
+                menuBarActionState = .result(.move(outcome, itemName: itemName))
                 if outcome == .permissionRevoked {
                     handleAccessibilityRevocation()
                 } else {
@@ -40,9 +44,11 @@ extension AppModel {
                 }
             } catch MenuBarAuthorizationError.permissionRevoked {
                 handleAccessibilityRevocation()
-                menuBarActionState = .result(Self.message(for: .permissionRevoked))
+                menuBarActionState = .result(.move(.permissionRevoked, itemName: itemName))
             } catch {
-                menuBarActionState = .result("That item cannot be moved to the requested position.")
+                menuBarActionState = .result(
+                    .failure("That item cannot be moved to the requested position.")
+                )
                 await restoreHiddenSectionIfNeeded(wasCollapsed)
             }
             refreshMenuBar()
@@ -54,7 +60,7 @@ extension AppModel {
               !isMenuBarActionInProgress
         else { return }
 
-        menuBarActionState = .moving
+        menuBarActionState = .moving(itemID: itemID)
         Task { [weak self] in
             guard let self else { return }
             let wasCollapsed = isHiddenSectionCollapsed
@@ -66,7 +72,9 @@ extension AppModel {
                 )
                 let plan = try SectionMovePlanner().plan(item: itemID, to: section, in: snapshot)
                 let outcome = await menuBarController.execute(plan)
-                menuBarActionState = .result(Self.message(for: outcome))
+                let itemName = snapshot.items.first(where: { $0.id == itemID })?.displayName
+                    ?? "the selected item"
+                menuBarActionState = .result(.move(outcome, itemName: itemName))
 
                 if outcome == .permissionRevoked {
                     handleAccessibilityRevocation()
@@ -85,11 +93,11 @@ extension AppModel {
                 refreshMenuBar()
             } catch MenuBarAuthorizationError.permissionRevoked {
                 handleAccessibilityRevocation()
-                menuBarActionState = .result(Self.message(for: .permissionRevoked))
+                menuBarActionState = .result(.move(.permissionRevoked, itemName: "the selected item"))
                 refreshMenuBar()
             } catch {
                 menuBarActionState = .result(
-                    "The section changed before the item could be moved. Refresh and try again."
+                    .warning("The section changed before the item could be moved. Refresh and try again.")
                 )
                 await restoreHiddenSectionIfNeeded(wasCollapsed)
                 refreshMenuBar()
@@ -104,7 +112,7 @@ extension AppModel {
               !isMenuBarActionInProgress
         else { return }
 
-        menuBarActionState = .moving
+        menuBarActionState = .moving(itemID: nil)
         Task { [weak self] in
             await self?.performBatchMove(itemIDs, to: section)
         }
@@ -115,7 +123,7 @@ extension AppModel {
               !isMenuBarActionInProgress
         else { return }
 
-        menuBarActionState = .moving
+        menuBarActionState = .moving(itemID: nil)
         Task { [weak self] in
             guard let self else { return }
             await revealHiddenSectionForAction()
@@ -126,7 +134,7 @@ extension AppModel {
                 )
                 let itemIDs = SectionResetPlanner().hiddenItemsToReveal(in: initial)
                 guard !itemIDs.isEmpty else {
-                    menuBarActionState = .result("Every menu bar item is already visible.")
+                    menuBarActionState = .result(.success("Every menu bar item is already visible."))
                     refreshMenuBar()
                     return
                 }
@@ -145,23 +153,31 @@ extension AppModel {
                         handleAccessibilityRevocation()
                     }
                     guard outcome == .success else {
+                        let detail = MenuBarActionResult.move(outcome, itemName: "the selected item")
                         menuBarActionState = .result(
-                            "Reset stopped safely. \(Self.message(for: outcome))"
+                            MenuBarActionResult(
+                                kind: detail.kind,
+                                message: "Reset stopped safely. \(detail.message)",
+                                symbol: detail.symbol,
+                                recovery: detail.recovery
+                            )
                         )
                         refreshMenuBar()
                         return
                     }
                 }
 
-                menuBarActionState = .result("Reset verified. Every movable item is visible.")
+                menuBarActionState = .result(.success("Reset verified. Every movable item is visible."))
                 refreshMenuBar()
             } catch MenuBarAuthorizationError.permissionRevoked {
                 handleAccessibilityRevocation()
-                menuBarActionState = .result(Self.message(for: .permissionRevoked))
+                menuBarActionState = .result(
+                    .move(.permissionRevoked, itemName: "the selected item")
+                )
                 refreshMenuBar()
             } catch {
                 menuBarActionState = .result(
-                    "Reset stopped safely because the menu bar changed. Refresh and try again."
+                    .warning("Reset stopped safely because the menu bar changed. Refresh and try again.")
                 )
                 refreshMenuBar()
             }
@@ -178,7 +194,9 @@ extension AppModel {
             dividerFrame: menuBarSnapshot?.hiddenSectionDivider?.frame
         )
         guard actualState == collapsed else {
-            menuBarActionState = .result("The hidden section divider is not ready yet.")
+            menuBarActionState = .result(
+                .failure("The hidden section divider is not ready yet.", symbol: "eye.slash")
+            )
             refreshMenuBar()
             return
         }
@@ -228,7 +246,9 @@ extension AppModel {
                 in: initialSnapshot
             )
             guard !orderedItemIDs.isEmpty else {
-                menuBarActionState = .result("No selected items can move to that section.")
+                menuBarActionState = .result(
+                    .warning("No selected items can move to that section.", recovery: .none)
+                )
                 await restoreHiddenSectionIfNeeded(wasCollapsed)
                 refreshMenuBar()
                 return
@@ -245,17 +265,19 @@ extension AppModel {
             }
 
             menuBarActionState = .result(
-                "Batch move verified for \(execution.movedCount) item(s)."
+                .success("Batch move verified for \(execution.movedCount) item(s).")
             )
             await collapseHiddenSectionIfNeeded(section == .hidden || wasCollapsed)
             refreshMenuBar()
         } catch MenuBarAuthorizationError.permissionRevoked {
             handleAccessibilityRevocation()
-            menuBarActionState = .result(Self.message(for: .permissionRevoked))
+            menuBarActionState = .result(
+                .move(.permissionRevoked, itemName: "the selected item")
+            )
             refreshMenuBar()
         } catch {
             menuBarActionState = .result(
-                "Batch move stopped safely because the menu bar changed. Refresh and try again."
+                .warning("Batch move stopped safely because the menu bar changed. Refresh and try again.")
             )
             await restoreHiddenSectionIfNeeded(wasCollapsed)
             refreshMenuBar()
@@ -291,8 +313,14 @@ extension AppModel {
         } else {
             await restoreHiddenSectionIfNeeded(wasCollapsed)
         }
+        let detail = MenuBarActionResult.move(failure, itemName: "the selected item")
         menuBarActionState = .result(
-            "Moved \(movedCount) item(s), then stopped safely. " + Self.message(for: failure)
+            MenuBarActionResult(
+                kind: detail.kind,
+                message: "Moved \(movedCount) item(s), then stopped safely. \(detail.message)",
+                symbol: detail.symbol,
+                recovery: detail.recovery
+            )
         )
         refreshMenuBar()
     }
@@ -309,26 +337,4 @@ extension AppModel {
         try? await Task.sleep(for: .milliseconds(120))
     }
 
-    private static func message(for outcome: MoveExecutionOutcome) -> String {
-        switch outcome {
-        case .success:
-            "Move verified."
-        case let .partial(observedIndex):
-            "The item stopped at position \(observedIndex + 1)."
-        case .topologyChanged:
-            "The menu bar changed before the move. Refresh and try again."
-        case .itemUnavailable:
-            "The selected item is no longer available."
-        case .permissionRevoked:
-            "Accessibility access was revoked. Re-enable prismBar before moving items."
-        case .menuBarUnavailable:
-            "The menu bar is hidden or unavailable on this display. Show it, then try again."
-        case .observationFailed:
-            "The result could not be verified. Refresh before trying again."
-        case .inputFailed:
-            "macOS rejected the move input."
-        case .timedOut:
-            "macOS did not finish the move in time. Nothing else was attempted. Refresh and try again."
-        }
-    }
 }

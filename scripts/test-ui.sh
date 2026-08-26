@@ -12,6 +12,10 @@ if [ "$test_selection" = "--source-audit" ]; then
     echo "Decorative content glass or obsolete page artwork remains." >&2
     exit 1
   fi
+  if rg -n 'resultSymbol\(for: message\)|isSuccessfulResult|message\.hasPrefix' App; then
+    echo "Menu action feedback is still classified from display text." >&2
+    exit 1
+  fi
   echo "UI source audit passed: content uses semantic surfaces and native interactive glass only."
   exit 0
 fi

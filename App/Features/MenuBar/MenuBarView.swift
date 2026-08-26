@@ -3,6 +3,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import prismBarCore
+import prismBarEngine
 import SwiftUI
 
 struct MenuBarView: View {
@@ -199,31 +200,47 @@ struct MenuBarView: View {
             .padding(.vertical, 10)
             .background(.background.secondary, in: .rect(cornerRadius: 14))
             .accessibilityIdentifier("menuBar.actionProgress")
-        case let .result(message):
-            Label(message, systemImage: resultSymbol(for: message))
-                .font(.callout.weight(.medium))
-                .foregroundStyle(resultColor(for: message))
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .background(.background.secondary, in: .rect(cornerRadius: 14))
-                .accessibilityIdentifier("menuBar.actionResult")
+        case let .result(result):
+            HStack(spacing: 10) {
+                Label(result.message, systemImage: result.symbol)
+                    .font(.callout.weight(.medium))
+                    .foregroundStyle(resultColor(for: result.kind))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                recoveryButton(for: result.recovery)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(.background.secondary, in: .rect(cornerRadius: 14))
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("menuBar.actionResult")
         }
     }
 
-    private func resultSymbol(for message: String) -> String {
-        isSuccessfulResult(message) ? "checkmark.circle.fill" : "exclamationmark.triangle.fill"
+    @ViewBuilder
+    private func recoveryButton(for recovery: MenuBarRecoveryAction) -> some View {
+        switch recovery {
+        case .refresh:
+            Button("Refresh", systemImage: "arrow.clockwise") {
+                model.refreshMenuBar()
+            }
+            .accessibilityIdentifier("menuBar.actionRecovery.refresh")
+        case .recheckPermission:
+            Button("Check Access", systemImage: "hand.raised") {
+                model.refreshAccessibility()
+            }
+            .accessibilityIdentifier("menuBar.actionRecovery.permission")
+        case .none:
+            EmptyView()
+        }
     }
 
-    private func resultColor(for message: String) -> Color {
-        isSuccessfulResult(message) ? .green : .orange
-    }
-
-    private func isSuccessfulResult(_ message: String) -> Bool {
-        message.hasPrefix("Move verified") ||
-            message.hasPrefix("Batch move verified") ||
-            message.hasPrefix("Reset verified") ||
-            message.hasSuffix("already visible.")
+    private func resultColor(for kind: MenuBarActionResultKind) -> Color {
+        switch kind {
+        case .success: .green
+        case .warning: .orange
+        case .failure: .red
+        }
     }
 
     private func items(
