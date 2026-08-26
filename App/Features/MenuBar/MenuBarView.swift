@@ -19,79 +19,81 @@ struct MenuBarView: View {
                     "against a fresh macOS topology before it is reported as complete."
             )
 
-            GlassCard {
-                VStack(spacing: 12) {
-                    HStack(spacing: 10) {
-                        Button(
-                            model.isHiddenSectionCollapsed ? "Reveal Hidden Items" : "Fold Hidden Items",
-                            systemImage: model.isHiddenSectionCollapsed ? "eye" : "eye.slash"
-                        ) {
-                            model.setHiddenSectionCollapsed(!model.isHiddenSectionCollapsed)
-                        }
-                        .buttonStyle(.glassProminent)
-                        .disabled(
-                            model.accessibilityState != .granted ||
-                                model.menuBarState == .loading ||
-                                model.menuBarSnapshot?.hiddenSectionDivider == nil
-                        )
-
-                        Button("Refresh", systemImage: "arrow.clockwise") {
-                            model.refreshMenuBar()
-                        }
-                        .buttonStyle(.glass)
-                        .disabled(
-                            model.accessibilityState != .granted ||
-                                model.menuBarState == .loading
-                        )
-
-                        Spacer()
-
-                        Menu {
-                            Button("Show Every Movable Item", systemImage: "arrow.uturn.backward") {
-                                isResetConfirmationPresented = true
+            if model.accessibilityState == .granted {
+                GlassCard {
+                    VStack(spacing: 12) {
+                        HStack(spacing: 10) {
+                            Button(
+                                model.isHiddenSectionCollapsed ? "Reveal Hidden Items" : "Fold Hidden Items",
+                                systemImage: model.isHiddenSectionCollapsed ? "eye" : "eye.slash"
+                            ) {
+                                model.setHiddenSectionCollapsed(!model.isHiddenSectionCollapsed)
                             }
-                            .disabled(model.isMenuBarActionInProgress)
-                        } label: {
-                            Label("Recovery", systemImage: "lifepreserver")
+                            .buttonStyle(.glassProminent)
+                            .disabled(
+                                model.accessibilityState != .granted ||
+                                    model.menuBarState == .loading ||
+                                    model.menuBarSnapshot?.hiddenSectionDivider == nil
+                            )
+
+                            Button("Refresh", systemImage: "arrow.clockwise") {
+                                model.refreshMenuBar()
+                            }
+                            .buttonStyle(.glass)
+                            .disabled(
+                                model.accessibilityState != .granted ||
+                                    model.menuBarState == .loading
+                            )
+
+                            Spacer()
+
+                            Menu {
+                                Button("Show Every Movable Item", systemImage: "arrow.uturn.backward") {
+                                    isResetConfirmationPresented = true
+                                }
+                                .disabled(model.isMenuBarActionInProgress)
+                            } label: {
+                                Label("Recovery", systemImage: "lifepreserver")
+                            }
+                            .menuStyle(.button)
+                            .buttonStyle(.glass)
+                            .disabled(model.accessibilityState != .granted || model.menuBarState != .ready)
                         }
-                        .menuStyle(.button)
-                        .buttonStyle(.glass)
-                        .disabled(model.accessibilityState != .granted || model.menuBarState != .ready)
-                    }
 
-                    Divider()
+                        Divider()
 
-                    HStack(spacing: 10) {
-                        Label(
-                            "\(selectedItemIDs.count) selected",
-                            systemImage: selectedItemIDs.isEmpty ? "checklist.unchecked" : "checklist.checked"
-                        )
-                        .font(.callout.weight(.medium))
-                        .foregroundStyle(selectedItemIDs.isEmpty ? .secondary : .primary)
+                        HStack(spacing: 10) {
+                            Label(
+                                "\(selectedItemIDs.count) selected",
+                                systemImage: selectedItemIDs.isEmpty ? "checklist.unchecked" : "checklist.checked"
+                            )
+                            .font(.callout.weight(.medium))
+                            .foregroundStyle(selectedItemIDs.isEmpty ? .secondary : .primary)
 
-                        Spacer()
+                            Spacer()
 
-                        Button("Hide Selected", systemImage: "eye.slash") {
-                            let selection = selectedItemIDs
-                            selectedItemIDs.removeAll()
-                            model.moveMenuBarItems(selection, to: .hidden)
+                            Button("Hide Selected", systemImage: "eye.slash") {
+                                let selection = selectedItemIDs
+                                selectedItemIDs.removeAll()
+                                model.moveMenuBarItems(selection, to: .hidden)
+                            }
+                            .buttonStyle(.glassProminent)
+                            .disabled(!canMoveSelection(to: .hidden))
+
+                            Button("Show Selected", systemImage: "eye") {
+                                let selection = selectedItemIDs
+                                selectedItemIDs.removeAll()
+                                model.moveMenuBarItems(selection, to: .visible)
+                            }
+                            .buttonStyle(.glass)
+                            .disabled(!canMoveSelection(to: .visible))
+
+                            Button("Clear") {
+                                selectedItemIDs.removeAll()
+                            }
+                            .buttonStyle(.glass)
+                            .disabled(selectedItemIDs.isEmpty || model.isMenuBarActionInProgress)
                         }
-                        .buttonStyle(.glassProminent)
-                        .disabled(!canMoveSelection(to: .hidden))
-
-                        Button("Show Selected", systemImage: "eye") {
-                            let selection = selectedItemIDs
-                            selectedItemIDs.removeAll()
-                            model.moveMenuBarItems(selection, to: .visible)
-                        }
-                        .buttonStyle(.glass)
-                        .disabled(!canMoveSelection(to: .visible))
-
-                        Button("Clear") {
-                            selectedItemIDs.removeAll()
-                        }
-                        .buttonStyle(.glass)
-                        .disabled(selectedItemIDs.isEmpty || model.isMenuBarActionInProgress)
                     }
                 }
             }
