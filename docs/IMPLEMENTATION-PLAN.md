@@ -105,7 +105,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [ ] Threat-model review against final code and entitlements.
 - [x] Declare app-local `UserDefaults` access with Apple required reason `CA92.1`.
 - [x] Audit release executables, linked libraries, local paths, credential-shaped strings, bundle identifiers, and entitlement allowlists in CI.
-- [ ] Secret and personal-information scan across Git history, source, tests, logs, build products, and symbols.
+- [x] Scan Git history, source, tests, tracked artifacts, public metadata, release products, and symbols for secrets and personal information.
 - [x] Dependency license inventory, build-tool inventory, and SPDX 2.3 source SBOM.
 - [ ] Similarity audit against the frozen GPL reference.
 - [ ] Confirm the public source revision exactly matches every distributed MPL-covered binary.
