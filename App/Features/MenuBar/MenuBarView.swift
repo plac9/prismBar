@@ -182,7 +182,9 @@ struct MenuBarView: View {
             selectedItemIDs.formIntersection(snapshot.items.map(\.id))
         }
     }
+}
 
+private extension MenuBarView {
     @ViewBuilder
     private var actionStatus: some View {
         switch model.menuBarActionState {

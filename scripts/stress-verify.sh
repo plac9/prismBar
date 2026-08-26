@@ -36,10 +36,16 @@ started_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 started_epoch="$(date '+%s')"
 deadline_epoch="$((started_epoch + duration_seconds))"
 cycles=0
+stress_scratch="$(mktemp -d "${TMPDIR:-/tmp}/prismbar-stress.XXXXXX")"
+cleanup() {
+  chmod -R u+w "$stress_scratch" 2>/dev/null || true
+  find "$stress_scratch" -depth -delete 2>/dev/null || true
+}
+trap cleanup EXIT INT TERM
 
 while [ "$(date '+%s')" -lt "$deadline_epoch" ]; do
-  swift test
-  UI_DERIVED_DATA_DIR="$repository_root/build/UI-StressDerivedData" \
+  swift test --scratch-path "$stress_scratch/SwiftPM"
+  UI_DERIVED_DATA_DIR="$stress_scratch/UI-DerivedData" \
     ./scripts/test-ui.sh
   cycles="$((cycles + 1))"
 done

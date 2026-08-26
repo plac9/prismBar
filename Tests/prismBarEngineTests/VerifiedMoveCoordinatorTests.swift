@@ -278,29 +278,6 @@ struct VerifiedMoveCoordinatorTests {
         #expect(await performer.executionCount == 0)
     }
 
-    private func snapshot(names: [String], generation: UInt64) -> MenuBarSnapshot {
-        MenuBarSnapshot(
-            generation: generation,
-            items: names.enumerated().map { index, name in
-                MenuBarItem(
-                    id: id(name),
-                    position: index,
-                    isMovable: true,
-                    displayName: name,
-                    frame: MenuBarItemFrame(
-                        minX: Double(index * 30),
-                        minY: 0,
-                        width: 24,
-                        height: 24
-                    )
-                )
-            }
-        )
-    }
-
-    private func id(_ value: String) -> MenuBarItemID {
-        MenuBarItemID(rawValue: value)
-    }
 }
 
 private actor SnapshotSequenceReader: MenuBarSnapshotReading {
@@ -417,20 +394,5 @@ private actor CountingFailingMovePerformer: MenuBarMovePerforming {
     ) throws {
         executionCount += 1
         throw error
-    }
-}
-
-private actor StalledMovePerformer: MenuBarMovePerforming {
-    private(set) var executionCount = 0
-
-    func move(
-        source _: MenuBarItemFrame,
-        destination _: MenuBarItemFrame,
-        insertionEdge _: MenuBarInsertionEdge,
-        deadline: OperationDeadline
-    ) async throws {
-        executionCount += 1
-        try await Task.sleep(for: deadline.remaining())
-        throw OperationDeadlineError.expired
     }
 }

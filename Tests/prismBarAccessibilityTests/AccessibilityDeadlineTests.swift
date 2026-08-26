@@ -101,8 +101,7 @@ struct AccessibilityDeadlineTests {
 
 private final class RecordingAccessibilityElementClient:
     AccessibilityElementClient,
-    @unchecked Sendable
-{
+    @unchecked Sendable {
     enum EventKind: Equatable {
         case timeout
         case attribute

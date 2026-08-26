@@ -16,13 +16,11 @@ enum MenuBarLoadingState: Equatable {
     case ready
     case unavailable
 }
-
 enum MenuBarActionState: Equatable {
     case idle
     case moving(itemID: MenuBarItemID?)
     case result(MenuBarActionResult)
 }
-
 enum PluginLoadingState: Equatable {
     case idle
     case loading
@@ -65,7 +63,6 @@ final class AppModel {
         }
         return false
     }
-
     private init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         let registry = try? PluginCatalog.makeRegistry()
@@ -350,7 +347,6 @@ extension AppModel {
             }
         }
     }
-
     private static func pluginFailureMessage(_ error: PluginClientError) -> String {
         switch error {
         case .busy:

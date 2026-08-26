@@ -34,12 +34,21 @@ fi
 swiftlint lint --strict
 swift test
 swift test -c release
-swift test --sanitize=address --scratch-path \
-  "${CI_ADDRESS_SANITIZER_DIR:-$repository_root/build/SwiftPM-ASan}"
-swift test --sanitize=thread --scratch-path \
-  "${CI_THREAD_SANITIZER_DIR:-$repository_root/build/SwiftPM-TSan}"
+verification_root="${CI_VERIFICATION_ROOT:-$(mktemp -d "${TMPDIR:-/tmp}/prismbar-ci.XXXXXX")}"
+if [ -z "${CI_VERIFICATION_ROOT:-}" ]; then
+  cleanup() {
+    chmod -R u+w "$verification_root" 2>/dev/null || true
+    find "$verification_root" -depth -delete 2>/dev/null || true
+  }
+  trap cleanup EXIT INT TERM
+fi
 
-derived_data_directory="${CI_DERIVED_DATA_DIR:-$repository_root/build/CI-DerivedData}"
+swift test --sanitize=address --scratch-path \
+  "${CI_ADDRESS_SANITIZER_DIR:-$verification_root/SwiftPM-ASan}"
+swift test --sanitize=thread --scratch-path \
+  "${CI_THREAD_SANITIZER_DIR:-$verification_root/SwiftPM-TSan}"
+
+derived_data_directory="${CI_DERIVED_DATA_DIR:-$verification_root/DerivedData}"
 common_build_arguments=(
   -project prismBar.xcodeproj
   -scheme prismBar

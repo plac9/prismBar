@@ -139,32 +139,21 @@ extension AppModel {
                     return
                 }
 
-                for itemID in itemIDs {
-                    let snapshot = try await menuBarController.snapshot(
-                        deadline: OperationDeadline(timeout: .seconds(8))
-                    )
-                    let plan = try SectionMovePlanner().plan(
-                        item: itemID,
-                        to: .visible,
-                        in: snapshot
-                    )
-                    let outcome = await menuBarController.execute(plan)
-                    if outcome == .permissionRevoked {
+                if let failure = try await executeResetMoves(itemIDs) {
+                    if failure == .permissionRevoked {
                         handleAccessibilityRevocation()
                     }
-                    guard outcome == .success else {
-                        let detail = MenuBarActionResult.move(outcome, itemName: "the selected item")
-                        menuBarActionState = .result(
-                            MenuBarActionResult(
-                                kind: detail.kind,
-                                message: "Reset stopped safely. \(detail.message)",
-                                symbol: detail.symbol,
-                                recovery: detail.recovery
-                            )
+                    let detail = MenuBarActionResult.move(failure, itemName: "the selected item")
+                    menuBarActionState = .result(
+                        MenuBarActionResult(
+                            kind: detail.kind,
+                            message: "Reset stopped safely. \(detail.message)",
+                            symbol: detail.symbol,
+                            recovery: detail.recovery
                         )
-                        refreshMenuBar()
-                        return
-                    }
+                    )
+                    refreshMenuBar()
+                    return
                 }
 
                 menuBarActionState = .result(.success("Reset verified. Every movable item is visible."))
@@ -182,6 +171,22 @@ extension AppModel {
                 refreshMenuBar()
             }
         }
+    }
+
+    private func executeResetMoves(
+        _ itemIDs: [MenuBarItemID]
+    ) async throws -> MoveExecutionOutcome? {
+        for itemID in itemIDs {
+            let snapshot = try await menuBarController.snapshot(
+                deadline: OperationDeadline(timeout: .seconds(8))
+            )
+            let plan = try SectionMovePlanner().plan(item: itemID, to: .visible, in: snapshot)
+            let outcome = await menuBarController.execute(plan)
+            guard outcome == .success else {
+                return outcome
+            }
+        }
+        return nil
     }
 
     func setHiddenSectionCollapsed(_ collapsed: Bool) {
