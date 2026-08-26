@@ -2,13 +2,33 @@
 
 set -euo pipefail
 
+repository_root="$(git rev-parse --show-toplevel)"
+
+if [ "${1:-}" = "--source-only" ]; then
+  if find "$repository_root/Resources" -type f -print | rg -i '/(thaw|ice|cube|melt|droplet)[^/]*$'; then
+    printf 'Release source audit failed: inherited icon artifact remains.\n' >&2
+    exit 1
+  fi
+  if rg -n 'Image\("PrismMark"\)|PrismMark' "$repository_root/App"; then
+    printf 'Release source audit failed: obsolete raster page mark remains.\n' >&2
+    exit 1
+  fi
+  if rg -n -i 'thaw|ice cube|melting cube|snowflake|droplet' \
+      "$repository_root/Resources/prismBar.icon/icon.json" \
+      "$repository_root/App/MenuBarSectionStatusController.swift"; then
+    printf 'Release source audit failed: inherited thaw imagery remains.\n' >&2
+    exit 1
+  fi
+  printf 'Release source audit passed: application and status artwork use the prism identity only.\n'
+  exit 0
+fi
+
 if [ "$#" -ne 1 ]; then
-  printf 'Usage: %s /path/to/prismBar.app\n' "$0" >&2
+  printf 'Usage: %s --source-only | /path/to/prismBar.app\n' "$0" >&2
   exit 64
 fi
 
 application_path="$1"
-repository_root="$(git rev-parse --show-toplevel)"
 
 fail() {
   printf 'Release audit failed: %s\n' "$1" >&2
