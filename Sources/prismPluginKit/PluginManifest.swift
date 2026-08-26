@@ -71,6 +71,13 @@ public struct PluginManifest: Equatable, Codable, Sendable {
         guard disallowed.isEmpty else {
             throw PluginValidationError.disallowedCapabilities(disallowed)
         }
+        let duplicated = Dictionary(grouping: capabilities, by: { $0 })
+            .filter { $0.value.count > 1 }
+            .map(\.key)
+            .sorted { $0.rawValue < $1.rawValue }
+        guard duplicated.isEmpty else {
+            throw PluginValidationError.duplicateCapabilities(duplicated)
+        }
 
         return self
     }
@@ -80,4 +87,5 @@ public enum PluginValidationError: Error, Equatable, Sendable {
     case unexpectedIdentifier(String)
     case unsupportedProtocol(PluginProtocolVersion)
     case disallowedCapabilities([PluginCapability])
+    case duplicateCapabilities([PluginCapability])
 }

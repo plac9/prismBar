@@ -63,4 +63,23 @@ struct PluginManifestTests {
             )
         }
     }
+
+    @Test("rejects duplicated capability declarations")
+    func rejectsDuplicateCapabilities() {
+        let manifest = PluginManifest(
+            identifier: "com.laclairtech.prismbar.plugin.prismcalc",
+            displayName: "prismCalc",
+            version: .init(major: 1, minor: 0, patch: 0),
+            protocolVersion: .current,
+            capabilities: [.panel, .panel]
+        )
+
+        #expect(throws: PluginValidationError.duplicateCapabilities([.panel])) {
+            try manifest.validated(
+                supportedProtocol: .current,
+                allowedIdentifier: manifest.identifier,
+                allowedCapabilities: [.panel]
+            )
+        }
+    }
 }

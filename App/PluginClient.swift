@@ -39,6 +39,7 @@ final class PrismCalcPluginClient {
         policy = try BundledPluginPolicy(
             pluginIdentifier: "com.laclairtech.prismbar.plugin.prismcalc",
             teamIdentifier: "N8A5T2PZY9",
+            expectedPluginVersion: .init(major: 0, minor: 1, patch: 0),
             allowedCapabilities: [.panel, .commands, .openApplication],
             allowedApplicationIdentifiers: ["com.laclairtech.prismcalc"]
         )
