@@ -15,6 +15,10 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 - Native menu bar command center and accessible main-window lifecycle scaffold.
 - Sandboxed out-of-process prismCalc plugin service that requires the exact signed host.
 - Versioned, bounded plugin wire protocol and independently authored calculator reducer.
+- Reciprocal host and plugin code-signing requirements with capability-gated handshakes.
+- Host-rendered native prismCalc panel with arithmetic, copy, and explicit open-app actions.
+- Plugin request timeout, cancellation, repeated-failure pause, and manual recovery behavior.
+- Strict lint boundaries that exclude generated build products.
 - Unit and physical-host UI launch tests.
 - Live Accessibility authorization state based on a fresh macOS trust check.
 - Stable `/Applications/prismBar.app` and exact signing identity validation before requesting Accessibility access.

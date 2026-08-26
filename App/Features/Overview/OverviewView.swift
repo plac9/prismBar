@@ -26,7 +26,7 @@ struct OverviewView: View {
                 GroupBox("Current state") {
                     LabeledContent("Accessibility", value: accessibilityLabel)
                     LabeledContent("Menu items", value: menuBarLabel)
-                    LabeledContent("Plugins", value: "prismCalc available")
+                    LabeledContent("Plugins", value: pluginLabel)
 
                     HStack {
                         if needsPermissionAction {
@@ -62,6 +62,9 @@ struct OverviewView: View {
             .frame(maxWidth: 700, alignment: .leading)
             .padding(32)
         }
+        .task {
+            model.loadPluginIfNeeded()
+        }
     }
 
     private var accessibilityLabel: String {
@@ -92,6 +95,19 @@ struct OverviewView: View {
             }
         case .unavailable:
             "Refresh needed"
+        }
+    }
+
+    private var pluginLabel: String {
+        switch model.pluginState {
+        case .idle, .loading:
+            "Checking"
+        case .ready:
+            "prismCalc ready"
+        case .unavailable:
+            "prismCalc unavailable"
+        case .disabled:
+            "prismCalc paused"
         }
     }
 }

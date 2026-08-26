@@ -2,11 +2,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import AppKit
 import Foundation
 import Observation
 import prismBarAccessibility
 import prismBarCore
 import prismBarEngine
+import prismPluginKit
 
 enum MenuBarLoadingState: Equatable {
     case waitingForPermission
@@ -21,6 +23,14 @@ enum MenuBarActionState: Equatable {
     case result(String)
 }
 
+enum PluginLoadingState: Equatable {
+    case idle
+    case loading
+    case ready
+    case unavailable
+    case disabled
+}
+
 @MainActor
 @Observable
 final class AppModel {
@@ -30,6 +40,10 @@ final class AppModel {
     private(set) var menuBarState: MenuBarLoadingState = .waitingForPermission
     private(set) var menuBarSnapshot: MenuBarSnapshot?
     private(set) var menuBarActionState: MenuBarActionState = .idle
+    private(set) var pluginState: PluginLoadingState = .idle
+    private(set) var pluginPanel: PluginPanelUpdate?
+    private(set) var pluginMessage: String?
+    private(set) var isPluginActionInProgress = false
 
     private static let requestHistoryKey = "accessibility.hasRequested"
     private let defaults: UserDefaults
@@ -37,6 +51,8 @@ final class AppModel {
     private var permissionRevision = 0
     private var topologyRevision = 0
     private let menuBarController = LiveMenuBarController()
+    private let pluginClient: PrismCalcPluginClient?
+    private var pluginRevision = 0
 
     var isMenuBarActionInProgress: Bool {
         if case .moving = menuBarActionState {
@@ -47,6 +63,7 @@ final class AppModel {
 
     private init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+        pluginClient = try? PrismCalcPluginClient()
         permissionSession = AccessibilityPermissionSession(
             evaluator: AccessibilityPermissionEvaluator(
                 expectedBundleIdentifier: "com.laclairtech.prismbar",
@@ -199,5 +216,112 @@ final class AppModel {
         await Task.detached(priority: .userInitiated) {
             SystemAccessibilityTrust.isTrusted(prompt: prompt)
         }.value
+    }
+}
+
+extension AppModel {
+    func refreshPlugin() {
+        guard let pluginClient else {
+            pluginState = .unavailable
+            pluginMessage = "The bundled plugin could not be configured."
+            return
+        }
+
+        pluginRevision += 1
+        let revision = pluginRevision
+        pluginState = .loading
+        pluginMessage = nil
+
+        Task { [weak self] in
+            do {
+                let update = try await pluginClient.loadPanel()
+                guard let self, revision == pluginRevision else { return }
+                pluginPanel = update
+                pluginState = .ready
+            } catch PluginClientError.disabledForSession {
+                guard let self, revision == pluginRevision else { return }
+                pluginState = .disabled
+                pluginMessage = "prismCalc paused after repeated failures. Retry when ready."
+            } catch {
+                guard let self, revision == pluginRevision else { return }
+                pluginState = .unavailable
+                pluginMessage = "prismCalc is temporarily unavailable."
+            }
+        }
+    }
+
+    func loadPluginIfNeeded() {
+        guard pluginState == .idle else { return }
+        refreshPlugin()
+    }
+
+    func retryPlugin() {
+        pluginClient?.retryAfterFailure()
+        refreshPlugin()
+    }
+
+    func invokePluginCommand(_ commandIdentifier: String) {
+        guard let pluginClient, !isPluginActionInProgress else { return }
+
+        pluginRevision += 1
+        let revision = pluginRevision
+        isPluginActionInProgress = true
+        pluginMessage = nil
+
+        Task { [weak self] in
+            defer {
+                if let self, revision == pluginRevision {
+                    isPluginActionInProgress = false
+                }
+            }
+            do {
+                let update = try await pluginClient.invoke(commandIdentifier)
+                guard let self, revision == pluginRevision else { return }
+                pluginPanel = update
+                pluginState = .ready
+                applyPluginMutations(update.mutations)
+            } catch PluginClientError.disabledForSession {
+                guard let self, revision == pluginRevision else { return }
+                pluginState = .disabled
+                pluginMessage = "prismCalc paused after repeated failures. Retry when ready."
+            } catch {
+                guard let self, revision == pluginRevision else { return }
+                pluginState = .unavailable
+                pluginMessage = "The command could not be completed."
+            }
+        }
+    }
+
+    private func applyPluginMutations(_ mutations: [PluginMutation]) {
+        for mutation in mutations {
+            switch mutation {
+            case let .copyText(value):
+                let pasteboard = NSPasteboard.general
+                pasteboard.clearContents()
+                if pasteboard.setString(value, forType: .string) {
+                    pluginMessage = "Result copied."
+                } else {
+                    pluginMessage = "The result could not be copied."
+                }
+            case let .openApplication(bundleIdentifier):
+                guard bundleIdentifier == "com.laclairtech.prismcalc",
+                      let applicationURL = NSWorkspace.shared.urlForApplication(
+                          withBundleIdentifier: bundleIdentifier
+                      )
+                else {
+                    pluginMessage = "prismCalc is not installed."
+                    continue
+                }
+                NSWorkspace.shared.openApplication(
+                    at: applicationURL,
+                    configuration: NSWorkspace.OpenConfiguration()
+                ) { [weak self] _, error in
+                    guard error != nil else { return }
+                    Task { @MainActor in
+                        self?.pluginMessage = "prismCalc could not be opened."
+                    }
+                }
+            }
+        }
     }
 }

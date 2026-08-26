@@ -5,14 +5,14 @@ import PackageDescription
 let package = Package(
     name: "prismBar",
     platforms: [
-        .macOS("27.0")
+        .macOS("27.0"),
     ],
     products: [
         .library(name: "prismBarCore", targets: ["prismBarCore"]),
         .library(name: "prismBarAccessibility", targets: ["prismBarAccessibility"]),
         .library(name: "prismBarEngine", targets: ["prismBarEngine"]),
         .library(name: "prismPluginKit", targets: ["prismPluginKit"]),
-        .library(name: "prismCalcPlugin", targets: ["prismCalcPlugin"])
+        .library(name: "prismCalcPlugin", targets: ["prismCalcPlugin"]),
     ],
     targets: [
         .target(name: "prismBarCore"),
@@ -48,7 +48,7 @@ let package = Package(
         .testTarget(
             name: "prismCalcPluginTests",
             dependencies: ["prismCalcPlugin"]
-        )
+        ),
     ],
     swiftLanguageModes: [.v6]
 )

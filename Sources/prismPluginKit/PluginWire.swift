@@ -19,10 +19,13 @@ public struct PluginHandshake: Equatable, Codable, Sendable {
 
 public enum PluginRequest: Equatable, Codable, Sendable {
     case handshake(PluginHandshake)
+    case panel
+    case invoke(PluginCommandInvocation)
 }
 
 public enum PluginResponse: Equatable, Codable, Sendable {
     case manifest(PluginManifest)
+    case panel(PluginPanelUpdate)
 }
 
 public enum PluginWireError: Error, Equatable, Sendable {

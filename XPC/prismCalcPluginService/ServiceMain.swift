@@ -17,8 +17,6 @@ enum prismCalcPluginServiceMain {
 }
 
 private final class ServiceDelegate: NSObject, NSXPCListenerDelegate {
-    private let service = PluginService()
-
     func listener(
         _: NSXPCListener,
         shouldAcceptNewConnection connection: NSXPCConnection
@@ -28,7 +26,7 @@ private final class ServiceDelegate: NSObject, NSXPCListenerDelegate {
             #"and certificate leaf[subject.OU] = "N8A5T2PZY9""#
         connection.setCodeSigningRequirement(hostRequirement)
         connection.exportedInterface = NSXPCInterface(with: PluginXPCServiceProtocol.self)
-        connection.exportedObject = service
+        connection.exportedObject = PluginService()
         connection.activate()
         return true
     }

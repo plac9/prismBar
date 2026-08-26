@@ -22,11 +22,7 @@ struct MainWindowView: View {
             case .menuBar:
                 MenuBarView()
             case .plugins:
-                PlaceholderDestination(
-                    title: "Plugins",
-                    message: "Bundled plugins run outside prismBar and never receive Accessibility access.",
-                    symbol: "puzzlepiece.extension"
-                )
+                PluginsView()
             case .shortcuts:
                 PlaceholderDestination(
                     title: "Shortcuts",

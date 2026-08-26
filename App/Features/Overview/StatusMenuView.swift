@@ -9,6 +9,7 @@ import SwiftUI
 struct StatusMenuView: View {
     @Environment(\.openSettings) private var openSettings
     @Environment(AppModel.self) private var model
+    @State private var isCalculatorExpanded = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -59,6 +60,17 @@ struct StatusMenuView: View {
                 }
             }
 
+            if let pluginPanel = model.pluginPanel, model.pluginState == .ready {
+                DisclosureGroup("prismCalc", isExpanded: $isCalculatorExpanded) {
+                    PluginPanelView(update: pluginPanel, compact: true)
+                        .padding(.top, 6)
+                }
+            } else if model.pluginState == .unavailable || model.pluginState == .disabled {
+                Button("Retry prismCalc", systemImage: "arrow.clockwise") {
+                    model.retryPlugin()
+                }
+            }
+
             Divider()
 
             Button("Open prismBar", systemImage: "rectangle.on.rectangle") {
@@ -79,6 +91,9 @@ struct StatusMenuView: View {
         }
         .padding(14)
         .frame(width: 280)
+        .task {
+            model.loadPluginIfNeeded()
+        }
     }
 
     private var accessibilityLabel: String {

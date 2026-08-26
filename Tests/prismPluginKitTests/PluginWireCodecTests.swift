@@ -25,4 +25,14 @@ struct PluginWireCodecTests {
             try PluginWireCodec().decode(PluginRequest.self, from: oversized)
         }
     }
+
+    @Test("round trips a bounded panel request")
+    func panelRequestRoundTrip() throws {
+        let request = PluginRequest.invoke(.init(commandIdentifier: "calculator.digit.7"))
+
+        let data = try PluginWireCodec().encode(request)
+        let decoded = try PluginWireCodec().decode(PluginRequest.self, from: data)
+
+        #expect(decoded == request)
+    }
 }

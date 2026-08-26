@@ -59,29 +59,29 @@ The project is complete only when every gate below has authoritative evidence fr
 
 - [ ] Implement a template-rendered prism status icon.
 - [ ] Ensure normal click always opens the command center.
-- [ ] Add primary section actions, current state, plugin panels, Settings, and Quit.
+- [x] Add primary section actions, current state, plugin panels, Settings, and Quit.
 - [ ] Add shortcut discovery and conflict detection.
 - [ ] Prove menu operation with no main window open.
 
 ## Phase 6: Plugin platform
 
-- [ ] Implement versioned `prismPluginKit` value and protocol contracts.
-- [ ] Implement manifest and capability validation.
-- [ ] Implement bounded declarative panel validation and native rendering.
-- [ ] Implement reciprocal XPC code-signing requirements.
-- [ ] Add sandboxed service entitlements with no network or file authority.
+- [x] Implement versioned `prismPluginKit` value and protocol contracts.
+- [x] Implement manifest and capability validation.
+- [x] Implement bounded declarative panel validation and native rendering.
+- [x] Implement reciprocal XPC code-signing requirements.
+- [x] Add sandboxed service entitlements with no network or file authority.
 - [ ] Implement health, timeout, crash-loop, disable, and recovery behavior.
 - [ ] Prove hostile descriptor, wrong signature, hang, crash, and version mismatch tests.
 
 ## Phase 7: prismCalc plugin
 
-- [ ] Write independent calculator reducer tests from the product contract.
-- [ ] Implement everyday arithmetic and deterministic decimal behavior.
-- [ ] Implement bounded local recent-result history.
-- [ ] Implement compact host-rendered calculator panel.
-- [ ] Implement copy-result and explicit open-full-prismCalc actions.
-- [ ] Prove the plugin remains useful when the full prismCalc app is absent.
-- [ ] Prove it cannot access Accessibility, network, arbitrary files, or proprietary prismCalc app storage.
+- [x] Write independent calculator reducer tests from the product contract.
+- [x] Implement everyday arithmetic and deterministic decimal behavior.
+- [x] Implement bounded local recent-result history.
+- [x] Implement compact host-rendered calculator panel.
+- [x] Implement copy-result and explicit open-full-prismCalc actions.
+- [x] Prove the plugin remains useful when the full prismCalc app is absent.
+- [x] Prove it cannot access Accessibility, network, arbitrary files, or proprietary prismCalc app storage.
 
 ## Phase 8: Complete macOS 27 experience
 

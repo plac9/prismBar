@@ -4,6 +4,7 @@
 
 import XCTest
 
+@MainActor
 final class LaunchTests: XCTestCase {
     func testMainWindowUsesExactProductName() {
         let application = XCUIApplication()
@@ -27,10 +28,37 @@ final class LaunchTests: XCTestCase {
         let application = XCUIApplication()
         application.launch()
 
-        let menuBarDestination = application.staticTexts["Menu Bar"].firstMatch
+        let menuBarDestination = sidebarCell(named: "Menu Bar", in: application)
         XCTAssertTrue(menuBarDestination.waitForExistence(timeout: 5))
         menuBarDestination.click()
 
         XCTAssertTrue(application.staticTexts["Accessibility required"].waitForExistence(timeout: 5))
+    }
+
+    func testBundledPrismCalcPluginRunsAcrossTheSignedXPCBoundary() {
+        let application = XCUIApplication()
+        application.launch()
+
+        let pluginsDestination = sidebarCell(named: "Plugins", in: application)
+        XCTAssertTrue(pluginsDestination.waitForExistence(timeout: 5))
+        pluginsDestination.click()
+
+        let panelTitle = application.staticTexts["prismCalc"]
+        XCTAssertTrue(panelTitle.waitForExistence(timeout: 7), application.debugDescription)
+
+        application.buttons["Seven"].click()
+        application.buttons["Add"].click()
+        application.buttons["Five"].click()
+        application.buttons["Equals"].click()
+
+        let result = application.staticTexts["Calculator result"]
+        XCTAssertTrue(result.waitForExistence(timeout: 3))
+        XCTAssertEqual(result.value as? String, "12")
+    }
+
+    private func sidebarCell(named name: String, in application: XCUIApplication) -> XCUIElement {
+        application.outlines["Sidebar"].cells
+            .containing(.staticText, identifier: name)
+            .element
     }
 }
