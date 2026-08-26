@@ -12,7 +12,6 @@
 		261CF815A371C909B5308412 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE01E333B738C28E2DD3D464 /* AboutView.swift */; };
 		2623DA0ED73E0705859DE3DD /* PluginClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B8C7BE0DF23129D943A0758 /* PluginClient.swift */; };
 		28CF60F875A77F50F17076A5 /* PrivacyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6BE812961FA45556F1A760 /* PrivacyView.swift */; };
-		2AEB8DD8854C420D958D679A /* PrivacyCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CB0465874724CFB886D665D /* PrivacyCopy.swift */; };
 		2BC33F74613199D3C60E4162 /* OverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33E93D3FF851F060C631EC8F /* OverviewView.swift */; };
 		33DF9EF2F689F4A077865E6E /* prismBarCore in Frameworks */ = {isa = PBXBuildFile; productRef = ACA2FF17A745D2E611D878C2 /* prismBarCore */; };
 		358D9DE052C06E98855551B9 /* prismCalcPlugin in Frameworks */ = {isa = PBXBuildFile; productRef = 331BE39DC57E5FC6C1771F43 /* prismCalcPlugin */; };
@@ -41,6 +40,7 @@
 		E40B7C773E5F51B23805FFF3 /* MenuBarItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE46BEA84E314F040D359964 /* MenuBarItemRow.swift */; };
 		E5C70F149F116D0AE30145D2 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B99796874F6C0C859873DF49 /* PrivacyInfo.xcprivacy */; };
 		E64955DB63E19420FC76CC0C /* MenuBarSectionStatusController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D8BAE01F43F46DF5610002B /* MenuBarSectionStatusController.swift */; };
+		ED364C206C4501008BF199EC /* PrivacyCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE72ACFC08C1C6F47C155D /* PrivacyCopy.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -75,8 +75,8 @@
 
 /* Begin PBXFileReference section */
 		132DB0E7D319E4672B6E1A58 /* prismBarUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = prismBarUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		0CB0465874724CFB886D665D /* PrivacyCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyCopy.swift; sourceTree = "<group>"; };
 		298F54AF53B0B08B5C294CF3 /* StatusMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusMenuView.swift; sourceTree = "<group>"; };
+		2CAE72ACFC08C1C6F47C155D /* PrivacyCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyCopy.swift; sourceTree = "<group>"; };
 		315A0592B925D2DB82D37406 /* AppLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLifecycle.swift; sourceTree = "<group>"; };
 		33E93D3FF851F060C631EC8F /* OverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewView.swift; sourceTree = "<group>"; };
 		3A6F51D219AFA0CC326CFE1F /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
@@ -253,10 +253,10 @@
 				797D62515E8C48EE5BF939F7 /* AppModel+MenuBarActions.swift */,
 				574A6994BBFD030D13E09840 /* LiveMenuBarController.swift */,
 				9D8BAE01F43F46DF5610002B /* MenuBarSectionStatusController.swift */,
-				0CB0465874724CFB886D665D /* PrivacyCopy.swift */,
 				48726DBAAF06DD0B61BFD0CE /* PluginCatalog.swift */,
 				8B8C7BE0DF23129D943A0758 /* PluginClient.swift */,
 				8FFF8A05443F8BB9B57C8CBC /* prismBarApp.swift */,
+				2CAE72ACFC08C1C6F47C155D /* PrivacyCopy.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -460,8 +460,8 @@
 				CE3C57B543CBD6AECD63561D /* PluginPanelView.swift in Sources */,
 				48F49065677526FB180F5344 /* PrismBarCommands.swift in Sources */,
 				AE30068A1AE8D0EAB237F76A /* PrismVisuals.swift in Sources */,
+				ED364C206C4501008BF199EC /* PrivacyCopy.swift in Sources */,
 				28CF60F875A77F50F17076A5 /* PrivacyView.swift in Sources */,
-				2AEB8DD8854C420D958D679A /* PrivacyCopy.swift in Sources */,
 				5BBE97F18265E328EA81844C /* SettingsRootView.swift in Sources */,
 				6A1FFD8E601EBDC2E3D3999C /* ShortcutsView.swift in Sources */,
 				774004B35A746E24A0FEBEF8 /* StatusMenuView.swift in Sources */,
