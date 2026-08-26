@@ -112,6 +112,7 @@ prismBar must provide useful menu bar control without becoming a route for infor
 - Signing credentials remain in Apple tooling or 1Password and are never printed.
 - Release builds come from a clean signed commit and generate an SBOM and checksums.
 - Binary contents, entitlements, linked libraries, and network strings are audited before notarization.
+- CI builds the unsigned Release application and rejects unexpected executables, non-system libraries, local paths, credential-shaped strings, bundle-identifier drift, or entitlement drift.
 
 ## Entitlement policy
 

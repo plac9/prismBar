@@ -41,14 +41,16 @@ derived_data_directory="${CI_DERIVED_DATA_DIR:-$repository_root/build/CI-Derived
 common_build_arguments=(
   -project prismBar.xcodeproj
   -scheme prismBar
-  -configuration Debug
   -destination 'platform=macOS,arch=arm64'
   -derivedDataPath "$derived_data_directory"
   CODE_SIGNING_ALLOWED=NO
   CODE_SIGNING_REQUIRED=NO
 )
 
-xcodebuild "${common_build_arguments[@]}" build
-xcodebuild "${common_build_arguments[@]}" analyze
+xcodebuild "${common_build_arguments[@]}" -configuration Debug build
+xcodebuild "${common_build_arguments[@]}" -configuration Debug analyze
+xcodebuild "${common_build_arguments[@]}" -configuration Release build
+./scripts/audit-release-bundle.sh \
+  "$derived_data_directory/Build/Products/Release/prismBar.app"
 
 printf 'CI verification passed without signing or publishing artifacts.\n'

@@ -103,6 +103,8 @@ The project is complete only when every gate below has authoritative evidence fr
 ## Phase 9: Security, privacy, and licensing assurance
 
 - [ ] Threat-model review against final code and entitlements.
+- [x] Declare app-local `UserDefaults` access with Apple required reason `CA92.1`.
+- [x] Audit release executables, linked libraries, local paths, credential-shaped strings, bundle identifiers, and entitlement allowlists in CI.
 - [ ] Secret and personal-information scan across Git history, source, tests, logs, build products, and symbols.
 - [ ] Dependency license inventory and SBOM.
 - [ ] Similarity audit against the frozen GPL reference.
