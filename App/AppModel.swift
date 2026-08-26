@@ -157,7 +157,9 @@ final class AppModel {
         Task { [weak self] in
             guard let self else { return }
             do {
-                let snapshot = try await menuBarController.snapshot()
+                let snapshot = try await menuBarController.snapshot(
+                    deadline: OperationDeadline(timeout: .seconds(8))
+                )
                 guard revision == topologyRevision else { return }
                 menuBarSnapshot = snapshot
                 menuBarState = .ready

@@ -259,9 +259,16 @@ struct MenuBarTopologyDiscoveryTests {
             isEnabled: true
         )
         let discovery = MenuBarTopologyDiscovery(reader: FixtureObservationReader(observations: [observation]))
+        let deadline = OperationDeadline(timeout: .seconds(1))
 
-        let first = try await discovery.snapshot(applications: [observation.owner])
-        let second = try await discovery.snapshot(applications: [observation.owner])
+        let first = try await discovery.snapshot(
+            applications: [observation.owner],
+            deadline: deadline
+        )
+        let second = try await discovery.snapshot(
+            applications: [observation.owner],
+            deadline: deadline
+        )
 
         #expect(first.generation == 1)
         #expect(second.generation == 2)
@@ -273,7 +280,10 @@ struct MenuBarTopologyDiscoveryTests {
         let reader = FixtureObservationReader(observations: [], unavailableSourceCount: 2)
         let discovery = MenuBarTopologyDiscovery(reader: reader)
 
-        let snapshot = try await discovery.snapshot(applications: [])
+        let snapshot = try await discovery.snapshot(
+            applications: [],
+            deadline: OperationDeadline(timeout: .seconds(1))
+        )
 
         #expect(snapshot.unavailableSourceCount == 2)
         #expect(!snapshot.isComplete)
@@ -284,8 +294,22 @@ struct MenuBarTopologyDiscoveryTests {
         let discovery = MenuBarTopologyDiscovery(reader: FailingObservationReader())
 
         await #expect(throws: MenuBarAuthorizationError.permissionRevoked) {
-            try await discovery.snapshot(applications: [])
+            try await discovery.snapshot(
+                applications: [],
+                deadline: OperationDeadline(timeout: .seconds(1))
+            )
         }
+    }
+
+    @Test("forwards the exact operation deadline to observation")
+    func forwardsDeadline() async throws {
+        let reader = DeadlineRecordingObservationReader()
+        let discovery = MenuBarTopologyDiscovery(reader: reader)
+        let deadline = OperationDeadline(timeout: .seconds(2))
+
+        _ = try await discovery.snapshot(applications: [], deadline: deadline)
+
+        #expect(await reader.receivedDeadline == deadline.expiresAt)
     }
 }
 
@@ -293,7 +317,10 @@ private struct FixtureObservationReader: MenuBarObservationReading {
     let observations: [MenuBarObservation]
     var unavailableSourceCount = 0
 
-    func observations(for _: [RunningApplicationDescriptor]) async throws -> MenuBarObservationBatch {
+    func observations(
+        for _: [RunningApplicationDescriptor],
+        deadline _: OperationDeadline
+    ) async throws -> MenuBarObservationBatch {
         MenuBarObservationBatch(
             observations: observations,
             unavailableSourceCount: unavailableSourceCount
@@ -302,7 +329,22 @@ private struct FixtureObservationReader: MenuBarObservationReading {
 }
 
 private struct FailingObservationReader: MenuBarObservationReading {
-    func observations(for _: [RunningApplicationDescriptor]) async throws -> MenuBarObservationBatch {
+    func observations(
+        for _: [RunningApplicationDescriptor],
+        deadline _: OperationDeadline
+    ) async throws -> MenuBarObservationBatch {
         throw MenuBarAuthorizationError.permissionRevoked
+    }
+}
+
+private actor DeadlineRecordingObservationReader: MenuBarObservationReading {
+    private(set) var receivedDeadline: ContinuousClock.Instant?
+
+    func observations(
+        for _: [RunningApplicationDescriptor],
+        deadline: OperationDeadline
+    ) -> MenuBarObservationBatch {
+        receivedDeadline = deadline.expiresAt
+        return MenuBarObservationBatch(observations: [])
     }
 }

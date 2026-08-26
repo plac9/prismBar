@@ -13,7 +13,10 @@ actor LiveMenuBarController: MenuBarSnapshotReading {
     func snapshot(deadline: OperationDeadline) async throws -> MenuBarSnapshot {
         try deadline.check()
         let applications = await RunningApplicationCatalog.current()
-        let snapshot = try await discovery.snapshot(applications: applications)
+        let snapshot = try await discovery.snapshot(
+            applications: applications,
+            deadline: deadline
+        )
         try deadline.check()
         return snapshot
     }

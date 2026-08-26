@@ -19,7 +19,9 @@ extension AppModel {
             await revealHiddenSectionForAction()
 
             do {
-                let snapshot = try await menuBarController.snapshot()
+                let snapshot = try await menuBarController.snapshot(
+                    deadline: OperationDeadline(timeout: .seconds(8))
+                )
                 guard snapshot.items.map(\.id) == displayedSnapshot.items.map(\.id) else {
                     menuBarActionState = .result(
                         "The menu bar changed before the move. Review the refreshed positions and try again."
@@ -59,7 +61,9 @@ extension AppModel {
             await revealHiddenSectionForAction()
 
             do {
-                let snapshot = try await menuBarController.snapshot()
+                let snapshot = try await menuBarController.snapshot(
+                    deadline: OperationDeadline(timeout: .seconds(8))
+                )
                 let plan = try SectionMovePlanner().plan(item: itemID, to: section, in: snapshot)
                 let outcome = await menuBarController.execute(plan)
                 menuBarActionState = .result(Self.message(for: outcome))
@@ -67,7 +71,9 @@ extension AppModel {
                 if outcome == .permissionRevoked {
                     handleAccessibilityRevocation()
                 } else if outcome == .success, wasCollapsed || section == .hidden {
-                    let observed = try? await menuBarController.snapshot()
+                    let observed = try? await menuBarController.snapshot(
+                        deadline: OperationDeadline(timeout: .seconds(8))
+                    )
                     isHiddenSectionCollapsed = MenuBarSectionStatusController.shared.setCollapsed(
                         true,
                         dividerFrame: observed?.hiddenSectionDivider?.frame
@@ -115,7 +121,9 @@ extension AppModel {
             await revealHiddenSectionForAction()
 
             do {
-                let initial = try await menuBarController.snapshot()
+                let initial = try await menuBarController.snapshot(
+                    deadline: OperationDeadline(timeout: .seconds(8))
+                )
                 let itemIDs = SectionResetPlanner().hiddenItemsToReveal(in: initial)
                 guard !itemIDs.isEmpty else {
                     menuBarActionState = .result("Every menu bar item is already visible.")
@@ -124,7 +132,9 @@ extension AppModel {
                 }
 
                 for itemID in itemIDs {
-                    let snapshot = try await menuBarController.snapshot()
+                    let snapshot = try await menuBarController.snapshot(
+                        deadline: OperationDeadline(timeout: .seconds(8))
+                    )
                     let plan = try SectionMovePlanner().plan(
                         item: itemID,
                         to: .visible,
@@ -191,7 +201,9 @@ extension AppModel {
 
     private func restoreHiddenSectionIfNeeded(_ shouldCollapse: Bool) async {
         guard shouldCollapse else { return }
-        let observed = try? await menuBarController.snapshot()
+        let observed = try? await menuBarController.snapshot(
+            deadline: OperationDeadline(timeout: .seconds(8))
+        )
         isHiddenSectionCollapsed = MenuBarSectionStatusController.shared.setCollapsed(
             true,
             dividerFrame: observed?.hiddenSectionDivider?.frame
@@ -207,7 +219,9 @@ extension AppModel {
         await revealHiddenSectionForAction()
 
         do {
-            let initialSnapshot = try await menuBarController.snapshot()
+            let initialSnapshot = try await menuBarController.snapshot(
+                deadline: OperationDeadline(timeout: .seconds(8))
+            )
             let orderedItemIDs = SectionBatchPlanner().itemIDsToMove(
                 itemIDs,
                 to: section,
@@ -254,7 +268,9 @@ extension AppModel {
     ) async throws -> (movedCount: Int, failure: MoveExecutionOutcome?) {
         var movedCount = 0
         for itemID in itemIDs {
-            let snapshot = try await menuBarController.snapshot()
+            let snapshot = try await menuBarController.snapshot(
+                deadline: OperationDeadline(timeout: .seconds(8))
+            )
             let plan = try SectionMovePlanner().plan(item: itemID, to: section, in: snapshot)
             let outcome = await menuBarController.execute(plan)
             guard outcome == .success else {
@@ -283,7 +299,9 @@ extension AppModel {
 
     private func collapseHiddenSectionIfNeeded(_ shouldCollapse: Bool) async {
         guard shouldCollapse else { return }
-        let observed = try? await menuBarController.snapshot()
+        let observed = try? await menuBarController.snapshot(
+            deadline: OperationDeadline(timeout: .seconds(8))
+        )
         isHiddenSectionCollapsed = MenuBarSectionStatusController.shared.setCollapsed(
             true,
             dividerFrame: observed?.hiddenSectionDivider?.frame

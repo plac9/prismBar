@@ -103,16 +103,22 @@ public enum RunningApplicationCatalog {
 }
 
 public actor NativeMenuBarObservationReader: MenuBarObservationReading {
-    private static let applicationTimeout: Float = 0.25
+    private static let maximumAccessibilitySlice: Duration = .milliseconds(250)
     private static let maximumTraversalDepth = 4
     private static let maximumElementsPerApplication = 256
     private static let maximumTotalObservations = 2_048
+    private let accessibility = DeadlineBoundAccessibilityClient(
+        client: SystemAccessibilityElementClient(),
+        maximumSlice: maximumAccessibilitySlice
+    )
 
     public init() {}
 
     public func observations(
-        for applications: [RunningApplicationDescriptor]
+        for applications: [RunningApplicationDescriptor],
+        deadline: OperationDeadline
     ) throws -> MenuBarObservationBatch {
+        try deadline.check()
         guard AXIsProcessTrusted() else {
             throw MenuBarAuthorizationError.permissionRevoked
         }
@@ -123,6 +129,7 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
         observations.reserveCapacity(applications.count)
 
         for (applicationIndex, application) in applications.enumerated() {
+            try deadline.check()
             guard observations.count < Self.maximumTotalObservations else {
                 unavailableSourceCount += applications.count - applicationIndex
                 break
@@ -130,7 +137,8 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
             do {
                 let applicationObservations = try readObservations(
                     for: application,
-                    surfaceResolver: surfaceResolver
+                    surfaceResolver: surfaceResolver,
+                    deadline: deadline
                 )
                 let remainingCapacity = Self.maximumTotalObservations - observations.count
                 observations.append(contentsOf: applicationObservations.prefix(remainingCapacity))
@@ -139,11 +147,16 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
                 }
             } catch MenuBarAuthorizationError.permissionRevoked {
                 throw MenuBarAuthorizationError.permissionRevoked
+            } catch is OperationDeadlineError {
+                throw OperationDeadlineError.expired
+            } catch is CancellationError {
+                throw CancellationError()
             } catch {
                 unavailableSourceCount += 1
             }
         }
 
+        try deadline.check()
         guard AXIsProcessTrusted() else {
             throw MenuBarAuthorizationError.permissionRevoked
         }
@@ -156,23 +169,16 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
 
     private func readObservations(
         for application: RunningApplicationDescriptor,
-        surfaceResolver: DisplaySurfaceResolver
+        surfaceResolver: DisplaySurfaceResolver,
+        deadline: OperationDeadline
     ) throws -> [MenuBarObservation] {
+        try deadline.check()
         let applicationElement = AXUIElementCreateApplication(application.processIdentifier)
-        let timeoutResult = AXUIElementSetMessagingTimeout(
-            applicationElement,
-            Self.applicationTimeout
-        )
-        if timeoutResult == .apiDisabled {
-            throw MenuBarAuthorizationError.permissionRevoked
-        }
-        guard timeoutResult == .success else {
-            throw MenuBarDiscoveryError.communicationFailure
-        }
 
         guard let extrasMenuBar = try optionalElementAttribute(
             kAXExtrasMenuBarAttribute as CFString,
-            from: applicationElement
+            from: applicationElement,
+            deadline: deadline
         ) else {
             return []
         }
@@ -181,23 +187,45 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
         let items = try menuBarItems(
             below: extrasMenuBar,
             depth: 0,
-            visitedElementCount: &visitedElementCount
+            visitedElementCount: &visitedElementCount,
+            deadline: deadline
         )
 
-        return items.enumerated().map { index, element in
-            let role = stringAttribute(kAXRoleAttribute as CFString, from: element)
-            let identifier = stringAttribute(kAXIdentifierAttribute as CFString, from: element)
-            let description = stringAttribute(kAXDescriptionAttribute as CFString, from: element)
-            let title = stringAttribute(kAXTitleAttribute as CFString, from: element)
+        return try items.enumerated().map { index, element in
+            try deadline.check()
+            let role = try stringAttribute(
+                kAXRoleAttribute as CFString,
+                from: element,
+                deadline: deadline
+            )
+            let identifier = try stringAttribute(
+                kAXIdentifierAttribute as CFString,
+                from: element,
+                deadline: deadline
+            )
+            let description = try stringAttribute(
+                kAXDescriptionAttribute as CFString,
+                from: element,
+                deadline: deadline
+            )
+            let title = try stringAttribute(
+                kAXTitleAttribute as CFString,
+                from: element,
+                deadline: deadline
+            )
             let stableToken = identifier ?? description ?? title ?? "\(role ?? "item"):\(index)"
-            let itemFrame = frame(of: element)
+            let itemFrame = try frame(of: element, deadline: deadline)
 
             return MenuBarObservation(
                 owner: application,
                 stableToken: stableToken,
                 displayName: description ?? title,
                 frame: itemFrame,
-                isEnabled: boolAttribute(kAXEnabledAttribute as CFString, from: element) ?? true,
+                isEnabled: try boolAttribute(
+                    kAXEnabledAttribute as CFString,
+                    from: element,
+                    deadline: deadline
+                ) ?? true,
                 surfaceToken: itemFrame.flatMap { surfaceResolver.surfaceToken(for: $0) }
             )
         }
@@ -206,8 +234,10 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
     private func menuBarItems(
         below element: AXUIElement,
         depth: Int,
-        visitedElementCount: inout Int
+        visitedElementCount: inout Int,
+        deadline: OperationDeadline
     ) throws -> [AXUIElement] {
+        try deadline.check()
         guard depth <= Self.maximumTraversalDepth,
               visitedElementCount < Self.maximumElementsPerApplication
         else {
@@ -215,26 +245,33 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
         }
 
         visitedElementCount += 1
-        if stringAttribute(kAXRoleAttribute as CFString, from: element) == kAXMenuBarItemRole as String {
+        if try stringAttribute(
+            kAXRoleAttribute as CFString,
+            from: element,
+            deadline: deadline
+        ) == kAXMenuBarItemRole as String {
             return [element]
         }
 
         guard let children = try optionalElementArrayAttribute(
             kAXChildrenAttribute as CFString,
-            from: element
+            from: element,
+            deadline: deadline
         ) else {
             return []
         }
 
         var results: [AXUIElement] = []
         for child in children {
+            try deadline.check()
             guard visitedElementCount < Self.maximumElementsPerApplication else {
                 break
             }
             try results.append(contentsOf: menuBarItems(
                 below: child,
                 depth: depth + 1,
-                visitedElementCount: &visitedElementCount
+                visitedElementCount: &visitedElementCount,
+                deadline: deadline
             ))
         }
         return results
@@ -242,9 +279,10 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
 
     private func optionalElementAttribute(
         _ attribute: CFString,
-        from element: AXUIElement
+        from element: AXUIElement,
+        deadline: OperationDeadline
     ) throws -> AXUIElement? {
-        let value = try optionalAttribute(attribute, from: element)
+        let value = try optionalAttribute(attribute, from: element, deadline: deadline)
         guard let value else { return nil }
         guard CFGetTypeID(value) == AXUIElementGetTypeID() else {
             throw MenuBarDiscoveryError.malformedAccessibilityValue
@@ -254,9 +292,10 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
 
     private func optionalElementArrayAttribute(
         _ attribute: CFString,
-        from element: AXUIElement
+        from element: AXUIElement,
+        deadline: OperationDeadline
     ) throws -> [AXUIElement]? {
-        let value = try optionalAttribute(attribute, from: element)
+        let value = try optionalAttribute(attribute, from: element, deadline: deadline)
         guard let value else { return nil }
         guard let values = value as? [CFTypeRef] else {
             throw MenuBarDiscoveryError.malformedAccessibilityValue
@@ -272,47 +311,48 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
 
     private func optionalAttribute(
         _ attribute: CFString,
-        from element: AXUIElement
+        from element: AXUIElement,
+        deadline: OperationDeadline
     ) throws -> CFTypeRef? {
-        var value: CFTypeRef?
-        let error = AXUIElementCopyAttributeValue(element, attribute, &value)
-
-        switch error {
-        case .success:
-            return value
-        case .attributeUnsupported, .noValue, .invalidUIElement:
-            return nil
-        case .apiDisabled:
-            throw MenuBarAuthorizationError.permissionRevoked
-        case .actionUnsupported, .cannotComplete, .failure, .illegalArgument, .invalidUIElementObserver,
-             .notificationAlreadyRegistered, .notificationNotRegistered,
-             .notificationUnsupported, .notEnoughPrecision, .notImplemented,
-             .parameterizedAttributeUnsupported:
-            throw MenuBarDiscoveryError.communicationFailure
-        @unknown default:
-            throw MenuBarDiscoveryError.communicationFailure
-        }
+        try accessibility.attribute(
+            attribute,
+            from: element,
+            deadline: deadline
+        )
     }
 
-    private func stringAttribute(_ attribute: CFString, from element: AXUIElement) -> String? {
-        var value: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(element, attribute, &value) == .success else {
-            return nil
-        }
+    private func stringAttribute(
+        _ attribute: CFString,
+        from element: AXUIElement,
+        deadline: OperationDeadline
+    ) throws -> String? {
+        let value = try optionalAttribute(attribute, from: element, deadline: deadline)
         return value as? String
     }
 
-    private func boolAttribute(_ attribute: CFString, from element: AXUIElement) -> Bool? {
-        var value: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(element, attribute, &value) == .success else {
-            return nil
-        }
+    private func boolAttribute(
+        _ attribute: CFString,
+        from element: AXUIElement,
+        deadline: OperationDeadline
+    ) throws -> Bool? {
+        let value = try optionalAttribute(attribute, from: element, deadline: deadline)
         return value as? Bool
     }
 
-    private func frame(of element: AXUIElement) -> MenuBarItemFrame? {
-        guard let position = pointAttribute(kAXPositionAttribute as CFString, from: element),
-              let size = sizeAttribute(kAXSizeAttribute as CFString, from: element),
+    private func frame(
+        of element: AXUIElement,
+        deadline: OperationDeadline
+    ) throws -> MenuBarItemFrame? {
+        guard let position = try pointAttribute(
+            kAXPositionAttribute as CFString,
+            from: element,
+            deadline: deadline
+        ),
+              let size = try sizeAttribute(
+                  kAXSizeAttribute as CFString,
+                  from: element,
+                  deadline: deadline
+              ),
               position.x.isFinite,
               position.y.isFinite,
               size.width.isFinite,
@@ -331,16 +371,34 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
         )
     }
 
-    private func pointAttribute(_ attribute: CFString, from element: AXUIElement) -> CGPoint? {
-        guard let value = axValueAttribute(attribute, from: element, expectedType: .cgPoint) else {
+    private func pointAttribute(
+        _ attribute: CFString,
+        from element: AXUIElement,
+        deadline: OperationDeadline
+    ) throws -> CGPoint? {
+        guard let value = try axValueAttribute(
+            attribute,
+            from: element,
+            expectedType: .cgPoint,
+            deadline: deadline
+        ) else {
             return nil
         }
         var point = CGPoint.zero
         return AXValueGetValue(value, .cgPoint, &point) ? point : nil
     }
 
-    private func sizeAttribute(_ attribute: CFString, from element: AXUIElement) -> CGSize? {
-        guard let value = axValueAttribute(attribute, from: element, expectedType: .cgSize) else {
+    private func sizeAttribute(
+        _ attribute: CFString,
+        from element: AXUIElement,
+        deadline: OperationDeadline
+    ) throws -> CGSize? {
+        guard let value = try axValueAttribute(
+            attribute,
+            from: element,
+            expectedType: .cgSize,
+            deadline: deadline
+        ) else {
             return nil
         }
         var size = CGSize.zero
@@ -350,11 +408,14 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
     private func axValueAttribute(
         _ attribute: CFString,
         from element: AXUIElement,
-        expectedType: AXValueType
-    ) -> AXValue? {
-        var value: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(element, attribute, &value) == .success,
-              let value,
+        expectedType: AXValueType,
+        deadline: OperationDeadline
+    ) throws -> AXValue? {
+        guard let value = try optionalAttribute(
+            attribute,
+            from: element,
+            deadline: deadline
+        ),
               CFGetTypeID(value) == AXValueGetTypeID()
         else {
             return nil

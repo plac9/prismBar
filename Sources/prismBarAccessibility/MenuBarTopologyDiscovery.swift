@@ -11,7 +11,8 @@ public enum MenuBarDiscoveryError: Error, Equatable, Sendable {
 
 public protocol MenuBarObservationReading: Sendable {
     func observations(
-        for applications: [RunningApplicationDescriptor]
+        for applications: [RunningApplicationDescriptor],
+        deadline: OperationDeadline
     ) async throws -> MenuBarObservationBatch
 }
 
@@ -39,9 +40,15 @@ public actor MenuBarTopologyDiscovery<Reader: MenuBarObservationReading> {
     }
 
     public func snapshot(
-        applications: [RunningApplicationDescriptor]
+        applications: [RunningApplicationDescriptor],
+        deadline: OperationDeadline
     ) async throws -> MenuBarSnapshot {
-        let batch = try await reader.observations(for: applications)
+        try deadline.check()
+        let batch = try await reader.observations(
+            for: applications,
+            deadline: deadline
+        )
+        try deadline.check()
         generation &+= 1
         return assembler.assemble(
             generation: generation,
