@@ -48,3 +48,5 @@ aggregate evidence under ignored `build/`, and keeps physical signed-app movemen
 ## Status
 
 Architecture is locked and the clean-room implementation is in progress. No release claim should be inferred until the physical macOS 27, signing, notarization, security, privacy, and accessibility gates in `docs/IMPLEMENTATION-PLAN.md` pass.
+
+Release candidates are archived with `scripts/archive-release-candidate.sh`. The separate `scripts/notarize-release-candidate.sh` accepts only a named `notarytool` Keychain profile, notarizes and staples the app, creates a signed APFS disk image, notarizes and staples that image, runs Gatekeeper and bundle audits, and writes revision-bound evidence under ignored `build/` output. Repository automation does not accept raw notarization credentials.

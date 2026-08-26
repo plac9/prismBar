@@ -129,6 +129,6 @@ The host owns a bounded build-time registry of bundled plugin registrations. Eac
 
 ## Distribution
 
-The production bundle uses Developer ID Application signing, Hardened Runtime, secure timestamps, and Apple notarization. The distribution container is a signed and notarized disk image or installer chosen after physical install testing. The product must be installed in `/Applications` before asking for Accessibility access.
+The production bundle uses Developer ID Application signing, Hardened Runtime, secure timestamps, and Apple notarization. Direct distribution uses a signed, notarized, and stapled APFS disk image containing `prismBar.app` plus an Applications-folder link. The application is notarized and stapled before the disk image is assembled, then the disk image is signed, notarized, stapled, and assessed independently. The product must be installed in `/Applications` before asking for Accessibility access.
 
 The Mac App Store is not a target because the required Accessibility behavior is incompatible with App Sandbox. This decision is reviewed if Apple provides a supported sandbox-compatible API that fulfills the complete product contract.

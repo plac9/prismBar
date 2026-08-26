@@ -15,6 +15,7 @@ done
 ./scripts/audit-tool-versions.sh
 ./scripts/audit-licensing.sh
 ./scripts/audit-public-safety.sh
+Tests/ReleaseWorkflowTests/notarization_contract.sh
 
 if [ "$(uname -m)" != "arm64" ] || [[ "$(xcrun --sdk macosx --show-sdk-version)" != 27.* ]]; then
   printf 'CI requires the Apple silicon Xcode 27 runner.\n' >&2

@@ -148,6 +148,8 @@ Every entitlement addition requires an ADR, privacy update, threat-model update,
 - host and plugins have the exact entitlement allowlists
 - deterministic hostile wire and calculator corpora remain bounded under Address Sanitizer and Thread Sanitizer
 - `codesign --verify --deep --strict`, `spctl`, notarization, and stapler validation pass
+- notarization accepts only a named Keychain credential profile; raw Apple IDs, passwords, API keys, key identifiers, and issuer values are not accepted by repository automation
+- the stapled application and stapled APFS disk image are assessed separately, and revision-bound evidence records both Apple submission identifiers and the final disk-image hash
 
 ## Residual risks
 
