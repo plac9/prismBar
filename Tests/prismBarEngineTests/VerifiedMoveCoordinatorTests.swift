@@ -4,6 +4,7 @@
 
 @testable import prismBarCore
 @testable import prismBarEngine
+import Dispatch
 import Testing
 
 @Suite("Verified menu item moves")
@@ -197,6 +198,28 @@ struct VerifiedMoveCoordinatorTests {
         #expect(await performer.executionCount == 0)
     }
 
+    @Test("does not claim a noncooperative observation stopped before it returns")
+    func waitsForNoncooperativeObservationBeforeTimeoutResult() async throws {
+        let initial = snapshot(names: ["one", "two"], generation: 1)
+        let plan = try MovePlanner().plan(item: id("two"), to: 0, in: initial)
+        let performer = RecordingMovePerformer()
+        let coordinator = VerifiedMoveCoordinator(
+            reader: NoncooperativeSnapshotReader(
+                snapshot: initial,
+                delay: .milliseconds(50)
+            ),
+            performer: performer,
+            operationTimeout: .milliseconds(5)
+        )
+        let clock = ContinuousClock()
+        let start = clock.now
+
+        #expect(await coordinator.execute(plan) == .timedOut)
+
+        #expect(start.duration(to: clock.now) >= .milliseconds(40))
+        #expect(await performer.executionCount == 0)
+    }
+
     @Test("times out stalled input without retrying or verifying")
     func timesOutStalledInput() async throws {
         let initial = snapshot(names: ["one", "two"], generation: 1)
@@ -305,6 +328,24 @@ private struct StalledSnapshotReader: MenuBarSnapshotReading {
     func snapshot(deadline: OperationDeadline) async throws -> MenuBarSnapshot {
         try await Task.sleep(for: deadline.remaining())
         throw OperationDeadlineError.expired
+    }
+}
+
+private struct NoncooperativeSnapshotReader: MenuBarSnapshotReading {
+    let snapshotValue: MenuBarSnapshot
+    let delay: DispatchTimeInterval
+
+    init(snapshot: MenuBarSnapshot, delay: DispatchTimeInterval) {
+        snapshotValue = snapshot
+        self.delay = delay
+    }
+
+    func snapshot(deadline _: OperationDeadline) async -> MenuBarSnapshot {
+        await withCheckedContinuation { continuation in
+            DispatchQueue.global().asyncAfter(deadline: .now() + delay) {
+                continuation.resume(returning: snapshotValue)
+            }
+        }
     }
 }
 
