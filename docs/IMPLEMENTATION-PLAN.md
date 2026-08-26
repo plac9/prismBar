@@ -115,7 +115,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Exercise plugin decoding and calculator commands with deterministic hostile-input corpora.
 - [x] Run static analysis plus Address Sanitizer and Thread Sanitizer across the Swift modules.
 - [x] Reconcile the current source controls against the threat model and verify reciprocal signing on the preserved Developer ID archive.
-- [ ] Run long-duration host, permission, movement, and plugin lifecycle stress tests.
+- [x] Run long-duration host, permission, movement, and plugin lifecycle stress tests. Revision `5dc0be646aff441153efeab19ed19b48eafc31f1` completed five full cycles over 1,081 seconds: 640 package tests and 70 UI tests. Physical signed-app movement remains part of Phase 10.
 - [x] Produce and inspect the required revision-bound dark HTML assurance report.
 
 ## Phase 10: Signed physical release proof
