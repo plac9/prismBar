@@ -21,8 +21,8 @@
       "layers" : [
         {
           "glass" : false,
-          "image-name" : "MeltingPrism.png",
-          "name" : "Melting prism",
+          "image-name" : "Prism.png",
+          "name" : "Optical prism",
           "position" : {
             "scale" : 1,
             "translation-in-points" : [

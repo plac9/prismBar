@@ -58,7 +58,7 @@ The project is complete only when every gate below has authoritative evidence fr
 
 ## Phase 5: Status item and daily workflow
 
-- [ ] Implement a template-rendered prism status icon.
+- [x] Implement a template-rendered prism status icon.
 - [x] Ensure normal click opens the command center and exposes its primary controls.
 - [x] Add primary section actions, current state, plugin panels, Settings, and Quit.
 - [ ] Add shortcut discovery and conflict detection.
@@ -92,7 +92,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [ ] Adopt system Liquid Glass components and remove decorative legacy styling.
 - [ ] Implement full keyboard navigation, VoiceOver, help, focus, and accessibility actions.
 - [ ] Verify light, dark, increased contrast, reduced transparency, reduced motion, and text-size variants.
-- [ ] Implement original application and template menu bar icons with no thaw imagery.
+- [x] Implement original application and template menu bar icons with no thaw imagery.
 - [ ] Generate the required HTML UI audit from exact shipping surfaces.
 
 ## Phase 9: Security, privacy, and licensing assurance
