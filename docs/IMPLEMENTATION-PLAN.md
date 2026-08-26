@@ -99,7 +99,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Verify every shipping destination remains operational in light, dark, increased contrast, reduced transparency, and reduced motion launch variants.
 - [ ] Complete physical VoiceOver, text-size, and visual accessibility verification.
 - [x] Implement original application and template menu bar icons with no thaw imagery.
-- [ ] Generate the required HTML UI audit from exact shipping surfaces.
+- [x] Generate and visually inspect the required HTML UI audit from exact shipping surfaces.
 
 ## Phase 9: Security, privacy, and licensing assurance
 
@@ -114,7 +114,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Exercise plugin decoding and calculator commands with deterministic hostile-input corpora.
 - [x] Run static analysis plus Address Sanitizer and Thread Sanitizer across the Swift modules.
 - [ ] Run long-duration host, permission, movement, and plugin lifecycle stress tests.
-- [ ] Produce the required dark HTML assurance report.
+- [x] Produce and inspect the required revision-bound dark HTML assurance report.
 
 ## Phase 10: Signed physical release proof
 
