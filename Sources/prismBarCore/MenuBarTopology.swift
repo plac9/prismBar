@@ -154,11 +154,16 @@ public struct MenuBarSnapshot: Equatable, Codable, Sendable {
     }
 
     public var surfaceIDs: [MenuBarSurfaceID] {
-        let knownSurfaceIDs = Set(
-            items.lazy.map(\.surfaceID).filter { $0 != .unknown }
-        )
-        let surfaceIDs = knownSurfaceIDs.isEmpty ? Set([.unknown]) : knownSurfaceIDs
-        return surfaceIDs.sorted { $0.rawValue < $1.rawValue }
+        var seen: Set<MenuBarSurfaceID> = []
+        let orderedSurfaceIDs: [MenuBarSurfaceID] = items.compactMap { item -> MenuBarSurfaceID? in
+            guard item.surfaceID != .unknown,
+                  seen.insert(item.surfaceID).inserted
+            else {
+                return nil
+            }
+            return item.surfaceID
+        }
+        return orderedSurfaceIDs.isEmpty ? [.unknown] : orderedSurfaceIDs
     }
 
     public func section(for itemID: MenuBarItemID) -> MenuBarSection? {

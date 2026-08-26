@@ -110,7 +110,6 @@ public struct MenuBarDragGeometry: Sendable {
 
 public enum NativeMenuBarMoveError: Error, Equatable, Sendable {
     case eventCreationFailed
-    case cancelled
 }
 
 public actor NativeMenuBarMovePerformer: MenuBarMovePerforming {
@@ -140,9 +139,7 @@ public actor NativeMenuBarMovePerformer: MenuBarMovePerforming {
         guard AXIsProcessTrusted() else {
             throw MenuBarAuthorizationError.permissionRevoked
         }
-        guard !Task.isCancelled else {
-            throw NativeMenuBarMoveError.cancelled
-        }
+        try Task.checkCancellation()
         let surfaces = await NativeMenuBarSurfaceCatalog.current()
         guard MenuBarInputSafetyValidator().allows(
             source: source,
