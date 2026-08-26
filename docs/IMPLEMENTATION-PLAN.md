@@ -102,7 +102,8 @@ The project is complete only when every gate below has authoritative evidence fr
 
 ## Phase 9: Security, privacy, and licensing assurance
 
-- [ ] Threat-model review against final code and entitlements.
+- [x] Establish a repository-grounded threat model for the runtime, entitlements, build system, and direct-distribution model.
+- [ ] Reconcile the threat model against the final shipping code and signed artifact.
 - [x] Declare app-local `UserDefaults` access with Apple required reason `CA92.1`.
 - [x] Audit release executables, linked libraries, local paths, credential-shaped strings, bundle identifiers, and entitlement allowlists in CI.
 - [x] Scan Git history, source, tests, tracked artifacts, public metadata, release products, and symbols for secrets and personal information.
