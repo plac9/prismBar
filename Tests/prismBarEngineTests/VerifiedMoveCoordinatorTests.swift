@@ -124,6 +124,69 @@ struct VerifiedMoveCoordinatorTests {
         #expect(await coordinator.execute(plan) == .permissionRevoked)
     }
 
+    @Test("reports bounded failures without retrying input")
+    func reportsBoundedFailuresWithoutRetries() async throws {
+        let initial = snapshot(names: ["one", "two"], generation: 1)
+        let plan = try MovePlanner().plan(item: id("two"), to: 0, in: initial)
+
+        let observationPerformer = RecordingMovePerformer()
+        let observationCoordinator = VerifiedMoveCoordinator(
+            reader: FailingSnapshotReader(error: VerifiedMoveError.observationFailed),
+            performer: observationPerformer
+        )
+        #expect(await observationCoordinator.execute(plan) == .observationFailed)
+        #expect(await observationPerformer.executionCount == 0)
+
+        let inputPerformer = CountingFailingMovePerformer(error: VerifiedMoveError.inputFailed)
+        let inputCoordinator = VerifiedMoveCoordinator(
+            reader: SnapshotSequenceReader(snapshots: [initial]),
+            performer: inputPerformer
+        )
+        #expect(await inputCoordinator.execute(plan) == .inputFailed)
+        #expect(await inputPerformer.executionCount == 1)
+    }
+
+    @Test("a no-op plan verifies fresh topology without producing input")
+    func verifiesNoOpWithoutInput() async throws {
+        let initial = snapshot(names: ["one", "two"], generation: 1)
+        let verified = snapshot(names: ["one", "two"], generation: 2)
+        let plan = try MovePlanner().plan(item: id("one"), to: 0, in: initial)
+        let performer = RecordingMovePerformer()
+        let coordinator = VerifiedMoveCoordinator(
+            reader: SnapshotSequenceReader(snapshots: [initial, verified]),
+            performer: performer
+        )
+
+        #expect(await coordinator.execute(plan) == .success)
+        #expect(await performer.executionCount == 0)
+    }
+
+    @Test("missing geometry never produces input")
+    func rejectsMissingGeometry() async throws {
+        let planned = snapshot(names: ["one", "two"], generation: 1)
+        let current = MenuBarSnapshot(
+            generation: 2,
+            items: planned.items.map { item in
+                MenuBarItem(
+                    id: item.id,
+                    position: item.position,
+                    isMovable: item.isMovable,
+                    displayName: item.displayName,
+                    frame: item.id == id("two") ? nil : item.frame
+                )
+            }
+        )
+        let plan = try MovePlanner().plan(item: id("two"), to: 0, in: planned)
+        let performer = RecordingMovePerformer()
+        let coordinator = VerifiedMoveCoordinator(
+            reader: SnapshotSequenceReader(snapshots: [current]),
+            performer: performer
+        )
+
+        #expect(await coordinator.execute(plan) == .itemUnavailable)
+        #expect(await performer.executionCount == 0)
+    }
+
     private func snapshot(names: [String], generation: UInt64) -> MenuBarSnapshot {
         MenuBarSnapshot(
             generation: generation,
@@ -208,6 +271,24 @@ private struct FailingMovePerformer: MenuBarMovePerforming {
         destination _: MenuBarItemFrame,
         insertionEdge _: MenuBarInsertionEdge
     ) throws {
+        throw error
+    }
+}
+
+private actor CountingFailingMovePerformer: MenuBarMovePerforming {
+    private(set) var executionCount = 0
+    let error: any Error & Sendable
+
+    init(error: any Error & Sendable) {
+        self.error = error
+    }
+
+    func move(
+        source _: MenuBarItemFrame,
+        destination _: MenuBarItemFrame,
+        insertionEdge _: MenuBarInsertionEdge
+    ) throws {
+        executionCount += 1
         throw error
     }
 }

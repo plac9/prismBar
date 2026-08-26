@@ -71,4 +71,36 @@ struct MovePlannerTests {
             try MovePlanner().plan(item: first.id, to: 1, in: snapshot)
         }
     }
+
+    @Test("preserves every item exactly once for all direct moves")
+    func exhaustiveDirectMoveInvariants() throws {
+        for itemCount in 1 ... 12 {
+            let items = (0 ..< itemCount).map { index in
+                MenuBarItem(
+                    id: .init(rawValue: "item-\(index)"),
+                    position: index,
+                    isMovable: true
+                )
+            }
+            let snapshot = MenuBarSnapshot(generation: 42, items: items)
+            let sourceOrder = items.map(\.id)
+
+            for sourceIndex in items.indices {
+                for destinationIndex in items.indices {
+                    let movingID = sourceOrder[sourceIndex]
+                    let plan = try MovePlanner().plan(
+                        item: movingID,
+                        to: destinationIndex,
+                        in: snapshot
+                    )
+
+                    #expect(plan.sourceOrder == sourceOrder)
+                    #expect(plan.expectedOrder.count == sourceOrder.count)
+                    #expect(Set(plan.expectedOrder) == Set(sourceOrder))
+                    #expect(plan.expectedOrder[destinationIndex] == movingID)
+                    #expect(plan.expectedOrder.filter { $0 == movingID }.count == 1)
+                }
+            }
+        }
+    }
 }

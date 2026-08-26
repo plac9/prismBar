@@ -43,7 +43,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Implement public Accessibility discovery behind a dedicated actor.
 - [x] Identify controllable, system-owned, unavailable, and self-owned items.
 - [x] Implement multi-display, full-screen, space, and topology-generation handling.
-- [ ] Write property tests for ordering, grouping, and plan validity.
+- [x] Write exhaustive invariant tests for ordering, grouping, and direct-move plan validity.
 - [x] Ensure production logs never include observed values.
 
 ## Phase 4: Verified actions and recovery

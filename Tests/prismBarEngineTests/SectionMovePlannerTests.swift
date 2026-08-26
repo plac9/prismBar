@@ -121,6 +121,49 @@ struct SectionMovePlannerTests {
         #expect(snapshot.section(for: MenuBarItemID(rawValue: "primary-control")) == .controller)
     }
 
+    @Test("classifies every item relative to its own display divider")
+    func exhaustiveSectionGrouping() {
+        let surfaces = [
+            MenuBarSurfaceID(rawValue: "first"),
+            MenuBarSurfaceID(rawValue: "second"),
+        ]
+
+        for dividerOffset in 0 ... 6 {
+            var items: [MenuBarItem] = []
+            for (surfaceIndex, surface) in surfaces.enumerated() {
+                for offset in 0 ... 6 {
+                    let position = offset * surfaces.count + surfaceIndex
+                    let role: MenuBarItemRole = offset == dividerOffset
+                        ? .hiddenSectionDivider
+                        : .item
+                    items.append(item(
+                        "surface-\(surfaceIndex)-item-\(offset)",
+                        position: position,
+                        role: role,
+                        surfaceID: surface
+                    ))
+                }
+            }
+
+            let snapshot = MenuBarSnapshot(generation: 1, items: items)
+            for surfaceIndex in surfaces.indices {
+                for offset in 0 ... 6 {
+                    let identifier = MenuBarItemID(
+                        rawValue: "surface-\(surfaceIndex)-item-\(offset)"
+                    )
+                    let expected: MenuBarSection = if offset < dividerOffset {
+                        .hidden
+                    } else if offset == dividerOffset {
+                        .controller
+                    } else {
+                        .visible
+                    }
+                    #expect(snapshot.section(for: identifier) == expected)
+                }
+            }
+        }
+    }
+
     private func fixtureSnapshot() -> MenuBarSnapshot {
         MenuBarSnapshot(
             generation: 1,
