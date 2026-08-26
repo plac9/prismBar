@@ -1,0 +1,9 @@
+* text=auto eol=lf
+*.swift text diff=swift
+*.pbxproj text
+*.plist text
+*.xcprivacy text
+LICENSE -whitespace
+*.png binary
+*.icns binary
+*.pdf binary
