@@ -88,6 +88,17 @@ extension AppModel {
         }
     }
 
+    func moveMenuBarItems(_ itemIDs: Set<MenuBarItemID>, to section: MenuBarSection) {
+        guard accessibilityState == .granted,
+              section != .controller,
+              !itemIDs.isEmpty
+        else { return }
+
+        Task { [weak self] in
+            await self?.performBatchMove(itemIDs, to: section)
+        }
+    }
+
     func resetMenuBar() {
         guard accessibilityState == .granted else { return }
 
@@ -168,6 +179,99 @@ extension AppModel {
     }
 
     private func restoreHiddenSectionIfNeeded(_ shouldCollapse: Bool) async {
+        guard shouldCollapse else { return }
+        let observed = try? await menuBarController.snapshot()
+        isHiddenSectionCollapsed = MenuBarSectionStatusController.shared.setCollapsed(
+            true,
+            dividerFrame: observed?.hiddenSectionDivider?.frame
+        )
+        try? await Task.sleep(for: .milliseconds(120))
+    }
+
+    private func performBatchMove(
+        _ itemIDs: Set<MenuBarItemID>,
+        to section: MenuBarSection
+    ) async {
+        let wasCollapsed = isHiddenSectionCollapsed
+        await revealHiddenSectionForAction()
+
+        do {
+            let initialSnapshot = try await menuBarController.snapshot()
+            let orderedItemIDs = SectionBatchPlanner().itemIDsToMove(
+                itemIDs,
+                to: section,
+                in: initialSnapshot
+            )
+            guard let firstItemID = orderedItemIDs.first else {
+                menuBarActionState = .result("No selected items can move to that section.")
+                await restoreHiddenSectionIfNeeded(wasCollapsed)
+                refreshMenuBar()
+                return
+            }
+
+            menuBarActionState = .moving(firstItemID)
+            let execution = try await executeBatchMoves(orderedItemIDs, to: section)
+            if let failure = execution.failure {
+                await finishFailedBatchMove(
+                    movedCount: execution.movedCount,
+                    failure: failure,
+                    wasCollapsed: wasCollapsed
+                )
+                return
+            }
+
+            menuBarActionState = .result(
+                "Batch move verified for \(execution.movedCount) item(s)."
+            )
+            await collapseHiddenSectionIfNeeded(section == .hidden || wasCollapsed)
+            refreshMenuBar()
+        } catch MenuBarAuthorizationError.permissionRevoked {
+            handleAccessibilityRevocation()
+            menuBarActionState = .result(Self.message(for: .permissionRevoked))
+            refreshMenuBar()
+        } catch {
+            menuBarActionState = .result(
+                "Batch move stopped safely because the menu bar changed. Refresh and try again."
+            )
+            await restoreHiddenSectionIfNeeded(wasCollapsed)
+            refreshMenuBar()
+        }
+    }
+
+    private func executeBatchMoves(
+        _ itemIDs: [MenuBarItemID],
+        to section: MenuBarSection
+    ) async throws -> (movedCount: Int, failure: MoveExecutionOutcome?) {
+        var movedCount = 0
+        for itemID in itemIDs {
+            let snapshot = try await menuBarController.snapshot()
+            let plan = try SectionMovePlanner().plan(item: itemID, to: section, in: snapshot)
+            let outcome = await menuBarController.execute(plan)
+            guard outcome == .success else {
+                return (movedCount, outcome)
+            }
+            movedCount += 1
+        }
+        return (movedCount, nil)
+    }
+
+    private func finishFailedBatchMove(
+        movedCount: Int,
+        failure: MoveExecutionOutcome,
+        wasCollapsed: Bool
+    ) async {
+        if failure == .permissionRevoked {
+            handleAccessibilityRevocation()
+        } else {
+            await restoreHiddenSectionIfNeeded(wasCollapsed)
+        }
+        menuBarActionState = .result(
+            "Moved \(movedCount) item(s), then stopped safely. " + Self.message(for: failure)
+        )
+        refreshMenuBar()
+    }
+
+    private func collapseHiddenSectionIfNeeded(_ shouldCollapse: Bool) async {
         guard shouldCollapse else { return }
         let observed = try? await menuBarController.snapshot()
         isHiddenSectionCollapsed = MenuBarSectionStatusController.shared.setCollapsed(

@@ -8,6 +8,7 @@ import SwiftUI
 struct MenuBarView: View {
     @Environment(AppModel.self) private var model
     @State private var isResetConfirmationPresented = false
+    @State private var selectedItemIDs: Set<MenuBarItemID> = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -19,39 +20,79 @@ struct MenuBarView: View {
             )
 
             GlassCard {
-                HStack(spacing: 10) {
-                    Button(
-                        model.isHiddenSectionCollapsed ? "Reveal Hidden Items" : "Fold Hidden Items",
-                        systemImage: model.isHiddenSectionCollapsed ? "eye" : "eye.slash"
-                    ) {
-                        model.setHiddenSectionCollapsed(!model.isHiddenSectionCollapsed)
-                    }
-                    .buttonStyle(.glassProminent)
-                    .disabled(
-                        model.accessibilityState != .granted ||
-                            model.menuBarState == .loading ||
-                            model.menuBarSnapshot?.hiddenSectionDivider == nil
-                    )
-
-                    Button("Refresh", systemImage: "arrow.clockwise") {
-                        model.refreshMenuBar()
-                    }
-                    .buttonStyle(.glass)
-                    .disabled(model.accessibilityState != .granted || model.menuBarState == .loading)
-
-                    Spacer()
-
-                    Menu {
-                        Button("Show Every Movable Item", systemImage: "arrow.uturn.backward") {
-                            isResetConfirmationPresented = true
+                VStack(spacing: 12) {
+                    HStack(spacing: 10) {
+                        Button(
+                            model.isHiddenSectionCollapsed ? "Reveal Hidden Items" : "Fold Hidden Items",
+                            systemImage: model.isHiddenSectionCollapsed ? "eye" : "eye.slash"
+                        ) {
+                            model.setHiddenSectionCollapsed(!model.isHiddenSectionCollapsed)
                         }
-                        .disabled(model.isMenuBarActionInProgress)
-                    } label: {
-                        Label("Recovery", systemImage: "lifepreserver")
+                        .buttonStyle(.glassProminent)
+                        .disabled(
+                            model.accessibilityState != .granted ||
+                                model.menuBarState == .loading ||
+                                model.menuBarSnapshot?.hiddenSectionDivider == nil
+                        )
+
+                        Button("Refresh", systemImage: "arrow.clockwise") {
+                            model.refreshMenuBar()
+                        }
+                        .buttonStyle(.glass)
+                        .disabled(
+                            model.accessibilityState != .granted ||
+                                model.menuBarState == .loading
+                        )
+
+                        Spacer()
+
+                        Menu {
+                            Button("Show Every Movable Item", systemImage: "arrow.uturn.backward") {
+                                isResetConfirmationPresented = true
+                            }
+                            .disabled(model.isMenuBarActionInProgress)
+                        } label: {
+                            Label("Recovery", systemImage: "lifepreserver")
+                        }
+                        .menuStyle(.button)
+                        .buttonStyle(.glass)
+                        .disabled(model.accessibilityState != .granted || model.menuBarState != .ready)
                     }
-                    .menuStyle(.button)
-                    .buttonStyle(.glass)
-                    .disabled(model.accessibilityState != .granted || model.menuBarState != .ready)
+
+                    Divider()
+
+                    HStack(spacing: 10) {
+                        Label(
+                            "\(selectedItemIDs.count) selected",
+                            systemImage: selectedItemIDs.isEmpty ? "checklist.unchecked" : "checklist.checked"
+                        )
+                        .font(.callout.weight(.medium))
+                        .foregroundStyle(selectedItemIDs.isEmpty ? .secondary : .primary)
+
+                        Spacer()
+
+                        Button("Hide Selected", systemImage: "eye.slash") {
+                            let selection = selectedItemIDs
+                            selectedItemIDs.removeAll()
+                            model.moveMenuBarItems(selection, to: .hidden)
+                        }
+                        .buttonStyle(.glassProminent)
+                        .disabled(!canMoveSelection(to: .hidden))
+
+                        Button("Show Selected", systemImage: "eye") {
+                            let selection = selectedItemIDs
+                            selectedItemIDs.removeAll()
+                            model.moveMenuBarItems(selection, to: .visible)
+                        }
+                        .buttonStyle(.glass)
+                        .disabled(!canMoveSelection(to: .visible))
+
+                        Button("Clear") {
+                            selectedItemIDs.removeAll()
+                        }
+                        .buttonStyle(.glass)
+                        .disabled(selectedItemIDs.isEmpty || model.isMenuBarActionInProgress)
+                    }
                 }
             }
 
@@ -73,7 +114,8 @@ struct MenuBarView: View {
                                     item: item,
                                     destinations: snapshot.movementDestinations(for: item.id),
                                     surfaceLabel: surfaceLabel(for: item, snapshot: snapshot),
-                                    section: .visible
+                                    section: .visible,
+                                    isSelected: selectionBinding(for: item.id)
                                 )
                             }
                         }
@@ -89,7 +131,8 @@ struct MenuBarView: View {
                                         item: item,
                                         destinations: snapshot.movementDestinations(for: item.id),
                                         surfaceLabel: surfaceLabel(for: item, snapshot: snapshot),
-                                        section: .hidden
+                                        section: .hidden,
+                                        isSelected: selectionBinding(for: item.id)
                                     )
                                 }
                             }
@@ -130,6 +173,13 @@ struct MenuBarView: View {
         } message: {
             Text("This preserves item order and leaves the hidden section unfolded.")
         }
+        .onChange(of: model.menuBarSnapshot?.generation) {
+            guard let snapshot = model.menuBarSnapshot else {
+                selectedItemIDs.removeAll()
+                return
+            }
+            selectedItemIDs.formIntersection(snapshot.items.map(\.id))
+        }
     }
 
     private func items(
@@ -153,6 +203,31 @@ struct MenuBarView: View {
         return "Display \(index + 1)"
     }
 
+    private func selectionBinding(for itemID: MenuBarItemID) -> Binding<Bool> {
+        Binding {
+            selectedItemIDs.contains(itemID)
+        } set: { isSelected in
+            if isSelected {
+                selectedItemIDs.insert(itemID)
+            } else {
+                selectedItemIDs.remove(itemID)
+            }
+        }
+    }
+
+    private func canMoveSelection(to section: MenuBarSection) -> Bool {
+        guard !model.isMenuBarActionInProgress,
+              let snapshot = model.menuBarSnapshot
+        else { return false }
+
+        return snapshot.items.contains { item in
+            selectedItemIDs.contains(item.id) &&
+                item.isMovable &&
+                item.availability == .controllable &&
+                snapshot.section(for: item.id) != section
+        }
+    }
+
     private var unavailableTitle: String {
         model.accessibilityState == .granted ? "Checking the menu bar" : "Accessibility required"
     }
@@ -170,23 +245,31 @@ private struct MenuBarItemRow: View {
     let destinations: [MenuBarItem]
     let surfaceLabel: String
     let section: MenuBarSection?
+    @Binding var isSelected: Bool
     @State private var destinationIndex: Int
 
     init(
         item: MenuBarItem,
         destinations: [MenuBarItem],
         surfaceLabel: String,
-        section: MenuBarSection?
+        section: MenuBarSection?,
+        isSelected: Binding<Bool>
     ) {
         self.item = item
         self.destinations = destinations
         self.surfaceLabel = surfaceLabel
         self.section = section
+        _isSelected = isSelected
         _destinationIndex = State(initialValue: item.position)
     }
 
     var body: some View {
         HStack(spacing: 14) {
+            Toggle("Select \(item.displayName)", isOn: $isSelected)
+                .labelsHidden()
+                .toggleStyle(.checkbox)
+                .disabled(!canMove)
+
             Image(systemName: ownershipSymbol)
                 .frame(width: 22)
                 .foregroundStyle(.secondary)
@@ -236,6 +319,31 @@ private struct MenuBarItemRow: View {
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .contain)
+        .accessibilityActions {
+            if canMove, section == .hidden {
+                Button("Show") {
+                    model.moveMenuBarItem(item.id, to: .visible)
+                }
+            } else if canMove, section == .visible {
+                Button("Hide") {
+                    model.moveMenuBarItem(item.id, to: .hidden)
+                }
+            }
+
+            if canMove, let firstDestination = destinations.first,
+               firstDestination.id != item.id {
+                Button("Move to First Position") {
+                    model.moveMenuBarItem(item.id, to: firstDestination.position)
+                }
+            }
+
+            if canMove, let lastDestination = destinations.last,
+               lastDestination.id != item.id {
+                Button("Move to Last Position") {
+                    model.moveMenuBarItem(item.id, to: lastDestination.position)
+                }
+            }
+        }
     }
 
     private var canMove: Bool {

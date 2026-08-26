@@ -50,6 +50,7 @@ The project is complete only when every gate below has authoritative evidence fr
 
 - [ ] Write failing tests for arbitrary-position moves, group moves, stale targets, revocation, rejection, partial movement, and timeout.
 - [x] Implement direct multi-position movement in one action.
+- [x] Implement order-preserving multi-item Hide and Show with a fresh verification for every item.
 - [x] Implement hide, show, section visibility, and reset semantics.
 - [x] Verify every operation against a fresh topology snapshot before reporting success.
 - [ ] Add equivalent keyboard and accessibility actions.
