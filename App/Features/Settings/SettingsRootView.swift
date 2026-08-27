@@ -15,10 +15,7 @@ struct SettingsRootView: View {
                 PrivacySettingsView()
             }
         }
-        .padding(12)
-        .containerBackground(for: .window) {
-            Color(nsColor: .windowBackgroundColor)
-        }
+        .padding(.top, 8)
     }
 }
 
@@ -26,64 +23,70 @@ private struct GeneralSettingsView: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            SettingsHeader(
-                title: "System access",
-                message: "One permission, checked against the current signed app every time."
-            )
-
-            ContentCard {
-                VStack(alignment: .leading, spacing: 14) {
-                    HStack(alignment: .top, spacing: 12) {
-                        Image(systemName: accessibilitySymbol)
-                            .font(.title2)
-                            .foregroundStyle(accessibilityColor)
-
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text("Accessibility")
-                                .font(.headline)
-                            Text(accessibilitySummary)
-                                .font(.callout)
-                                .foregroundStyle(.secondary)
-                        }
-
-                        Spacer()
-                    }
-
-                    HStack(spacing: 10) {
-                        if needsPermissionRequest {
-                            Button(permissionActionLabel) {
-                                model.requestAccessibility()
-                            }
-                            .buttonStyle(.glassProminent)
-                        }
-
-                        Button("Check Again", systemImage: "arrow.clockwise") {
-                            model.refreshAccessibility()
-                        }
-                        .buttonStyle(.glass)
-
-                        Spacer()
-
-                        Button("Open Workspace", systemImage: "rectangle.on.rectangle") {
-                            AppWindowController.shared.showWorkspace()
-                        }
-                        .buttonStyle(.glass)
-                    }
+        Form {
+            Section {
+                LabeledContent {
+                    Label(accessibilityTitle, systemImage: accessibilitySymbol)
+                        .foregroundStyle(accessibilityColor)
+                } label: {
+                    Text("Accessibility")
                 }
+
+                Text(accessibilitySummary)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                HStack(spacing: 10) {
+                    if needsPermissionRequest {
+                        Button(permissionActionLabel) {
+                            model.requestAccessibility()
+                        }
+                        .buttonStyle(.glassProminent)
+                    }
+
+                    Button("Check Again", systemImage: "arrow.clockwise") {
+                        model.refreshAccessibility()
+                    }
+                    .buttonStyle(.glass)
+
+                    Spacer()
+
+                    Button("Open Workspace", systemImage: "rectangle.on.rectangle") {
+                        AppWindowController.shared.showWorkspace()
+                    }
+                    .buttonStyle(.glass)
+                }
+            } header: {
+                Text("System access")
+            } footer: {
+                Text("prismBar checks the current signed app each time. Permission state is never cached as truth.")
             }
 
-            Text("prismBar does not request Screen Recording, Input Monitoring, Files and Folders, or network access.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-
-            Spacer(minLength: 0)
+            Section("Not requested") {
+                LabeledContent("Screen Recording", value: "Never")
+                LabeledContent("Input Monitoring", value: "Never")
+                LabeledContent("Files and Folders", value: "Never")
+                LabeledContent("Network Access", value: "Never")
+            }
         }
-        .padding(24)
+        .formStyle(.grouped)
+        .padding(.horizontal, 14)
+        .padding(.bottom, 14)
     }
 
     private var needsPermissionRequest: Bool {
         model.accessibilityState == .notRequested || model.accessibilityState == .denied
+    }
+
+    private var accessibilityTitle: String {
+        switch model.accessibilityState {
+        case .granted: "Ready"
+        case .requiresStableInstall: "Install required"
+        case .identityMismatch: "Identity mismatch"
+        case .notRequested: "Not requested"
+        case .denied: "Access required"
+        }
     }
 
     private var accessibilitySymbol: String {
@@ -96,22 +99,21 @@ private struct GeneralSettingsView: View {
     }
 
     private var accessibilityColor: Color {
-        model.accessibilityState == .granted ? .green : .orange
+        model.accessibilityState == .granted ? .primary : .orange
     }
 
     private var accessibilitySummary: String {
         switch model.accessibilityState {
         case .granted:
-            "Ready. prismBar can observe and move menu bar items when you ask."
+            "prismBar can observe and move menu bar items only when you ask."
         case .requiresStableInstall:
             "Install this signed build in Applications before granting access."
         case .identityMismatch:
             "The running build does not match prismBar's signed identity."
         case .notRequested:
-            "Not requested. macOS will show its standard consent prompt."
+            "macOS will show its standard consent prompt when you allow access."
         case .denied:
-            "Not granted. If prismBar is already enabled in Accessibility, remove it, " +
-                "add /Applications/prismBar.app again, then check again."
+            "If prismBar is already enabled, remove it, add /Applications/prismBar.app again, then check again."
         }
     }
 
@@ -122,58 +124,28 @@ private struct GeneralSettingsView: View {
 
 private struct PrivacySettingsView: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            SettingsHeader(
-                title: "Private by construction",
-                message: PrivacyCopy.observation
-            )
-
-            Text(PrivacyCopy.boundary)
-                .font(.callout)
-                .foregroundStyle(.secondary)
-
-            ContentCard {
-                VStack(spacing: 12) {
-                    PrivacySetting(label: "Screen capture and OCR", value: "Never", symbol: "eye.slash")
-                    Divider()
-                    PrivacySetting(label: "Analytics and telemetry", value: "None", symbol: "waveform.path")
-                    Divider()
-                    PrivacySetting(label: "Network requests", value: "None", symbol: "network.slash")
-                    Divider()
-                    PrivacySetting(label: "Plugin permissions", value: "Sandboxed", symbol: "shippingbox")
-                }
-            }
-
-            Text("Observed menu item labels remain in memory only and are never written to production logs.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-
-            Spacer(minLength: 0)
-        }
-        .padding(24)
-    }
-}
-
-private struct SettingsHeader: View {
-    let title: String
-    let message: String
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "gearshape")
-                .font(.title2.weight(.semibold))
-                .foregroundStyle(.tint)
-                .frame(width: 38, height: 38)
-                .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.title2.bold())
-                Text(message)
-                    .font(.callout)
+        Form {
+            Section {
+                Text(PrivacyCopy.observation)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(PrivacyCopy.boundary)
                     .foregroundStyle(.secondary)
-                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            } header: {
+                Text("Private by construction")
+            }
+
+            Section("Data boundary") {
+                PrivacySetting(label: "Screen capture and OCR", value: "Never", symbol: "eye.slash")
+                PrivacySetting(label: "Analytics and telemetry", value: "None", symbol: "waveform.path")
+                PrivacySetting(label: "Network requests", value: "None", symbol: "network.slash")
+                PrivacySetting(label: "Tool permissions", value: "Sandboxed", symbol: "shippingbox")
+                PrivacySetting(label: "Observed menu labels", value: "Memory only", symbol: "memorychip")
             }
         }
+        .formStyle(.grouped)
+        .padding(.horizontal, 14)
+        .padding(.bottom, 14)
     }
 }
 

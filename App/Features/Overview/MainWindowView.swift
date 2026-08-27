@@ -2,33 +2,16 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import prismBarCore
 import SwiftUI
 
 struct MainWindowView: View {
     @Environment(AppModel.self) private var model
-    @State private var selection: Destination? = .overview
+    @State private var selection: WorkspaceDestination? = .home
 
     var body: some View {
         NavigationSplitView {
-            List(selection: $selection) {
-                Section {
-                    ForEach(Destination.primary) { destination in
-                        Label(destination.title, systemImage: destination.symbol)
-                            .tag(destination)
-                            .padding(.vertical, 4)
-                    }
-                }
-
-                Section("prismBar") {
-                    ForEach(Destination.information) { destination in
-                        Label(destination.title, systemImage: destination.symbol)
-                            .tag(destination)
-                            .padding(.vertical, 4)
-                    }
-                }
-            }
-            .scrollContentBackground(.hidden)
-            .safeAreaInset(edge: .top) {
+            VStack(spacing: 0) {
                 HStack(spacing: 10) {
                     Image(systemName: "triangle")
                         .font(.title2.weight(.semibold))
@@ -37,7 +20,7 @@ struct MainWindowView: View {
                     VStack(alignment: .leading, spacing: 0) {
                         Text("prismBar")
                             .font(.headline)
-                        Text("Local menu bar control")
+                        Text("Menu bar workspace")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -45,13 +28,32 @@ struct MainWindowView: View {
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
+
+                Divider()
+
+                List(selection: $selection) {
+                    Section {
+                        ForEach(WorkspaceDestination.primary) { destination in
+                            Label(destination.title, systemImage: destination.symbol)
+                                .tag(destination)
+                                .padding(.vertical, 4)
+                        }
+                    }
+
+                    Section("Information") {
+                        ForEach(WorkspaceDestination.information) { destination in
+                            Label(destination.title, systemImage: destination.symbol)
+                                .tag(destination)
+                                .padding(.vertical, 4)
+                        }
+                    }
+                }
+                .listStyle(.sidebar)
+                .accessibilityIdentifier("workspace.sidebar")
             }
             .navigationSplitViewColumnWidth(min: 190, ideal: 220, max: 260)
         } detail: {
             detailView
-        }
-        .containerBackground(for: .window) {
-            Color(nsColor: .windowBackgroundColor)
         }
         .navigationTitle("prismBar")
         .toolbar {
@@ -75,14 +77,14 @@ struct MainWindowView: View {
 
     @ViewBuilder
     private var detailView: some View {
-        switch selection ?? .overview {
-        case .overview:
+        switch selection ?? .home {
+        case .home:
             OverviewView()
         case .menuBar:
             MenuBarView()
-        case .plugins:
+        case .tools:
             PluginsView()
-        case .shortcuts:
+        case .automation:
             ShortcutsView()
         case .privacy:
             PrivacyView()
@@ -107,42 +109,4 @@ struct MainWindowView: View {
     private var connectionColor: Color {
         model.accessibilityState == .granted ? .green : .orange
     }
-}
-
-private enum Destination: String, CaseIterable, Identifiable {
-    case overview
-    case menuBar
-    case plugins
-    case shortcuts
-    case privacy
-    case about
-
-    var id: String {
-        rawValue
-    }
-
-    var title: String {
-        switch self {
-        case .overview: "Overview"
-        case .menuBar: "Menu Bar"
-        case .plugins: "Plugins"
-        case .shortcuts: "Shortcuts"
-        case .privacy: "Privacy"
-        case .about: "About"
-        }
-    }
-
-    var symbol: String {
-        switch self {
-        case .overview: "sparkles"
-        case .menuBar: "menubar.rectangle"
-        case .plugins: "puzzlepiece.extension"
-        case .shortcuts: "keyboard"
-        case .privacy: "hand.raised"
-        case .about: "info.circle"
-        }
-    }
-
-    static let primary: [Destination] = [.overview, .menuBar, .plugins, .shortcuts]
-    static let information: [Destination] = [.privacy, .about]
 }

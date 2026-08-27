@@ -12,17 +12,16 @@ struct PluginsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 PageHeader(
-                    symbol: "puzzlepiece.extension",
-                    eyebrow: "Extensions",
-                    title: "Plugins",
-                    message: "Focused tools in isolated, signed services. Every plugin is bundled, " +
-                        "capability-checked, and rendered by prismBar."
+                    symbol: "wrench.and.screwdriver",
+                    eyebrow: "Tools",
+                    title: "Tools that stay out of your way.",
+                    message: "Enable and inspect focused utilities here, then open each tool in its own window. " +
+                        "The plugin framework keeps every tool isolated and capability-limited."
                 )
-                .accessibilityIdentifier("plugins.header.puzzlepiece.extension")
+                .accessibilityIdentifier("tools.header.wrench.and.screwdriver")
 
                 if let registration = model.bundledPluginRegistrations.first {
                     pluginCard(registration)
-                    pluginContent
                 } else {
                     ContentUnavailableView(
                         "Plugin registry unavailable",
@@ -41,85 +40,91 @@ struct PluginsView: View {
     }
 
     private func pluginCard(_ registration: BundledPluginRegistration) -> some View {
-        ContentCard {
+        GroupBox {
             VStack(alignment: .leading, spacing: 14) {
-                HStack(spacing: 12) {
-                    Image(systemName: "plus.forwardslash.minus")
-                        .font(.title2)
-                        .foregroundStyle(.tint)
-                        .frame(width: 38, height: 38)
-                        .background(.background.secondary, in: .circle)
+                toolIdentity(registration)
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(registration.displayName)
-                            .font(.headline)
-                        Text("Bundled first-party plugin  •  v\(version(registration.version))")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer()
-
-                    Toggle("Enable \(registration.displayName)", isOn: pluginEnabledBinding)
-                        .labelsHidden()
-                        .accessibilityIdentifier("plugin.enabled")
-                }
-
-                Text("Runs outside the prismBar process with no Accessibility, network, or file access. " +
-                    "Only validated panel controls and explicit local actions cross the connection.")
+                Text("prismCalc runs outside the prismBar process with no Accessibility, network, or file access. " +
+                    "Only validated controls and explicit local actions cross the connection.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
 
-                HStack(spacing: 8) {
-                    ForEach(
-                        registration.capabilities.sorted { $0.rawValue < $1.rawValue },
-                        id: \.rawValue
-                    ) { capability in
-                        capabilityBadge(capability)
-                    }
-                    Spacer()
-                    Label(pluginHealthTitle, systemImage: pluginHealthSymbol)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(pluginHealthColor)
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Plugin health: \(pluginHealthTitle)")
-                    .accessibilityIdentifier("plugin.health")
-                }
+                toolCapabilities(registration)
+
+                Divider()
+                toolActions
             }
+        } label: {
+            Text("Available tools")
+                .font(.headline)
         }
     }
 
-    @ViewBuilder
-    private var pluginContent: some View {
-        if !model.isPluginEnabled {
-            ContentUnavailableView {
-                Label("prismCalc is off", systemImage: "puzzlepiece.extension")
-            } description: {
-                Text("Enable it above when you want the calculator in prismBar.")
+    private func toolIdentity(_ registration: BundledPluginRegistration) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: "plus.forwardslash.minus")
+                .font(.title2)
+                .foregroundStyle(.tint)
+                .frame(width: 38, height: 38)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(registration.displayName)
+                    .font(.headline)
+                Text("Bundled first-party tool  •  v\(version(registration.version))")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
-            .frame(maxWidth: .infinity, minHeight: 240)
-        } else {
-            switch model.pluginState {
-            case .idle, .loading:
-                ProgressView("Connecting to prismCalc…")
-                    .controlSize(.large)
-                    .frame(maxWidth: .infinity, minHeight: 280)
-            case .ready:
-                if let update = model.pluginPanel {
-                    PluginPanelView(update: update, compact: true)
-                }
-            case .unavailable, .paused, .disabled:
-                ContentUnavailableView {
-                    Label("prismCalc unavailable", systemImage: "puzzlepiece.extension")
-                } description: {
-                    Text(model.pluginMessage ?? "The isolated plugin service did not respond.")
-                } actions: {
-                    Button("Retry", systemImage: "arrow.clockwise") {
-                        model.retryPlugin()
-                    }
-                }
-                .frame(maxWidth: .infinity, minHeight: 280)
+
+            Spacer()
+
+            Toggle("Enable \(registration.displayName)", isOn: pluginEnabledBinding)
+                .labelsHidden()
+                .accessibilityIdentifier("plugin.enabled")
+        }
+    }
+
+    private func toolCapabilities(_ registration: BundledPluginRegistration) -> some View {
+        HStack(spacing: 8) {
+            ForEach(
+                registration.capabilities.sorted { $0.rawValue < $1.rawValue },
+                id: \.rawValue
+            ) { capability in
+                capabilityBadge(capability)
             }
+            Spacer()
+            Label(pluginHealthTitle, systemImage: pluginHealthSymbol)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(pluginHealthColor)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Plugin health: \(pluginHealthTitle)")
+                .accessibilityIdentifier("plugin.health")
+        }
+    }
+
+    private var toolActions: some View {
+        HStack(spacing: 10) {
+            if model.pluginState == .unavailable || model.pluginState == .paused {
+                Button("Retry", systemImage: "arrow.clockwise") {
+                    model.retryPlugin()
+                }
+                .buttonStyle(.glass)
+            }
+
+            if let message = model.pluginMessage,
+               model.pluginState != .ready {
+                Text(message)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
+
+            Spacer()
+
+            Button("Open prismCalc", systemImage: "arrow.up.forward.app") {
+                AppWindowController.shared.showPrismCalc()
+            }
+            .buttonStyle(.glassProminent)
+            .disabled(!model.isPluginEnabled || model.pluginState != .ready)
         }
     }
 

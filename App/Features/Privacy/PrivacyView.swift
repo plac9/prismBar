@@ -16,10 +16,8 @@ struct PrivacyView: View {
                 )
                 .accessibilityIdentifier("privacy.header.hand.raised")
 
-                ContentCard {
+                GroupBox {
                     VStack(alignment: .leading, spacing: 16) {
-                        Label("One permission, one purpose", systemImage: "checkmark.shield")
-                            .font(.title2.bold())
                         Text(
                             "Permission state is rechecked live and is never stored as trusted truth. " +
                                 PrivacyCopy.observation
@@ -49,17 +47,23 @@ struct PrivacyView: View {
                             symbol: "memorychip"
                         )
                     }
+                } label: {
+                    Label("One permission, one purpose", systemImage: "checkmark.shield")
+                        .font(.headline)
                 }
 
-                HStack(alignment: .top, spacing: 16) {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Enforced boundaries")
+                        .font(.headline)
                     PrivacyPrinciple(
                         title: "No data exhaust",
                         message: "Production logs contain outcomes, never observed menu labels or screen content.",
                         symbol: "text.badge.xmark"
                     )
+                    Divider()
                     PrivacyPrinciple(
-                        title: "Isolated plugins",
-                        message: "Plugins run in sandboxed services without Accessibility, files, or network access.",
+                        title: "Isolated tools",
+                        message: "Tools run in sandboxed services without Accessibility, files, or network access.",
                         symbol: "shippingbox.and.arrow.backward"
                     )
                 }
@@ -91,18 +95,19 @@ private struct PrivacyPrinciple: View {
     let symbol: String
 
     var body: some View {
-        ContentCard {
-            VStack(alignment: .leading, spacing: 10) {
-                Image(systemName: symbol)
-                    .font(.title2)
-                    .foregroundStyle(.tint)
+        Label {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.headline)
                 Text(message)
                     .font(.callout)
                     .foregroundStyle(.secondary)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+        } icon: {
+            Image(systemName: symbol)
+                .font(.title2)
+                .foregroundStyle(.tint)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

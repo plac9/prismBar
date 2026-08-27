@@ -69,3 +69,33 @@ public enum PrismToolID: String, CaseIterable, Identifiable, Sendable {
         "prismCalc"
     }
 }
+
+public struct MenuBarObservationPresentation: Equatable, Sendable {
+    public let itemCount: Int
+    public let unavailableSourceCount: Int
+
+    public init(itemCount: Int, unavailableSourceCount: Int) {
+        self.itemCount = max(0, itemCount)
+        self.unavailableSourceCount = max(0, unavailableSourceCount)
+    }
+
+    public var isComplete: Bool {
+        unavailableSourceCount == 0
+    }
+
+    public var summary: String {
+        let items = "\(itemCount) \(itemCount == 1 ? "item" : "items")"
+        guard unavailableSourceCount > 0 else {
+            return items
+        }
+        let sources = unavailableSourceCount == 1 ? "source" : "sources"
+        return "\(items), \(unavailableSourceCount) \(sources) unavailable"
+    }
+
+    public var unavailableSourcesWarning: String? {
+        guard unavailableSourceCount > 0 else { return nil }
+        let source = unavailableSourceCount == 1 ? "source" : "sources"
+        return "\(unavailableSourceCount) menu bar \(source) did not respond. " +
+            "Visible items remain available and every move is still verified."
+    }
+}

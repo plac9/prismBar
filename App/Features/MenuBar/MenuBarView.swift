@@ -12,157 +12,31 @@ struct MenuBarView: View {
     @State private var selectedItemIDs: Set<MenuBarItemID> = []
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            PageHeader(
-                symbol: "menubar.rectangle",
-                eyebrow: "Organization",
-                title: "Menu Bar",
-                message: "Move directly to any position in a section. Every action is checked " +
-                    "against a fresh macOS topology before it is reported as complete."
+        GeometryReader { geometry in
+            VStack(alignment: .leading, spacing: 16) {
+                PageHeader(
+                    symbol: "menubar.rectangle",
+                    eyebrow: "Organization",
+                    title: "Menu Bar",
+                    message: "Move directly to any position in a section. Every action is checked " +
+                        "against a fresh macOS topology before it is reported as complete."
+                )
+                .accessibilityIdentifier("menuBar.header.menubar.rectangle")
+
+                if model.accessibilityState == .granted {
+                    menuBarControls
+                }
+
+                actionStatus
+                menuBarContent
+            }
+            .padding(28)
+            .frame(
+                width: geometry.size.width,
+                height: geometry.size.height,
+                alignment: .topLeading
             )
-            .accessibilityIdentifier("menuBar.header.menubar.rectangle")
-
-            if model.accessibilityState == .granted {
-                ContentCard {
-                    VStack(spacing: 12) {
-                        HStack(spacing: 10) {
-                            Button(
-                                model.isHiddenSectionCollapsed ? "Reveal Hidden Items" : "Fold Hidden Items",
-                                systemImage: model.isHiddenSectionCollapsed ? "eye" : "eye.slash"
-                            ) {
-                                model.setHiddenSectionCollapsed(!model.isHiddenSectionCollapsed)
-                            }
-                            .buttonStyle(.glassProminent)
-                            .disabled(
-                                model.accessibilityState != .granted ||
-                                    model.menuBarState == .loading ||
-                                    model.menuBarSnapshot?.hiddenSectionDivider == nil
-                            )
-
-                            Button("Refresh", systemImage: "arrow.clockwise") {
-                                model.refreshMenuBar()
-                            }
-                            .buttonStyle(.glass)
-                            .disabled(
-                                model.accessibilityState != .granted ||
-                                    model.menuBarState == .loading
-                            )
-
-                            Spacer()
-
-                            Menu {
-                                Button("Show Every Movable Item", systemImage: "arrow.uturn.backward") {
-                                    isResetConfirmationPresented = true
-                                }
-                                .disabled(model.isMenuBarActionInProgress)
-                            } label: {
-                                Label("Recovery", systemImage: "lifepreserver")
-                            }
-                            .menuStyle(.button)
-                            .buttonStyle(.glass)
-                            .disabled(model.accessibilityState != .granted || model.menuBarState != .ready)
-                        }
-
-                        Divider()
-
-                        HStack(spacing: 10) {
-                            Label(
-                                "\(selectedItemIDs.count) selected",
-                                systemImage: selectedItemIDs.isEmpty ? "checklist.unchecked" : "checklist.checked"
-                            )
-                            .font(.callout.weight(.medium))
-                            .foregroundStyle(selectedItemIDs.isEmpty ? .secondary : .primary)
-
-                            Spacer()
-
-                            Button("Hide Selected", systemImage: "eye.slash") {
-                                let selection = selectedItemIDs
-                                selectedItemIDs.removeAll()
-                                model.moveMenuBarItems(selection, to: .hidden)
-                            }
-                            .buttonStyle(.glassProminent)
-                            .disabled(!canMoveSelection(to: .hidden))
-
-                            Button("Show Selected", systemImage: "eye") {
-                                let selection = selectedItemIDs
-                                selectedItemIDs.removeAll()
-                                model.moveMenuBarItems(selection, to: .visible)
-                            }
-                            .buttonStyle(.glass)
-                            .disabled(!canMoveSelection(to: .visible))
-
-                            Button("Clear") {
-                                selectedItemIDs.removeAll()
-                            }
-                            .buttonStyle(.glass)
-                            .disabled(selectedItemIDs.isEmpty || model.isMenuBarActionInProgress)
-                        }
-                    }
-                }
-            }
-
-            actionStatus
-
-            VStack(alignment: .leading, spacing: 10) {
-                if let snapshot = model.menuBarSnapshot {
-                    if snapshot.unavailableSourceCount > 0 {
-                        Label(
-                            "\(snapshot.unavailableSourceCount) menu bar source(s) did not respond. " +
-                                "Visible items remain available and every move is still verified.",
-                            systemImage: "exclamationmark.triangle"
-                        )
-                        .foregroundStyle(.orange)
-                    }
-
-                    List {
-                        Section("Visible") {
-                            ForEach(items(in: .visible, snapshot: snapshot)) { item in
-                                MenuBarItemRow(
-                                    item: item,
-                                    destinations: snapshot.movementDestinations(for: item.id),
-                                    surfaceLabel: surfaceLabel(for: item, snapshot: snapshot),
-                                    section: .visible,
-                                    isSelected: selectionBinding(for: item.id)
-                                )
-                            }
-                        }
-
-                        Section("Hidden") {
-                            let hiddenItems = items(in: .hidden, snapshot: snapshot)
-                            if hiddenItems.isEmpty {
-                                Label("No hidden items", systemImage: "checkmark.circle")
-                                    .foregroundStyle(.secondary)
-                            } else {
-                                ForEach(hiddenItems) { item in
-                                    MenuBarItemRow(
-                                        item: item,
-                                        destinations: snapshot.movementDestinations(for: item.id),
-                                        surfaceLabel: surfaceLabel(for: item, snapshot: snapshot),
-                                        section: .hidden,
-                                        isSelected: selectionBinding(for: item.id)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    .listStyle(.inset)
-                    .scrollContentBackground(.hidden)
-                    .frame(minHeight: 220)
-
-                } else {
-                    Spacer(minLength: 24)
-                    ContentUnavailableView(
-                        unavailableTitle,
-                        systemImage: "menubar.rectangle",
-                        description: Text(unavailableDescription)
-                    )
-                    .frame(maxWidth: .infinity)
-                    Spacer(minLength: 24)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .topLeading)
         }
-        .padding(28)
         .confirmationDialog(
             "Show every movable menu bar item?",
             isPresented: $isResetConfirmationPresented
@@ -185,6 +59,147 @@ struct MenuBarView: View {
 }
 
 private extension MenuBarView {
+    private var menuBarControls: some View {
+        GroupBox {
+            VStack(spacing: 12) {
+                HStack(spacing: 10) {
+                    Button(
+                        model.isHiddenSectionCollapsed ? "Reveal Hidden Items" : "Fold Hidden Items",
+                        systemImage: model.isHiddenSectionCollapsed ? "eye" : "eye.slash"
+                    ) {
+                        model.setHiddenSectionCollapsed(!model.isHiddenSectionCollapsed)
+                    }
+                    .buttonStyle(.glassProminent)
+                    .disabled(
+                        model.accessibilityState != .granted ||
+                            model.menuBarState == .loading ||
+                            model.menuBarSnapshot?.hiddenSectionDivider == nil
+                    )
+
+                    Button("Refresh", systemImage: "arrow.clockwise") {
+                        model.refreshMenuBar()
+                    }
+                    .buttonStyle(.glass)
+                    .disabled(
+                        model.accessibilityState != .granted ||
+                            model.menuBarState == .loading
+                    )
+
+                    Spacer()
+
+                    Menu {
+                        Button("Show Every Movable Item", systemImage: "arrow.uturn.backward") {
+                            isResetConfirmationPresented = true
+                        }
+                        .disabled(model.isMenuBarActionInProgress)
+                    } label: {
+                        Label("Recovery", systemImage: "lifepreserver")
+                    }
+                    .menuStyle(.button)
+                    .buttonStyle(.glass)
+                    .disabled(model.accessibilityState != .granted || model.menuBarState != .ready)
+                }
+
+                Divider()
+
+                HStack(spacing: 10) {
+                    Label(
+                        "\(selectedItemIDs.count) selected",
+                        systemImage: selectedItemIDs.isEmpty ? "checklist.unchecked" : "checklist.checked"
+                    )
+                    .font(.callout.weight(.medium))
+                    .foregroundStyle(selectedItemIDs.isEmpty ? .secondary : .primary)
+
+                    Spacer()
+
+                    Button("Hide Selected", systemImage: "eye.slash") {
+                        let selection = selectedItemIDs
+                        selectedItemIDs.removeAll()
+                        model.moveMenuBarItems(selection, to: .hidden)
+                    }
+                    .buttonStyle(.glassProminent)
+                    .disabled(!canMoveSelection(to: .hidden))
+
+                    Button("Show Selected", systemImage: "eye") {
+                        let selection = selectedItemIDs
+                        selectedItemIDs.removeAll()
+                        model.moveMenuBarItems(selection, to: .visible)
+                    }
+                    .buttonStyle(.glass)
+                    .disabled(!canMoveSelection(to: .visible))
+
+                    Button("Clear") {
+                        selectedItemIDs.removeAll()
+                    }
+                    .buttonStyle(.glass)
+                    .disabled(selectedItemIDs.isEmpty || model.isMenuBarActionInProgress)
+                }
+            }
+        } label: {
+            Label("Menu bar controls", systemImage: "slider.horizontal.3")
+                .font(.headline)
+        }
+    }
+
+    @ViewBuilder
+    private var menuBarContent: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            if let snapshot = model.menuBarSnapshot {
+                if let warning = MenuBarObservationPresentation(
+                    itemCount: snapshot.items.count,
+                    unavailableSourceCount: snapshot.unavailableSourceCount
+                ).unavailableSourcesWarning {
+                    Label(
+                        warning,
+                        systemImage: "exclamationmark.triangle"
+                    )
+                    .foregroundStyle(.orange)
+                }
+
+                List {
+                    Section("Visible") {
+                        ForEach(items(in: .visible, snapshot: snapshot)) { item in
+                            MenuBarItemRow(
+                                item: item,
+                                destinations: snapshot.movementDestinations(for: item.id),
+                                surfaceLabel: surfaceLabel(for: item, snapshot: snapshot),
+                                section: .visible,
+                                isSelected: selectionBinding(for: item.id)
+                            )
+                        }
+                    }
+
+                    Section("Hidden") {
+                        let hiddenItems = items(in: .hidden, snapshot: snapshot)
+                        if hiddenItems.isEmpty {
+                            Label("No hidden items", systemImage: "checkmark.circle")
+                                .foregroundStyle(.secondary)
+                        } else {
+                            ForEach(hiddenItems) { item in
+                                MenuBarItemRow(
+                                    item: item,
+                                    destinations: snapshot.movementDestinations(for: item.id),
+                                    surfaceLabel: surfaceLabel(for: item, snapshot: snapshot),
+                                    section: .hidden,
+                                    isSelected: selectionBinding(for: item.id)
+                                )
+                            }
+                        }
+                    }
+                }
+                .listStyle(.inset)
+                .frame(minHeight: 220)
+            } else {
+                ContentUnavailableView(
+                    unavailableTitle,
+                    systemImage: "menubar.rectangle",
+                    description: Text(unavailableDescription)
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
     @ViewBuilder
     private var actionStatus: some View {
         switch model.menuBarActionState {

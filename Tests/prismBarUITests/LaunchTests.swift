@@ -11,7 +11,7 @@ final class LaunchTests: XCTestCase {
         let application = XCUIApplication()
         application.launch()
 
-        let mainWindow = application.windows.firstMatch
+        let mainWindow = application.windows["prismBar"]
         XCTAssertTrue(mainWindow.waitForExistence(timeout: 5))
         XCTAssertEqual(mainWindow.title, "prismBar")
     }
@@ -40,7 +40,7 @@ final class LaunchTests: XCTestCase {
         let application = XCUIApplication()
         application.launch()
 
-        let mainWindow = application.windows.firstMatch
+        let mainWindow = application.windows["prismBar"]
         XCTAssertTrue(mainWindow.waitForExistence(timeout: 5))
         let initialFrame = mainWindow.frame
 
@@ -55,13 +55,13 @@ final class LaunchTests: XCTestCase {
         XCTAssertEqual(mainWindow.frame.height, initialFrame.height, accuracy: 1)
     }
 
-    func testShortcutsDestinationExposesPrivacyPreservingCommands() {
+    func testAutomationDestinationExposesPrivacyPreservingCommands() {
         let application = XCUIApplication()
         application.launch()
 
-        let shortcutsDestination = sidebarCell(named: "Shortcuts", in: application)
-        XCTAssertTrue(shortcutsDestination.waitForExistence(timeout: 5))
-        shortcutsDestination.click()
+        let automationDestination = sidebarCell(named: "Automation", in: application)
+        XCTAssertTrue(automationDestination.waitForExistence(timeout: 5))
+        automationDestination.click()
 
         XCTAssertTrue(application.staticTexts["prismBar commands"].waitForExistence(timeout: 5))
         XCTAssertTrue(application.staticTexts["No global keyboard monitoring"].exists)
@@ -94,10 +94,10 @@ final class LaunchTests: XCTestCase {
         application.launch()
 
         let destinations = [
-            ("Overview", "Your menu bar, in focus."),
+            ("Home", "Your menu bar, in focus."),
             ("Menu Bar", "Accessibility required"),
-            ("Plugins", "prismCalc"),
-            ("Shortcuts", "prismBar commands"),
+            ("Tools", "prismCalc"),
+            ("Automation", "prismBar commands"),
             ("Privacy", "Your menu bar stays on your Mac."),
             ("About", "Mozilla Public License 2.0"),
         ]
@@ -125,10 +125,10 @@ final class LaunchTests: XCTestCase {
         application.launch()
 
         let destinations = [
-            ("Overview", "overview.header.sparkles"),
+            ("Home", "home.header.sparkles"),
             ("Menu Bar", "menuBar.header.menubar.rectangle"),
-            ("Plugins", "plugins.header.puzzlepiece.extension"),
-            ("Shortcuts", "shortcuts.header.keyboard"),
+            ("Tools", "tools.header.wrench.and.screwdriver"),
+            ("Automation", "automation.header.bolt.badge.clock"),
             ("Privacy", "privacy.header.hand.raised"),
             ("About", "about.header.info.circle"),
         ]
@@ -158,14 +158,14 @@ final class LaunchTests: XCTestCase {
             application.launchArguments = launchArguments
             application.launch()
 
-            let mainWindow = application.windows.firstMatch
+            let mainWindow = application.windows["prismBar"]
             XCTAssertTrue(
                 mainWindow.waitForExistence(timeout: 5),
                 "Main window unavailable for \(launchArguments)"
             )
             XCTAssertEqual(mainWindow.title, "prismBar")
 
-            for destination in ["Overview", "Menu Bar", "Plugins", "Shortcuts", "Privacy", "About"] {
+            for destination in ["Home", "Menu Bar", "Tools", "Automation", "Privacy", "About"] {
                 application.activate()
                 XCTAssertEqual(
                     application.state,
@@ -189,7 +189,7 @@ final class LaunchTests: XCTestCase {
         let application = XCUIApplication()
         application.launch()
 
-        let mainWindow = application.windows.firstMatch
+        let mainWindow = application.windows["prismBar"]
         XCTAssertTrue(mainWindow.waitForExistence(timeout: 5))
         application.typeKey("w", modifierFlags: .command)
         XCTAssertTrue(mainWindow.waitForNonExistence(timeout: 3))
@@ -200,13 +200,13 @@ final class LaunchTests: XCTestCase {
         XCTAssertEqual(mainWindow.title, "prismBar")
     }
 
-    func testBundledPrismCalcPluginRendersVerifiedWorkspaceState() {
+    func testToolsWorkspaceLaunchesPrismCalcWithoutEmbeddingCalculator() {
         let application = XCUIApplication()
         application.launch()
 
-        let pluginsDestination = sidebarCell(named: "Plugins", in: application)
-        XCTAssertTrue(pluginsDestination.waitForExistence(timeout: 5))
-        pluginsDestination.click()
+        let toolsDestination = sidebarCell(named: "Tools", in: application)
+        XCTAssertTrue(toolsDestination.waitForExistence(timeout: 5))
+        toolsDestination.click()
 
         let panelTitle = application.staticTexts["prismCalc"]
         XCTAssertTrue(panelTitle.waitForExistence(timeout: 7), application.debugDescription)
@@ -214,9 +214,15 @@ final class LaunchTests: XCTestCase {
         XCTAssertTrue(health.waitForExistence(timeout: 3))
         XCTAssertEqual(health.label, "Plugin health: Verified and ready")
 
-        let result = application.staticTexts["Calculator result"]
-        XCTAssertTrue(result.waitForExistence(timeout: 3))
-        XCTAssertEqual(result.value as? String, "0")
+        XCTAssertFalse(application.staticTexts["Calculator result"].exists)
+
+        let openTool = application.buttons["Open prismCalc"]
+        XCTAssertTrue(openTool.waitForExistence(timeout: 3))
+        openTool.click()
+
+        let utility = application.windows["prismCalc"]
+        XCTAssertTrue(utility.waitForExistence(timeout: 5), application.debugDescription)
+        XCTAssertTrue(application.staticTexts["Calculator result"].waitForExistence(timeout: 5))
     }
 
     func testHungPluginTimesOutWithoutHangingHostAndRecovers() throws {
@@ -230,17 +236,19 @@ final class LaunchTests: XCTestCase {
             _ = kill(servicePID, SIGCONT)
         }
 
-        application.buttons["Seven"].click()
-        XCTAssertTrue(application.staticTexts["prismCalc unavailable"].waitForExistence(timeout: 5))
+        let utility = application.windows["prismCalc"]
+        let workspace = application.windows["prismBar"]
+        utility.buttons["Seven"].click()
+        XCTAssertTrue(utility.staticTexts["prismCalc unavailable"].waitForExistence(timeout: 5))
         XCTAssertEqual(
-            application.descendants(matching: .any)["plugin.health"].label,
+            workspace.descendants(matching: .any)["plugin.health"].label,
             "Plugin health: Connection needs attention"
         )
         XCTAssertNotEqual(application.state, .notRunning)
 
         XCTAssertEqual(kill(servicePID, SIGCONT), 0)
-        application.buttons["Retry"].click()
-        XCTAssertTrue(application.buttons["Seven"].waitForExistence(timeout: 5))
+        utility.buttons["Retry"].click()
+        XCTAssertTrue(utility.buttons["Seven"].waitForExistence(timeout: 5))
         XCTAssertNotEqual(application.state, .notRunning)
     }
 
@@ -251,18 +259,20 @@ final class LaunchTests: XCTestCase {
 
         let servicePID = try XCTUnwrap(pluginServicePID())
         XCTAssertEqual(kill(servicePID, SIGSTOP), 0)
-        application.buttons["Seven"].click()
+        let utility = application.windows["prismCalc"]
+        let workspace = application.windows["prismBar"]
+        utility.buttons["Seven"].click()
         XCTAssertEqual(kill(servicePID, SIGKILL), 0)
 
-        XCTAssertTrue(application.staticTexts["prismCalc unavailable"].waitForExistence(timeout: 5))
+        XCTAssertTrue(utility.staticTexts["prismCalc unavailable"].waitForExistence(timeout: 5))
         XCTAssertEqual(
-            application.descendants(matching: .any)["plugin.health"].label,
+            workspace.descendants(matching: .any)["plugin.health"].label,
             "Plugin health: Connection needs attention"
         )
         XCTAssertNotEqual(application.state, .notRunning)
 
-        application.buttons["Retry"].click()
-        XCTAssertTrue(application.buttons["Seven"].waitForExistence(timeout: 8))
+        utility.buttons["Retry"].click()
+        XCTAssertTrue(utility.buttons["Seven"].waitForExistence(timeout: 8))
         XCTAssertNotEqual(application.state, .notRunning)
     }
 
@@ -270,16 +280,19 @@ final class LaunchTests: XCTestCase {
 
 @MainActor
 private func sidebarCell(named name: String, in application: XCUIApplication) -> XCUIElement {
-    application.outlines["Sidebar"].cells
+    application.descendants(matching: .any)["workspace.sidebar"].cells
         .containing(.staticText, identifier: name)
         .element
 }
 
 @MainActor
 private func openReadyPlugin(in application: XCUIApplication) throws {
-    let pluginsDestination = sidebarCell(named: "Plugins", in: application)
-    XCTAssertTrue(pluginsDestination.waitForExistence(timeout: 5))
-    pluginsDestination.click()
+    let toolsDestination = sidebarCell(named: "Tools", in: application)
+    XCTAssertTrue(toolsDestination.waitForExistence(timeout: 5))
+    toolsDestination.click()
+    let openTool = application.buttons["Open prismCalc"]
+    XCTAssertTrue(openTool.waitForExistence(timeout: 7))
+    openTool.click()
     XCTAssertTrue(application.buttons["Seven"].waitForExistence(timeout: 7))
     _ = try XCTUnwrap(pluginServicePID())
 }

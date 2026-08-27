@@ -20,73 +20,62 @@ struct AboutView: View {
                 )
                 .accessibilityIdentifier("about.header.info.circle")
 
-                ContentCard {
+                GroupBox {
                     VStack(alignment: .leading, spacing: 18) {
-                        HStack(alignment: .firstTextBaseline) {
-                            Text("Build")
-                                .font(.title2.bold())
-                            Spacer()
-                            Text(versionLabel)
-                                .font(.system(.body, design: .monospaced))
-                                .foregroundStyle(.secondary)
-                        }
-
-                        Divider()
-
+                        LabeledContent("Version", value: versionLabel)
                         LabeledContent("License", value: "Mozilla Public License 2.0")
                         LabeledContent("Platform", value: "macOS 27 on Apple silicon")
                         LabeledContent("Architecture", value: "Native Swift 6.4 and SwiftUI")
                         LabeledContent("Distribution", value: "Developer ID")
                         LabeledContent("Source revision", value: sourceRevisionLabel)
                     }
+                } label: {
+                    Text("Build")
+                        .font(.headline)
                 }
 
-                HStack(alignment: .top, spacing: 16) {
-                    ContentCard {
-                        VStack(alignment: .leading, spacing: 14) {
-                            Label {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Public source")
-                                        .font(.headline)
-                                    Text("Every MPL-covered release maps to its public source revision.")
-                                        .font(.callout)
-                                        .foregroundStyle(.secondary)
-                                }
-                            } icon: {
-                                Image(systemName: "chevron.left.forwardslash.chevron.right")
-                                    .font(.title2)
-                                    .foregroundStyle(.tint)
-                            }
-
-                            HStack {
-                                Button("View Source", systemImage: "safari") {
-                                    openURL(ProductIdentity.sourceURL(for: sourceRevision))
-                                }
-                                .accessibilityIdentifier("about.source")
-
-                                Button("View License", systemImage: "doc.text") {
-                                    isShowingLegalDocuments = true
-                                }
-                                .accessibilityIdentifier("about.license")
-                            }
-                            .buttonStyle(.bordered)
+                VStack(alignment: .leading, spacing: 16) {
+                    Label {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Public source")
+                                .font(.headline)
+                            Text("Every MPL-covered release maps to its public source revision.")
+                                .font(.callout)
+                                .foregroundStyle(.secondary)
                         }
+                    } icon: {
+                        Image(systemName: "chevron.left.forwardslash.chevron.right")
+                            .font(.title2)
+                            .foregroundStyle(.tint)
                     }
 
-                    ContentCard {
-                        Label {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Independent work")
-                                    .font(.headline)
-                                Text("Authored under a documented clean-room policy.")
-                                    .font(.callout)
-                                    .foregroundStyle(.secondary)
-                            }
-                        } icon: {
-                            Image(systemName: "checkmark.seal")
-                                .font(.title2)
-                                .foregroundStyle(.tint)
+                    HStack {
+                        Button("View Source", systemImage: "safari") {
+                            openURL(ProductIdentity.sourceURL(for: sourceRevision))
                         }
+                        .accessibilityIdentifier("about.source")
+
+                        Button("View License", systemImage: "doc.text") {
+                            isShowingLegalDocuments = true
+                        }
+                        .accessibilityIdentifier("about.license")
+                    }
+                    .buttonStyle(.glass)
+
+                    Divider()
+
+                    Label {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Independent work")
+                                .font(.headline)
+                            Text("Authored under a documented clean-room policy.")
+                                .font(.callout)
+                                .foregroundStyle(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: "checkmark.seal")
+                            .font(.title2)
+                            .foregroundStyle(.tint)
                     }
                 }
 

@@ -40,4 +40,42 @@ struct PresentationCatalogTests {
         #expect(PrismToolID.allCases == [.prismCalc])
         #expect(PrismToolID.prismCalc.displayName == "prismCalc")
     }
+
+    @Test("distinguishes observed items from unavailable sources")
+    func menuBarObservationSummary() {
+        let partial = MenuBarObservationPresentation(
+            itemCount: 18,
+            unavailableSourceCount: 25
+        )
+        let complete = MenuBarObservationPresentation(
+            itemCount: 1,
+            unavailableSourceCount: 0
+        )
+
+        #expect(partial.summary == "18 items, 25 sources unavailable")
+        #expect(partial.isComplete == false)
+        #expect(complete.summary == "1 item")
+        #expect(complete.isComplete)
+    }
+
+    @Test("pluralizes unavailable menu bar source warnings")
+    func unavailableSourceWarnings() {
+        let single = MenuBarObservationPresentation(
+            itemCount: 1,
+            unavailableSourceCount: 1
+        )
+        let multiple = MenuBarObservationPresentation(
+            itemCount: 1,
+            unavailableSourceCount: 2
+        )
+
+        #expect(
+            single.unavailableSourcesWarning ==
+                "1 menu bar source did not respond. Visible items remain available and every move is still verified."
+        )
+        #expect(
+            multiple.unavailableSourcesWarning ==
+                "2 menu bar sources did not respond. Visible items remain available and every move is still verified."
+        )
+    }
 }

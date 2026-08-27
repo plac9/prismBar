@@ -45,6 +45,24 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
+if [ "$installed_was_running" = true ]; then
+  while IFS= read -r installed_pid; do
+    kill -TERM "$installed_pid"
+  done < <(pgrep -f "^$installed_executable$")
+
+  for _ in {1..50}; do
+    if ! pgrep -f "^$installed_executable$" >/dev/null 2>&1; then
+      break
+    fi
+    sleep 0.1
+  done
+
+  if pgrep -f "^$installed_executable$" >/dev/null 2>&1; then
+    echo "Installed prismBar did not terminate before UI testing." >&2
+    exit 1
+  fi
+fi
+
 DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode-beta.app/Contents/Developer}" \
   xcodebuild \
     -project prismBar.xcodeproj \

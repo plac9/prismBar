@@ -12,20 +12,16 @@ struct ShortcutsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 PageHeader(
-                    symbol: "keyboard",
-                    eyebrow: "Commands",
-                    title: "Shortcuts",
-                    message: "Fast, discoverable controls while prismBar is frontmost. " +
-                        "Every command is also available from the menu bar popover."
+                    symbol: "bolt.badge.clock",
+                    eyebrow: "Automation",
+                    title: "Fast paths, on your terms.",
+                    message: "Use standard app commands while prismBar is frontmost. " +
+                        "No background key monitoring is required."
                 )
-                .accessibilityIdentifier("shortcuts.header.keyboard")
+                .accessibilityIdentifier("automation.header.bolt.badge.clock")
 
-                ContentCard {
+                GroupBox {
                     VStack(alignment: .leading, spacing: 0) {
-                        Label("prismBar commands", systemImage: "command")
-                            .font(.title2.bold())
-                            .padding(.bottom, 10)
-
                         ForEach(shortcuts, id: \.action) { shortcut in
                             HStack(spacing: 16) {
                                 Image(systemName: shortcut.symbol)
@@ -52,25 +48,26 @@ struct ShortcutsView: View {
                             }
                         }
                     }
+                } label: {
+                    Label("prismBar commands", systemImage: "command")
+                        .font(.headline)
                 }
 
-                ContentCard {
-                    Label {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("No global keyboard monitoring")
-                                .font(.headline)
-                            Text(
-                                "These are standard app commands. prismBar does not install a global " +
-                                    "keystroke monitor or request Input Monitoring access."
-                            )
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                        }
-                    } icon: {
-                        Image(systemName: "keyboard.badge.ellipsis")
-                            .font(.title2)
-                            .foregroundStyle(.tint)
+                Label {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("No global keyboard monitoring")
+                            .font(.headline)
+                        Text(
+                            "These are standard app commands. prismBar does not install a global " +
+                                "keystroke monitor or request Input Monitoring access."
+                        )
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
                     }
+                } icon: {
+                    Image(systemName: "keyboard.badge.ellipsis")
+                        .font(.title2)
+                        .foregroundStyle(.tint)
                 }
             }
             .frame(maxWidth: 760, alignment: .leading)
