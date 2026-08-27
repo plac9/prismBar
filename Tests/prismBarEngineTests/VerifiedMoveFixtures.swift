@@ -25,6 +25,34 @@ func snapshot(names: [String], generation: UInt64) -> MenuBarSnapshot {
     )
 }
 
+func sectionedSnapshot(
+    hiddenNames: [String],
+    visibleNames: [String],
+    generation: UInt64
+) -> MenuBarSnapshot {
+    let surfaceID = MenuBarSurfaceID(rawValue: "main")
+    let orderedNames = hiddenNames + ["divider"] + visibleNames
+    return MenuBarSnapshot(
+        generation: generation,
+        items: orderedNames.enumerated().map { index, name in
+            MenuBarItem(
+                id: id(name),
+                position: index,
+                isMovable: name != "divider",
+                displayName: name,
+                role: name == "divider" ? .hiddenSectionDivider : .item,
+                frame: MenuBarItemFrame(
+                    minX: Double(index * 30),
+                    minY: 0,
+                    width: 24,
+                    height: 24
+                ),
+                surfaceID: surfaceID
+            )
+        }
+    )
+}
+
 func id(_ value: String) -> MenuBarItemID {
     MenuBarItemID(rawValue: value)
 }

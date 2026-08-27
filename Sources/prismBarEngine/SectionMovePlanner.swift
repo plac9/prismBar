@@ -41,11 +41,14 @@ public struct SectionMovePlanner: Sendable {
         let directPlan = try MovePlanner().plan(item: itemID, to: dividerIndex, in: snapshot)
         return MovePlan(
             item: directPlan.item,
+            destinationItem: directPlan.destinationItem,
             sourceIndex: directPlan.sourceIndex,
             destinationIndex: directPlan.destinationIndex,
             snapshotGeneration: directPlan.snapshotGeneration,
             sourceOrder: directPlan.sourceOrder,
             expectedOrder: directPlan.expectedOrder,
+            sourceScopeOrder: directPlan.sourceScopeOrder,
+            expectedScopeOrder: directPlan.expectedScopeOrder,
             verificationSection: section
         )
     }

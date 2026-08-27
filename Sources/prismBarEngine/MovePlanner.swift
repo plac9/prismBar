@@ -6,30 +6,63 @@ import prismBarCore
 
 public struct MovePlan: Equatable, Sendable {
     public let item: MenuBarItemID
+    public let destinationItem: MenuBarItemID
     public let sourceIndex: Int
     public let destinationIndex: Int
     public let snapshotGeneration: UInt64
     public let sourceOrder: [MenuBarItemID]
     public let expectedOrder: [MenuBarItemID]
+    public let sourceScopeOrder: [MenuBarItemID]
+    public let expectedScopeOrder: [MenuBarItemID]
     public let verificationSection: MenuBarSection?
 
     public init(
         item: MenuBarItemID,
+        destinationItem: MenuBarItemID,
         sourceIndex: Int,
         destinationIndex: Int,
         snapshotGeneration: UInt64,
         sourceOrder: [MenuBarItemID],
         expectedOrder: [MenuBarItemID],
+        sourceScopeOrder: [MenuBarItemID],
+        expectedScopeOrder: [MenuBarItemID],
         verificationSection: MenuBarSection? = nil
     ) {
         self.item = item
+        self.destinationItem = destinationItem
         self.sourceIndex = sourceIndex
         self.destinationIndex = destinationIndex
         self.snapshotGeneration = snapshotGeneration
         self.sourceOrder = sourceOrder
         self.expectedOrder = expectedOrder
+        self.sourceScopeOrder = sourceScopeOrder
+        self.expectedScopeOrder = expectedScopeOrder
         self.verificationSection = verificationSection
     }
+}
+
+func moveScopeOrder(
+    item itemID: MenuBarItemID,
+    destination destinationID: MenuBarItemID,
+    in snapshot: MenuBarSnapshot
+) -> [MenuBarItemID]? {
+    guard let sourceItem = snapshot.items.first(where: { $0.id == itemID }),
+          let destinationItem = snapshot.items.first(where: { $0.id == destinationID }),
+          sourceItem.surfaceID == destinationItem.surfaceID
+    else {
+        return nil
+    }
+
+    if let sourceSection = snapshot.section(for: itemID),
+       let destinationSection = snapshot.section(for: destinationID),
+       sourceSection == destinationSection,
+       sourceSection != .controller {
+        return snapshot.movementDestinations(for: itemID).map(\.id)
+    }
+
+    return snapshot.items
+        .filter { $0.surfaceID == sourceItem.surfaceID }
+        .map(\.id)
 }
 
 public enum MovePlanningError: Error, Equatable, Sendable {
@@ -62,17 +95,36 @@ public struct MovePlanner: Sendable {
             throw MovePlanningError.differentSurface
         }
 
-        var expectedOrder = snapshot.items.map(\.id)
+        let destinationItem = snapshot.items[destinationIndex].id
+        let sourceOrder = snapshot.items.map(\.id)
+        var expectedOrder = sourceOrder
         let movingItem = expectedOrder.remove(at: sourceIndex)
         expectedOrder.insert(movingItem, at: destinationIndex)
 
+        guard let sourceScopeOrder = moveScopeOrder(
+            item: itemID,
+            destination: destinationItem,
+            in: snapshot
+        ),
+        let sourceScopeIndex = sourceScopeOrder.firstIndex(of: itemID),
+        let destinationScopeIndex = sourceScopeOrder.firstIndex(of: destinationItem)
+        else {
+            throw MovePlanningError.differentSurface
+        }
+        var expectedScopeOrder = sourceScopeOrder
+        let scopedMovingItem = expectedScopeOrder.remove(at: sourceScopeIndex)
+        expectedScopeOrder.insert(scopedMovingItem, at: destinationScopeIndex)
+
         return MovePlan(
             item: itemID,
+            destinationItem: destinationItem,
             sourceIndex: sourceIndex,
             destinationIndex: destinationIndex,
             snapshotGeneration: snapshot.generation,
-            sourceOrder: snapshot.items.map(\.id),
+            sourceOrder: sourceOrder,
             expectedOrder: expectedOrder,
+            sourceScopeOrder: sourceScopeOrder,
+            expectedScopeOrder: expectedScopeOrder,
             verificationSection: nil
         )
     }

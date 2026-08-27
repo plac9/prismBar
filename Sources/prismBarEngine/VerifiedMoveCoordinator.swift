@@ -75,21 +75,29 @@ public actor VerifiedMoveCoordinator<
             return VerifiedMoveResult(outcome: outcome)
         }
 
-        guard current.items.map(\.id) == plan.sourceOrder else {
+        guard moveScopeOrder(
+            item: plan.item,
+            destination: plan.destinationItem,
+            in: current
+        ) == plan.sourceScopeOrder else {
             return VerifiedMoveResult(outcome: .topologyChanged)
         }
         guard let sourceItem = current.items.first(where: { $0.id == plan.item }),
-              current.items.indices.contains(plan.destinationIndex),
+              let sourceIndex = current.items.firstIndex(where: { $0.id == plan.item }),
+              let destinationIndex = current.items.firstIndex(where: {
+                  $0.id == plan.destinationItem
+              }),
               let sourceFrame = sourceItem.frame,
-              let destinationFrame = current.items[plan.destinationIndex].frame
+              let destinationFrame = current.items[destinationIndex].frame
         else {
             return VerifiedMoveResult(outcome: .itemUnavailable)
         }
 
-        if plan.sourceIndex != plan.destinationIndex {
+        if plan.item != plan.destinationItem {
             let inputDeadline = OperationDeadline(timeout: operationTimeout)
             if let failure = await performMove(
-                plan: plan,
+                sourceIndex: sourceIndex,
+                destinationIndex: destinationIndex,
                 sourceFrame: sourceFrame,
                 destinationFrame: destinationFrame,
                 deadline: inputDeadline
@@ -162,13 +170,14 @@ public actor VerifiedMoveCoordinator<
     }
 
     private func performMove(
-        plan: MovePlan,
+        sourceIndex: Int,
+        destinationIndex: Int,
         sourceFrame: MenuBarItemFrame,
         destinationFrame: MenuBarItemFrame,
         deadline: OperationDeadline
     ) async -> MoveExecutionOutcome? {
         let insertionEdge: MenuBarInsertionEdge =
-            plan.sourceIndex < plan.destinationIndex ? .after : .before
+            sourceIndex < destinationIndex ? .after : .before
         do {
             try deadline.check()
             try await performer.move(
@@ -200,8 +209,18 @@ public actor VerifiedMoveCoordinator<
            observed.section(for: plan.item) == verificationSection {
             return .success
         }
-        if observed.items.map(\.id) == plan.expectedOrder {
+        if moveScopeOrder(
+            item: plan.item,
+            destination: plan.destinationItem,
+            in: observed
+        ) == plan.expectedScopeOrder {
             return .success
+        }
+        if let section = observed.section(for: plan.item),
+           section != .controller,
+           let observedIndex = observed.movementDestinations(for: plan.item)
+               .firstIndex(where: { $0.id == plan.item }) {
+            return .partial(observedIndex: observedIndex)
         }
         if let observedIndex = observed.items.firstIndex(where: { $0.id == plan.item }) {
             return .partial(observedIndex: observedIndex)
