@@ -100,6 +100,17 @@ struct MenuBarEventTimingTests {
 
         #expect(event.timestamp == 42)
     }
+
+    @Test("creates input from the active login session state")
+    func usesCombinedSessionEventState() throws {
+        let source = try #require(MenuBarEventSourceFactory().make())
+        let event = try #require(CGEvent(source: source))
+
+        #expect(
+            event.getIntegerValueField(.eventSourceStateID) ==
+                Int64(CGEventSourceStateID.combinedSessionState.rawValue)
+        )
+    }
 }
 
 @Suite("Menu bar input safety")

@@ -29,6 +29,12 @@ struct MenuBarEventTimestampRefresher: Sendable {
     }
 }
 
+struct MenuBarEventSourceFactory: Sendable {
+    func make() -> CGEventSource? {
+        CGEventSource(stateID: .combinedSessionState)
+    }
+}
+
 struct MenuBarInputSurface: Equatable, Sendable {
     let frame: MenuBarItemFrame
     let reservedMenuBarHeight: Double
@@ -198,7 +204,7 @@ public actor NativeMenuBarMovePerformer: MenuBarMovePerforming {
     }
 
     private func prepare(gesture: MenuBarDragGesture) throws -> PreparedDrag {
-        guard let eventSource = CGEventSource(stateID: .hidSystemState),
+        guard let eventSource = MenuBarEventSourceFactory().make(),
               let currentPointer = CGEvent(source: nil)?.location,
               let mouseEvents = mouseEvents(
                   source: eventSource,
