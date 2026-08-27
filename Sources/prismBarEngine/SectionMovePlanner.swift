@@ -38,6 +38,15 @@ public struct SectionMovePlanner: Sendable {
         guard currentSection != section else {
             throw SectionMovePlanningError.alreadyInSection(section)
         }
-        return try MovePlanner().plan(item: itemID, to: dividerIndex, in: snapshot)
+        let directPlan = try MovePlanner().plan(item: itemID, to: dividerIndex, in: snapshot)
+        return MovePlan(
+            item: directPlan.item,
+            sourceIndex: directPlan.sourceIndex,
+            destinationIndex: directPlan.destinationIndex,
+            snapshotGeneration: directPlan.snapshotGeneration,
+            sourceOrder: directPlan.sourceOrder,
+            expectedOrder: directPlan.expectedOrder,
+            verificationSection: section
+        )
     }
 }

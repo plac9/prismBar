@@ -11,6 +11,25 @@ public struct MovePlan: Equatable, Sendable {
     public let snapshotGeneration: UInt64
     public let sourceOrder: [MenuBarItemID]
     public let expectedOrder: [MenuBarItemID]
+    public let verificationSection: MenuBarSection?
+
+    public init(
+        item: MenuBarItemID,
+        sourceIndex: Int,
+        destinationIndex: Int,
+        snapshotGeneration: UInt64,
+        sourceOrder: [MenuBarItemID],
+        expectedOrder: [MenuBarItemID],
+        verificationSection: MenuBarSection? = nil
+    ) {
+        self.item = item
+        self.sourceIndex = sourceIndex
+        self.destinationIndex = destinationIndex
+        self.snapshotGeneration = snapshotGeneration
+        self.sourceOrder = sourceOrder
+        self.expectedOrder = expectedOrder
+        self.verificationSection = verificationSection
+    }
 }
 
 public enum MovePlanningError: Error, Equatable, Sendable {
@@ -53,7 +72,8 @@ public struct MovePlanner: Sendable {
             destinationIndex: destinationIndex,
             snapshotGeneration: snapshot.generation,
             sourceOrder: snapshot.items.map(\.id),
-            expectedOrder: expectedOrder
+            expectedOrder: expectedOrder,
+            verificationSection: nil
         )
     }
 }

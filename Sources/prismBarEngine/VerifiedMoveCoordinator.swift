@@ -194,6 +194,10 @@ public actor VerifiedMoveCoordinator<
         for plan: MovePlan,
         observed: MenuBarSnapshot
     ) -> MoveExecutionOutcome {
+        if let verificationSection = plan.verificationSection,
+           observed.section(for: plan.item) == verificationSection {
+            return .success
+        }
         if observed.items.map(\.id) == plan.expectedOrder {
             return .success
         }
