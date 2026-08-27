@@ -45,7 +45,8 @@ trap cleanup EXIT INT TERM
 
 while [ "$(date '+%s')" -lt "$deadline_epoch" ]; do
   swift test --scratch-path "$stress_scratch/SwiftPM"
-  UI_DERIVED_DATA_DIR="$stress_scratch/UI-DerivedData" \
+  PRISM_SOURCE_REVISION="$revision" \
+    UI_DERIVED_DATA_DIR="$stress_scratch/UI-DerivedData" \
     ./scripts/test-ui.sh
   cycles="$((cycles + 1))"
 done

@@ -75,6 +75,16 @@ for required in \
   }
 done
 
+for required in \
+  'git status --porcelain=v1' \
+  'PRISM_SOURCE_REVISION="$revision"' \
+  'build/stress'; do
+  rg -Fq -- "$required" scripts/stress-verify.sh || {
+    printf 'Assurance contract failed: stress evidence is missing %s.\n' "$required" >&2
+    exit 1
+  }
+done
+
 if rg -n 'Final clean-revision gate pending|Owner-gated release work' \
     docs/assurance-report.template.html; then
   printf 'Assurance contract failed: static release claims remain in the report template.\n' >&2
