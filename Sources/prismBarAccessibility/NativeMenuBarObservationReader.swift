@@ -32,13 +32,9 @@ public enum RunningApplicationCatalog {
 }
 
 public actor NativeMenuBarObservationReader: MenuBarObservationReading {
-    private static let maximumAccessibilitySlice: Duration = .milliseconds(250)
-    private static let maximumTraversalDepth = 4
-    private static let maximumElementsPerApplication = 256
-    private static let maximumTotalObservations = 2_048
-    private let accessibility = DeadlineBoundAccessibilityClient(
-        client: SystemAccessibilityElementClient(),
-        maximumSlice: maximumAccessibilitySlice
+    private let reader = ConcurrentMenuBarObservationReader(
+        sourceReader: NativeApplicationObservationReader(),
+        maximumConcurrentSources: 8
     )
 
     public init() {}
@@ -46,53 +42,46 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
     public func observations(
         for applications: [RunningApplicationDescriptor],
         deadline: OperationDeadline
-    ) throws -> MenuBarObservationBatch {
+    ) async throws -> MenuBarObservationBatch {
         try deadline.check()
         guard AXIsProcessTrusted() else {
             throw MenuBarAuthorizationError.permissionRevoked
         }
 
-        var observations: [MenuBarObservation] = []
-        var unavailableSourceCount = 0
-        let surfaceResolver = ActiveDisplaySurfaceCatalog.current()
-        observations.reserveCapacity(applications.count)
-
-        for (applicationIndex, application) in applications.enumerated() {
-            try deadline.check()
-            guard observations.count < Self.maximumTotalObservations else {
-                unavailableSourceCount += applications.count - applicationIndex
-                break
-            }
-            do {
-                let applicationObservations = try readObservations(
-                    for: application,
-                    surfaceResolver: surfaceResolver,
-                    deadline: deadline
-                )
-                let remainingCapacity = Self.maximumTotalObservations - observations.count
-                observations.append(contentsOf: applicationObservations.prefix(remainingCapacity))
-                if applicationObservations.count > remainingCapacity {
-                    unavailableSourceCount += 1
-                }
-            } catch MenuBarAuthorizationError.permissionRevoked {
-                throw MenuBarAuthorizationError.permissionRevoked
-            } catch is OperationDeadlineError {
-                throw OperationDeadlineError.expired
-            } catch is CancellationError {
-                throw CancellationError()
-            } catch {
-                unavailableSourceCount += 1
-            }
-        }
+        let batch = try await reader.observations(
+            for: applications,
+            deadline: deadline
+        )
 
         try deadline.check()
         guard AXIsProcessTrusted() else {
             throw MenuBarAuthorizationError.permissionRevoked
         }
 
-        return MenuBarObservationBatch(
-            observations: observations,
-            unavailableSourceCount: unavailableSourceCount
+        return batch
+    }
+}
+
+private struct NativeApplicationObservationReader:
+    MenuBarApplicationObservationReading,
+    Sendable {
+    private static let maximumAccessibilitySlice: Duration = .milliseconds(250)
+    private static let maximumTraversalDepth = 4
+    private static let maximumElementsPerApplication = 256
+    private let accessibility = DeadlineBoundAccessibilityClient(
+        client: SystemAccessibilityElementClient(),
+        maximumSlice: maximumAccessibilitySlice
+    )
+    private let surfaceResolver = ActiveDisplaySurfaceCatalog.current()
+
+    func observations(
+        for application: RunningApplicationDescriptor,
+        deadline: OperationDeadline
+    ) async throws -> [MenuBarObservation] {
+        try readObservations(
+            for: application,
+            surfaceResolver: surfaceResolver,
+            deadline: deadline
         )
     }
 
@@ -214,7 +203,7 @@ public actor NativeMenuBarObservationReader: MenuBarObservationReading {
     }
 }
 
-private extension NativeMenuBarObservationReader {
+private extension NativeApplicationObservationReader {
     private func optionalElementAttribute(
         _ attribute: CFString,
         from element: AXUIElement,

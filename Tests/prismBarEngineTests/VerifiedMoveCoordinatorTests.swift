@@ -25,8 +25,8 @@ struct VerifiedMoveCoordinatorTests {
         #expect(await performer.executionCount == 1)
     }
 
-    @Test("shares one absolute deadline across observation input and verification")
-    func sharesOneAbsoluteDeadline() async throws {
+    @Test("gives observation input and verification independent bounded deadlines")
+    func usesIndependentPhaseDeadlines() async throws {
         let initial = snapshot(names: ["one", "two", "three"], generation: 1)
         let expected = snapshot(names: ["three", "one", "two"], generation: 2)
         let plan = try MovePlanner().plan(item: id("three"), to: 0, in: initial)
@@ -40,11 +40,11 @@ struct VerifiedMoveCoordinatorTests {
 
         #expect(await coordinator.execute(plan) == .success)
         let readDeadlines = await reader.deadlines
-        let moveDeadline = await performer.deadline
+        let moveDeadline = try #require(await performer.deadline)
 
         #expect(readDeadlines.count == 2)
-        #expect(readDeadlines[0] == readDeadlines[1])
-        #expect(moveDeadline == readDeadlines[0])
+        #expect(readDeadlines[0] < moveDeadline)
+        #expect(moveDeadline < readDeadlines[1])
     }
 
     @Test("rejects a stale plan before producing input")

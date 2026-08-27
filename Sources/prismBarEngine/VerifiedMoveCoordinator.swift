@@ -66,9 +66,9 @@ public actor VerifiedMoveCoordinator<
     }
 
     public func executeWithObservation(_ plan: MovePlan) async -> VerifiedMoveResult {
-        let deadline = OperationDeadline(timeout: operationTimeout)
+        let preflightDeadline = OperationDeadline(timeout: operationTimeout)
         let current: MenuBarSnapshot
-        switch await readSnapshot(deadline: deadline) {
+        switch await readSnapshot(deadline: preflightDeadline) {
         case let .success(snapshot):
             current = snapshot
         case let .failure(outcome):
@@ -87,17 +87,19 @@ public actor VerifiedMoveCoordinator<
         }
 
         if plan.sourceIndex != plan.destinationIndex {
+            let inputDeadline = OperationDeadline(timeout: operationTimeout)
             if let failure = await performMove(
                 plan: plan,
                 sourceFrame: sourceFrame,
                 destinationFrame: destinationFrame,
-                deadline: deadline
+                deadline: inputDeadline
             ) {
                 return VerifiedMoveResult(outcome: failure)
             }
         }
 
-        switch await readSnapshot(deadline: deadline) {
+        let verificationDeadline = OperationDeadline(timeout: operationTimeout)
+        switch await readSnapshot(deadline: verificationDeadline) {
         case let .success(observed):
             return VerifiedMoveResult(
                 outcome: verificationOutcome(for: plan, observed: observed),
