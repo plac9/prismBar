@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import prismBarCore
 import SwiftUI
 
 struct SettingsRootView: View {
@@ -24,6 +25,7 @@ struct SettingsRootView: View {
 }
 
 private struct GeneralSettingsView: View {
+    @Environment(\.openWindow) private var openWindow
     @Environment(AppModel.self) private var model
 
     var body: some View {
@@ -57,7 +59,7 @@ private struct GeneralSettingsView: View {
                     Spacer()
 
                     Button("Open Workspace", systemImage: "rectangle.on.rectangle") {
-                        AppWindowController.shared.showWorkspace()
+                        openWindow(id: PrismSceneID.workspace)
                     }
                     .buttonStyle(.glass)
                 }

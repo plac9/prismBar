@@ -41,7 +41,7 @@ final class VisualAuditTests: XCTestCase {
 
         application.typeKey(",", modifierFlags: .command)
         let settings = application.windows
-            .matching(NSPredicate(format: "title CONTAINS %@", "Settings"))
+            .matching(identifier: "com_apple_SwiftUI_Settings_window")
             .firstMatch
         XCTAssertTrue(settings.waitForExistence(timeout: 5))
         attach(settings.screenshot(), named: "07-settings")

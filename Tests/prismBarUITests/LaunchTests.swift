@@ -193,6 +193,25 @@ final class LaunchTests: XCTestCase {
         }
     }
 
+    func testNativeSettingsCommandReusesOneAdaptiveWindow() {
+        let application = XCUIApplication()
+        application.launch()
+
+        application.typeKey(",", modifierFlags: .command)
+        let settingsWindows = application.windows.matching(
+            identifier: "com_apple_SwiftUI_Settings_window"
+        )
+        let settings = settingsWindows.firstMatch
+        XCTAssertTrue(settings.waitForExistence(timeout: 5), application.debugDescription)
+        XCTAssertGreaterThanOrEqual(settings.frame.width, 640)
+        XCTAssertGreaterThanOrEqual(settings.frame.height, 500)
+        XCTAssertTrue(settings.buttons["General"].exists)
+        XCTAssertTrue(settings.buttons["Privacy"].exists)
+
+        application.typeKey(",", modifierFlags: .command)
+        XCTAssertEqual(settingsWindows.count, 1)
+    }
+
     func testKeyboardCommandReopensTheMainWindow() {
         let application = XCUIApplication()
         application.launch()

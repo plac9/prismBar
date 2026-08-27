@@ -4,7 +4,7 @@
 
 **Goal:** Make the SwiftUI `Settings` scene the sole owner of prismBar Settings and prove every native entry point opens one adaptive, reusable Settings window.
 
-**Architecture:** Keep the existing SwiftUI `Settings` scene and shared `AppModel`, remove every Settings-specific member from `AppWindowController`, restore the system application Settings command, and use `SettingsLink` inside Prism Deck. Preserve AppKit only for the status items, popover presentation boundary, workspace window, and prismCalc utility window.
+**Architecture:** Keep the existing SwiftUI `Settings` scene and shared `AppModel`, restore the system application Settings command, and use `SettingsLink` inside Prism Deck. macOS 27 does not activate the native Settings command when prismBar has no primary SwiftUI scene, so the workspace and prismCalc utility are also migrated to `WindowGroup` and `UtilityWindow`. Preserve AppKit only for status items and the popover presentation boundary. A bounded scene-action router bridges that intentional AppKit boundary to SwiftUI `openWindow` actions.
 
 **Tech Stack:** Swift 6, SwiftUI, AppKit, XCTest/XCUITest, Xcode 27 beta, XcodeGen, bash source-policy audit.
 
@@ -33,7 +33,7 @@
 - Consumes: the existing `scripts/test-ui.sh --source-audit` policy gate.
 - Produces: a source-policy gate that rejects duplicate Settings ownership and requires the two public SwiftUI Settings entry points.
 
-- [ ] **Step 1: Extend the source audit before changing production code**
+- [x] **Step 1: Extend the source audit before changing production code**
 
 Add checks that fail if application sources contain any of these legacy contracts:
 
@@ -57,7 +57,7 @@ if ! rg -q 'SettingsLink[[:space:]]*\{' App/Features/Overview/PrismDeckView.swif
 fi
 ```
 
-- [ ] **Step 2: Run the source audit and verify RED**
+- [x] **Step 2: Run the source audit and verify RED**
 
 Run:
 
@@ -67,7 +67,7 @@ scripts/test-ui.sh --source-audit
 
 Expected: FAIL with `Legacy Settings ownership or routing remains.` and matches in `AppLifecycle.swift`, `PrismBarCommands.swift`, `MenuBarSectionStatusController.swift`, and `PrismDeckView.swift`.
 
-- [ ] **Step 3: Leave the failing gate in place for Task 3**
+- [x] **Step 3: Leave the failing gate in place for Task 3**
 
 Do not weaken the patterns to make the audit pass. The production architecture must change.
 
@@ -81,7 +81,7 @@ Do not weaken the patterns to make the audit pass. The production architecture m
 - Consumes: XCUITest access to the real application, application menu commands, status item, and Settings window.
 - Produces: lifecycle coverage for singleton presentation, adaptive size, both tabs, workspace independence, close, and status-item recovery.
 
-- [ ] **Step 1: Add a failing Command-comma singleton and content test**
+- [x] **Step 1: Add a failing Command-comma singleton and content test**
 
 Add this test to `LaunchTests`:
 
@@ -108,7 +108,7 @@ func testNativeSettingsCommandReusesOneAdaptiveWindow() {
 
 The production change that makes this test pass is replacing the fixed 560 by 420 custom Settings window with the adaptive SwiftUI scene while retaining singleton native presentation.
 
-- [ ] **Step 2: Strengthen the Prism Deck lifecycle test**
+- [x] **Step 2: Strengthen the Prism Deck lifecycle test**
 
 After Prism Deck opens Settings, assert the adaptive bounds and tabs. After closing Settings, reopen Prism Deck and open Settings again to prove both public entry points remain operational without reopening the workspace:
 
@@ -127,7 +127,7 @@ XCTAssertTrue(settingsWindow.waitForExistence(timeout: 5))
 XCTAssertFalse(workspace.exists)
 ```
 
-- [ ] **Step 3: Run the focused tests and verify RED**
+- [x] **Step 3: Run the focused tests and verify RED**
 
 Run:
 
@@ -138,20 +138,21 @@ scripts/test-ui.sh 'prismBarUITests/PrismDeckTests/testPrismDeckOpensSettingsWit
 
 Expected: at least the size assertions fail because the current custom window is 560 by 420. If desktop focus interrupts XCUITest, isolate foreground windows and rerun without changing the test expectation.
 
-### Task 3: Make SwiftUI the sole Settings owner
+### Task 3: Make SwiftUI own application windows
 
 **Files:**
 - Modify: `App/prismBarApp.swift:15-23`
-- Modify: `App/AppLifecycle.swift:35-87`
+- Modify: `App/AppLifecycle.swift`
+- Create: `App/SceneActionRouter.swift`
 - Modify: `App/Features/Shortcuts/PrismBarCommands.swift:11-44`
 - Modify: `App/MenuBarSectionStatusController.swift:18-40`
 - Modify: `App/Features/Overview/PrismDeckView.swift:10-29,235-255`
 
 **Interfaces:**
 - Consumes: `SettingsRootView`, `AppModel.shared`, SwiftUI `Settings`, and SwiftUI `SettingsLink`.
-- Produces: one adaptive Settings scene with native Command-comma and Prism Deck presentation.
+- Produces: native workspace, utility, and adaptive Settings scenes with Command-comma and Prism Deck presentation.
 
-- [ ] **Step 1: Make the Settings scene adaptive**
+- [x] **Step 1: Make the Settings scene adaptive**
 
 Replace the fixed frame in `prismBarApp` with:
 
@@ -166,19 +167,19 @@ Replace the fixed frame in `prismBarApp` with:
 
 Keep `.environment(AppModel.shared)` on `SettingsRootView`.
 
-- [ ] **Step 2: Remove Settings from `AppWindowController`**
+- [x] **Step 2: Remove manual application-window ownership**
 
-Delete `settingsFrameName`, `settingsWindow`, and `showSettings()`. Leave workspace and prismCalc window construction unchanged.
+Delete `AppWindowController` and its manually hosted workspace, prismCalc, and Settings windows. Declare the workspace as `WindowGroup`, prismCalc as `UtilityWindow`, and Settings as `Settings`. Retain the AppKit status-item popover.
 
-- [ ] **Step 3: Restore the system Settings command**
+- [x] **Step 3: Restore the system Settings command**
 
 Delete the complete `CommandGroup(replacing: .appSettings)` block from `PrismBarCommands`. Retain the prismBar domain command menu unchanged.
 
-- [ ] **Step 4: Remove callback routing from the status controller**
+- [x] **Step 4: Bound AppKit-to-scene routing**
 
-Delete the `openSettings` argument passed to `PrismDeckView`. Do not add a replacement callback or selector.
+Delete the `openSettings` callback passed to `PrismDeckView`. Capture SwiftUI's public `openWindow` action from the workspace scene and expose only `openWorkspace()` and `openPrismCalc()` through `SceneActionRouter` for the AppKit popover boundary.
 
-- [ ] **Step 5: Replace Prism Deck injection with `SettingsLink`**
+- [x] **Step 5: Replace Prism Deck injection with `SettingsLink`**
 
 Remove the `openSettings` property and initializer parameter. Replace the footer Settings button with:
 
@@ -193,7 +194,7 @@ SettingsLink {
 
 Keep the shared `.buttonStyle(.glass)` on the footer.
 
-- [ ] **Step 6: Run the source audit and verify GREEN**
+- [x] **Step 6: Run the source audit and verify GREEN**
 
 Run:
 
@@ -203,7 +204,7 @@ scripts/test-ui.sh --source-audit
 
 Expected: PASS with the existing glass-policy message and no Settings architecture failure.
 
-- [ ] **Step 7: Regenerate the Xcode project and verify the focused tests GREEN**
+- [x] **Step 7: Regenerate the Xcode project and verify the focused tests GREEN**
 
 Run:
 
@@ -215,7 +216,7 @@ scripts/test-ui.sh 'prismBarUITests/PrismDeckTests/testPrismDeckOpensSettingsWit
 
 Expected: both tests pass, one Settings window exists, both tabs exist, and the workspace stays closed through Prism Deck presentation.
 
-- [ ] **Step 8: Run lint and hosted tests**
+- [x] **Step 8: Run lint and hosted tests**
 
 Run:
 
@@ -237,7 +238,7 @@ Expected: zero lint violations and all hosted tests pass.
 - Consumes: the final source revision, focused test evidence, and full verification scripts.
 - Produces: revision-bound evidence and one atomic local commit.
 
-- [ ] **Step 1: Run the complete UI suite**
+- [x] **Step 1: Run the complete UI suite**
 
 Run:
 
@@ -247,7 +248,7 @@ scripts/test-ui.sh
 
 Expected: all UI tests pass. Overlapping desktop windows are an environmental failure and must be isolated before rerun, not hidden by weaker assertions.
 
-- [ ] **Step 2: Run the complete production verifier**
+- [x] **Step 2: Run the complete production verifier**
 
 Run:
 
@@ -257,11 +258,11 @@ scripts/ci-verify.sh
 
 Expected: licensing, SBOM, public safety, history scan, lint, Debug and Release tests, hosted tests, sanitizers, static analysis, builds, and unsigned bundle audit all pass with a revision-bound JSON evidence artifact.
 
-- [ ] **Step 3: Record accurate documentation**
+- [x] **Step 3: Record accurate documentation**
 
 Add the native Settings migration to `CHANGELOG.md`. In `docs/IMPLEMENTATION-PLAN.md`, record only the source and automated UI gates actually proven. Do not mark physical VoiceOver, signed Accessibility, notarization, Gatekeeper, or release-publication gates complete.
 
-- [ ] **Step 4: Self-review the diff**
+- [x] **Step 4: Self-review the diff**
 
 Run:
 
@@ -273,7 +274,7 @@ git status --short
 
 Expected: no whitespace errors, no unrelated files, no build products, and only the planned sources, tests, scripts, and documentation are changed.
 
-- [ ] **Step 5: Commit atomically**
+- [x] **Step 5: Commit atomically**
 
 Run:
 

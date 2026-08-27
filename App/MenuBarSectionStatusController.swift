@@ -14,6 +14,7 @@ final class MenuBarSectionStatusController: NSObject {
     private var primaryItem: NSStatusItem?
     private var anchorItem: NSStatusItem?
     private var spacerItem: NSStatusItem?
+    private var commandPopoverKeyMonitor: Any?
 
     private lazy var commandPopover: NSPopover = {
         let popover = NSPopover()
@@ -26,15 +27,11 @@ final class MenuBarSectionStatusController: NSObject {
                 model: AppModel.shared,
                 openWorkspace: { [weak self] in
                     self?.dismissCommandCenter()
-                    AppWindowController.shared.showWorkspace()
+                    SceneActionRouter.shared.openWorkspace()
                 },
                 openPrismCalc: { [weak self] in
                     self?.dismissCommandCenter()
-                    AppWindowController.shared.showPrismCalc()
-                },
-                openSettings: { [weak self] in
-                    self?.dismissCommandCenter()
-                    AppWindowController.shared.showSettings()
+                    SceneActionRouter.shared.openPrismCalc()
                 }
             )
         )
@@ -135,5 +132,28 @@ extension MenuBarSectionStatusController: NSPopoverDelegate {
 
         window.autorecalculatesKeyViewLoop = true
         window.recalculateKeyViewLoop()
+        installCommandPopoverKeyMonitor()
+    }
+
+    func popoverDidClose(_ notification: Notification) {
+        guard notification.object as? NSPopover === commandPopover else { return }
+        removeCommandPopoverKeyMonitor()
+    }
+
+    private func installCommandPopoverKeyMonitor() {
+        removeCommandPopoverKeyMonitor()
+        commandPopoverKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard event.keyCode == 53, self?.commandPopover.isShown == true else {
+                return event
+            }
+            self?.dismissCommandCenter()
+            return nil
+        }
+    }
+
+    private func removeCommandPopoverKeyMonitor() {
+        guard let commandPopoverKeyMonitor else { return }
+        NSEvent.removeMonitor(commandPopoverKeyMonitor)
+        self.commandPopoverKeyMonitor = nil
     }
 }

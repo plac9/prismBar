@@ -26,6 +26,35 @@ if [ "$test_selection" = "--source-audit" ]; then
     echo "Menu action feedback is still classified from display text." >&2
     exit 1
   fi
+  if rg -n \
+      'showSettings\(|settingsWindow|settingsFrameName|CommandGroup\(replacing: \.appSettings\)|openSettings:' \
+      App; then
+    echo "Legacy Settings ownership or routing remains." >&2
+    exit 1
+  fi
+  settings_scene_count="$(
+    rg -l '^[[:space:]]*Settings[[:space:]]*\{' App --glob '*.swift' | wc -l | tr -d ' '
+  )"
+  if [ "$settings_scene_count" != '1' ]; then
+    echo "Exactly one SwiftUI Settings scene is required." >&2
+    exit 1
+  fi
+  if ! rg -q 'SettingsLink[[:space:]]*\{' App/Features/Overview/PrismDeckView.swift; then
+    echo "Prism Deck must use SettingsLink." >&2
+    exit 1
+  fi
+  if ! rg -q 'WindowGroup\("prismBar", id: PrismSceneID\.workspace\)' App/prismBarApp.swift; then
+    echo "The workspace must be owned by a SwiftUI WindowGroup scene." >&2
+    exit 1
+  fi
+  if ! rg -q 'UtilityWindow\("prismCalc", id: PrismSceneID\.prismCalc\)' App/prismBarApp.swift; then
+    echo "prismCalc must be owned by a SwiftUI utility scene." >&2
+    exit 1
+  fi
+  if rg -n 'AppWindowController|NSWindow\(|NSHostingController' App/AppLifecycle.swift App/Features; then
+    echo "Manual AppKit ownership remains for a SwiftUI application window." >&2
+    exit 1
+  fi
   echo "UI source audit passed: native glass is centralized with bounded floating-surface exceptions."
   exit 0
 fi

@@ -37,10 +37,13 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 ### Changed
 
 - Adopted centralized native macOS 27 Liquid Glass surfaces across the workspace and Settings.
+- Migrated the workspace, prismCalc utility, and Settings lifecycle to native SwiftUI scenes while preserving the AppKit status-item popover boundary.
 - Replaced the status-item artwork with a template-rendered prism identity shared by the app UI.
 
 ### Fixed
 
+- Restored the native macOS Settings command and made both Command-comma and Prism Deck reuse one adaptive Settings window.
+- Restored Escape-key dismissal and repeat opening for the Prism Deck status-item popover.
 - Made visual assurance ignore persisted user window geometry and embed the exact audited source revision.
 - Replaced deprecated disk-image creation with the native macOS 27 `diskutil image` workflow.
 - Enforced a hard observation deadline even when an Accessibility reader does not cooperate with cancellation.

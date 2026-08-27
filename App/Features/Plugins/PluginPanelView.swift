@@ -2,10 +2,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import prismBarCore
 import prismPluginKit
 import SwiftUI
 
 struct PluginsView: View {
+    @Environment(\.openWindow) private var openWindow
     @Environment(AppModel.self) private var model
 
     var body: some View {
@@ -123,7 +125,8 @@ struct PluginsView: View {
             Spacer()
 
             Button("Open prismCalc", systemImage: "arrow.up.forward.app") {
-                AppWindowController.shared.showPrismCalc()
+                model.loadPluginIfNeeded()
+                openWindow(id: PrismSceneID.prismCalc)
             }
             .buttonStyle(.glassProminent)
             .disabled(!model.isPluginEnabled || model.pluginState != .ready)

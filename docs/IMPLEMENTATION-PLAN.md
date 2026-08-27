@@ -93,6 +93,8 @@ The project is complete only when every gate below has authoritative evidence fr
 
 - [x] Build Overview, Menu Bar, Plugins, Shortcuts, Privacy, and About destinations.
 - [x] Preserve the main-window frame and restore its native keyboard focus loop.
+- [x] Replace manual AppKit workspace, utility, and Settings windows with macOS 27 SwiftUI scene ownership.
+- [x] Prove native Command-comma and Prism Deck Settings entry points reuse one adaptive Settings window.
 - [x] Build onboarding, empty, unavailable, revoked, error, and recovery surfaces.
 - [x] Integrate the native system window background, semantic content surfaces, and standard interactive glass controls.
 - [x] Adopt system Liquid Glass components and remove decorative legacy styling.

@@ -75,19 +75,23 @@ final class PrismDeckTests: XCTestCase {
         settings.click()
 
         let settingsWindow = application.windows
-            .matching(NSPredicate(format: "title CONTAINS %@", "Settings"))
+            .matching(identifier: "com_apple_SwiftUI_Settings_window")
             .firstMatch
         XCTAssertTrue(settingsWindow.waitForExistence(timeout: 5), application.debugDescription)
+        XCTAssertGreaterThanOrEqual(settingsWindow.frame.width, 640)
+        XCTAssertGreaterThanOrEqual(settingsWindow.frame.height, 500)
+        XCTAssertTrue(settingsWindow.buttons["General"].exists)
+        XCTAssertTrue(settingsWindow.buttons["Privacy"].exists)
         XCTAssertFalse(workspace.exists)
 
         application.typeKey("w", modifierFlags: .command)
         XCTAssertTrue(settingsWindow.waitForNonExistence(timeout: 3))
 
         statusItem.click()
-        XCTAssertTrue(
-            application.descendants(matching: .any)["prismDeck.mode"]
-                .waitForExistence(timeout: 3)
-        )
+        XCTAssertTrue(settings.waitForExistence(timeout: 3))
+        settings.click()
+        XCTAssertTrue(settingsWindow.waitForExistence(timeout: 5))
+        XCTAssertFalse(workspace.exists)
     }
 
     private func closeWorkspaceIfNeeded(in application: XCUIApplication) -> XCUIElement {

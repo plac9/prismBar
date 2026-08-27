@@ -11,7 +11,6 @@ struct PrismDeckView: View {
     @Bindable private var model: AppModel
     private let openWorkspace: () -> Void
     private let openPrismCalc: () -> Void
-    private let openSettings: () -> Void
     @State private var mode = PrismDeckMode.bar
     @State private var isResetConfirmationPresented = false
     @State private var isItemListExpanded = false
@@ -19,13 +18,11 @@ struct PrismDeckView: View {
     init(
         model: AppModel,
         openWorkspace: @escaping () -> Void,
-        openPrismCalc: @escaping () -> Void,
-        openSettings: @escaping () -> Void
+        openPrismCalc: @escaping () -> Void
     ) {
         self.model = model
         self.openWorkspace = openWorkspace
         self.openPrismCalc = openPrismCalc
-        self.openSettings = openSettings
     }
 
     var body: some View {
@@ -238,10 +235,12 @@ private extension PrismDeckView {
                 openWorkspace()
             }
 
-            Button("Settings", systemImage: "gearshape") {
-                openSettings()
+            SettingsLink {
+                Label("Settings", systemImage: "gearshape")
+                    .labelStyle(.iconOnly)
             }
-            .labelStyle(.iconOnly)
+            .help("Open prismBar Settings")
+            .accessibilityLabel("Settings")
 
             Spacer()
 
