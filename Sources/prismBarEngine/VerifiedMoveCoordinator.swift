@@ -25,6 +25,19 @@ public enum MoveExecutionOutcome: Equatable, Sendable {
     case timedOut
 }
 
+public struct VerifiedMoveResult: Equatable, Sendable {
+    public let outcome: MoveExecutionOutcome
+    public let verifiedSnapshot: MenuBarSnapshot?
+
+    public init(
+        outcome: MoveExecutionOutcome,
+        verifiedSnapshot: MenuBarSnapshot? = nil
+    ) {
+        self.outcome = outcome
+        self.verifiedSnapshot = verifiedSnapshot
+    }
+}
+
 public actor VerifiedMoveCoordinator<
     Reader: MenuBarSnapshotReading,
     Performer: MenuBarMovePerforming
@@ -49,24 +62,28 @@ public actor VerifiedMoveCoordinator<
     }
 
     public func execute(_ plan: MovePlan) async -> MoveExecutionOutcome {
+        await executeWithObservation(plan).outcome
+    }
+
+    public func executeWithObservation(_ plan: MovePlan) async -> VerifiedMoveResult {
         let deadline = OperationDeadline(timeout: operationTimeout)
         let current: MenuBarSnapshot
         switch await readSnapshot(deadline: deadline) {
         case let .success(snapshot):
             current = snapshot
         case let .failure(outcome):
-            return outcome
+            return VerifiedMoveResult(outcome: outcome)
         }
 
         guard current.items.map(\.id) == plan.sourceOrder else {
-            return .topologyChanged
+            return VerifiedMoveResult(outcome: .topologyChanged)
         }
         guard let sourceItem = current.items.first(where: { $0.id == plan.item }),
               current.items.indices.contains(plan.destinationIndex),
               let sourceFrame = sourceItem.frame,
               let destinationFrame = current.items[plan.destinationIndex].frame
         else {
-            return .itemUnavailable
+            return VerifiedMoveResult(outcome: .itemUnavailable)
         }
 
         if plan.sourceIndex != plan.destinationIndex {
@@ -76,19 +93,56 @@ public actor VerifiedMoveCoordinator<
                 destinationFrame: destinationFrame,
                 deadline: deadline
             ) {
-                return failure
+                return VerifiedMoveResult(outcome: failure)
             }
         }
 
         switch await readSnapshot(deadline: deadline) {
         case let .success(observed):
-            return verificationOutcome(for: plan, observed: observed)
+            return VerifiedMoveResult(
+                outcome: verificationOutcome(for: plan, observed: observed),
+                verifiedSnapshot: observed
+            )
         case let .failure(outcome):
-            return outcome
+            return VerifiedMoveResult(outcome: outcome)
         }
     }
 
     private func readSnapshot(deadline: OperationDeadline) async -> SnapshotReadResult {
+        let reader = reader
+        let remaining = deadline.remaining()
+        let results = AsyncStream<SnapshotReadResult> { continuation in
+            let observationTask = Task.detached(priority: .userInitiated) {
+                let result = await Self.snapshotResult(reader: reader, deadline: deadline)
+                continuation.yield(result)
+                continuation.finish()
+            }
+            let deadlineTask = Task.detached(priority: .userInitiated) {
+                do {
+                    try await Task.sleep(for: remaining)
+                    try Task.checkCancellation()
+                    continuation.yield(.failure(.timedOut))
+                    continuation.finish()
+                } catch {
+                    return
+                }
+            }
+            continuation.onTermination = { @Sendable _ in
+                observationTask.cancel()
+                deadlineTask.cancel()
+            }
+        }
+
+        for await result in results {
+            return result
+        }
+        return .failure(.timedOut)
+    }
+
+    private nonisolated static func snapshotResult(
+        reader: Reader,
+        deadline: OperationDeadline
+    ) async -> SnapshotReadResult {
         do {
             try deadline.check()
             let snapshot = try await reader.snapshot(deadline: deadline)

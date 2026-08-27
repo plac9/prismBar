@@ -6,16 +6,20 @@ import SwiftUI
 
 struct SettingsRootView: View {
     var body: some View {
-        TabView {
-            Tab("General", systemImage: "gearshape") {
-                GeneralSettingsView()
-            }
+        ZStack {
+            PrismCanvasBackground()
 
-            Tab("Privacy", systemImage: "hand.raised") {
-                PrivacySettingsView()
+            TabView {
+                Tab("General", systemImage: "gearshape") {
+                    GeneralSettingsView()
+                }
+
+                Tab("Privacy", systemImage: "hand.raised") {
+                    PrivacySettingsView()
+                }
             }
+            .padding(.top, 8)
         }
-        .padding(.top, 8)
     }
 }
 
@@ -71,6 +75,7 @@ private struct GeneralSettingsView: View {
             }
         }
         .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
         .padding(.horizontal, 14)
         .padding(.bottom, 14)
     }
@@ -144,6 +149,7 @@ private struct PrivacySettingsView: View {
             }
         }
         .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
         .padding(.horizontal, 14)
         .padding(.bottom, 14)
     }

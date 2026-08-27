@@ -25,4 +25,9 @@ actor LiveMenuBarController: MenuBarSnapshotReading {
         let coordinator = VerifiedMoveCoordinator(reader: self, performer: performer)
         return await coordinator.execute(plan)
     }
+
+    func executeWithObservation(_ plan: MovePlan) async -> VerifiedMoveResult {
+        let coordinator = VerifiedMoveCoordinator(reader: self, performer: performer)
+        return await coordinator.executeWithObservation(plan)
+    }
 }

@@ -20,8 +20,13 @@ struct AboutView: View {
                 )
                 .accessibilityIdentifier("about.header.info.circle")
 
-                GroupBox {
+                PrismGlassSurface {
                     VStack(alignment: .leading, spacing: 18) {
+                        Label("Build", systemImage: "hammer")
+                            .font(.headline)
+
+                        Divider()
+
                         LabeledContent("Version", value: versionLabel)
                         LabeledContent("License", value: "Mozilla Public License 2.0")
                         LabeledContent("Platform", value: "macOS 27 on Apple silicon")
@@ -29,53 +34,52 @@ struct AboutView: View {
                         LabeledContent("Distribution", value: "Developer ID")
                         LabeledContent("Source revision", value: sourceRevisionLabel)
                     }
-                } label: {
-                    Text("Build")
-                        .font(.headline)
                 }
 
-                VStack(alignment: .leading, spacing: 16) {
-                    Label {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Public source")
-                                .font(.headline)
-                            Text("Every MPL-covered release maps to its public source revision.")
-                                .font(.callout)
-                                .foregroundStyle(.secondary)
+                PrismGlassSurface(tint: .blue) {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Label {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Public source")
+                                    .font(.headline)
+                                Text("Every MPL-covered release maps to its public source revision.")
+                                    .font(.callout)
+                                    .foregroundStyle(.secondary)
+                            }
+                        } icon: {
+                            Image(systemName: "chevron.left.forwardslash.chevron.right")
+                                .font(.title2)
+                                .foregroundStyle(.tint)
                         }
-                    } icon: {
-                        Image(systemName: "chevron.left.forwardslash.chevron.right")
-                            .font(.title2)
-                            .foregroundStyle(.tint)
-                    }
 
-                    HStack {
-                        Button("View Source", systemImage: "safari") {
-                            openURL(ProductIdentity.sourceURL(for: sourceRevision))
+                        HStack {
+                            Button("View Source", systemImage: "safari") {
+                                openURL(ProductIdentity.sourceURL(for: sourceRevision))
+                            }
+                            .accessibilityIdentifier("about.source")
+
+                            Button("View License", systemImage: "doc.text") {
+                                isShowingLegalDocuments = true
+                            }
+                            .accessibilityIdentifier("about.license")
                         }
-                        .accessibilityIdentifier("about.source")
+                        .buttonStyle(.glass)
 
-                        Button("View License", systemImage: "doc.text") {
-                            isShowingLegalDocuments = true
+                        Divider()
+
+                        Label {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Independent work")
+                                    .font(.headline)
+                                Text("Authored under a documented clean-room policy.")
+                                    .font(.callout)
+                                    .foregroundStyle(.secondary)
+                            }
+                        } icon: {
+                            Image(systemName: "checkmark.seal")
+                                .font(.title2)
+                                .foregroundStyle(.tint)
                         }
-                        .accessibilityIdentifier("about.license")
-                    }
-                    .buttonStyle(.glass)
-
-                    Divider()
-
-                    Label {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Independent work")
-                                .font(.headline)
-                            Text("Authored under a documented clean-room policy.")
-                                .font(.callout)
-                                .foregroundStyle(.secondary)
-                        }
-                    } icon: {
-                        Image(systemName: "checkmark.seal")
-                            .font(.title2)
-                            .foregroundStyle(.tint)
                     }
                 }
 

@@ -8,6 +8,8 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 
 ### Added
 
+- Prism Rail drag-to-place controls for direct, verified multi-position menu bar moves.
+- Privacy-safe visual audit captures for every shipping workspace surface and the status item.
 - Clean-room repository with independent Git history.
 - Product, architecture, security, privacy, design, licensing, and plugin contracts.
 - MPL-2.0 public-source licensing foundation.
@@ -30,3 +32,14 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 - Public-AppKit status-item control with deterministic section anchors and a native command popover.
 - Verified hide, show, fold, reveal, arbitrary-position, and order-preserving recovery plans.
 - Safe section expansion before protected movement and automatic restoration after the action.
+
+### Changed
+
+- Adopted centralized native macOS 27 Liquid Glass surfaces across the workspace and Settings.
+- Replaced the status-item artwork with a template-rendered prism identity shared by the app UI.
+
+### Fixed
+
+- Enforced a hard observation deadline even when an Accessibility reader does not cooperate with cancellation.
+- Made native menu bar movement use a dense bounded Command-drag with guaranteed mouse, modifier, and pointer cleanup.
+- Synchronized verified post-move topology directly into the interface instead of waiting for a second refresh.

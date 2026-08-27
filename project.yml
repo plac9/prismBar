@@ -74,8 +74,6 @@ targets:
         CFBundleVersion: "1"
         LSApplicationCategoryType: public.app-category.utilities
         LSMinimumSystemVersion: "$(MACOSX_DEPLOYMENT_TARGET)"
-        NSHighResolutionCapable: true
-        NSSupportsAutomaticGraphicsSwitching: true
         NSHumanReadableCopyright: Copyright 2026 Patrick LaClair and LaClair Technologies
         PrismSourceRepositoryURL: https://github.com/plac9/prismBar
         PrismSourceRevision: "$(PRISM_SOURCE_REVISION)"

@@ -55,7 +55,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Verify every operation against a fresh topology snapshot before reporting success.
 - [x] Reject input when the target display has no reserved menu bar area or geometry crosses displays.
 - [x] Add equivalent keyboard and accessibility actions.
-- [x] Prove mouse-up and pointer restoration on cancellation and failure; use per-event Command flags without synthesizing modifier key state.
+- [x] Prove mouse-up, Command-up, and pointer restoration on cancellation and failure after one bounded Command-drag.
 
 ## Phase 5: Status item and daily workflow
 
@@ -105,7 +105,8 @@ The project is complete only when every gate below has authoritative evidence fr
 ## Phase 9: Security, privacy, and licensing assurance
 
 - [x] Establish a repository-grounded threat model for the runtime, entitlements, build system, and direct-distribution model.
-- [ ] Reconcile the threat model against the final shipping code and signed artifact.
+- [x] Reconcile the threat model against the current working-tree code and Development artifact.
+- [ ] Reconcile the threat model against the final clean revision and notarized artifact.
 - [x] Declare app-local `UserDefaults` access with Apple required reason `CA92.1`.
 - [x] Audit release executables, linked libraries, local paths, credential-shaped strings, bundle identifiers, and entitlement allowlists in CI.
 - [x] Scan Git history, source, tests, tracked artifacts, public metadata, release products, and symbols for secrets and personal information.
@@ -115,14 +116,14 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Exercise plugin decoding and calculator commands with deterministic hostile-input corpora.
 - [x] Run static analysis plus Address Sanitizer and Thread Sanitizer across the Swift modules.
 - [x] Reconcile the current source controls against the threat model and verify reciprocal signing on the preserved Developer ID archive.
-- [x] Run long-duration host, permission, movement, and plugin lifecycle stress tests. Revision `5dc0be646aff441153efeab19ed19b48eafc31f1` completed five full cycles over 1,081 seconds: 640 package tests and 70 UI tests. Physical signed-app movement remains part of Phase 10.
-- [x] Produce and inspect the required revision-bound dark HTML assurance report.
+- [ ] Repeat long-duration host, permission, movement, and plugin lifecycle stress tests on the final clean revision. Revision `5dc0be646aff441153efeab19ed19b48eafc31f1` remains historical evidence only because the movement engine and interface have changed.
+- [ ] Produce and inspect the required revision-bound dark HTML assurance report for the final clean revision.
 
 ## Phase 10: Signed physical release proof
 
 - [x] Verify Apple identifier and signing configuration for `com.laclairtech.prismbar`.
-- [x] Archive with Xcode 27 using Developer ID and Hardened Runtime.
-- [x] Verify nested signing order and exact entitlement allowlists.
+- [ ] Archive the final clean revision with Xcode 27 using Developer ID and Hardened Runtime.
+- [ ] Verify nested signing order and exact entitlement allowlists on that archive.
 - [ ] Package, notarize, staple, and validate the distribution artifact.
 - [ ] Install through the shipping flow to `/Applications/prismBar.app`.
 - [ ] Complete the physical macOS 27 permission, move, status item, plugin, relaunch, upgrade, displays, spaces, full-screen, sleep, wake, logout, and reboot matrix.

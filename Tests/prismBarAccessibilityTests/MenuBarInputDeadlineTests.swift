@@ -16,6 +16,7 @@ struct MenuBarInputDeadlineTests {
         )
 
         try await lifecycle.perform(
+            dragStepCount: 3,
             deadline: OperationDeadline(timeout: .seconds(1)),
             post: recorder.record
         )
@@ -23,10 +24,13 @@ struct MenuBarInputDeadlineTests {
         #expect(
             recorder.stages == [
                 .position,
+                .modifierDown,
                 .press,
-                .midpoint,
-                .endpoint,
+                .dragStep(0),
+                .dragStep(1),
+                .dragStep(2),
                 .release,
+                .modifierUp,
                 .restore,
             ]
         )
@@ -42,6 +46,7 @@ struct MenuBarInputDeadlineTests {
 
         await #expect(throws: OperationDeadlineError.expired) {
             try await lifecycle.perform(
+                dragStepCount: 2,
                 deadline: OperationDeadline(expiresAt: now),
                 post: recorder.record
             )
@@ -58,14 +63,24 @@ struct MenuBarInputDeadlineTests {
 
         await #expect(throws: OperationDeadlineError.expired) {
             try await lifecycle.perform(
+                dragStepCount: 2,
                 deadline: OperationDeadline(timeout: .milliseconds(5)),
                 post: recorder.record
             )
         }
-        #expect(recorder.stages == [.position, .press, .release, .restore])
+        #expect(
+            recorder.stages == [
+                .position,
+                .modifierDown,
+                .press,
+                .release,
+                .modifierUp,
+                .restore,
+            ]
+        )
     }
 
-    @Test("stage failure after midpoint still cleans up exactly once")
+    @Test("stage failure during the path still cleans up exactly once")
     func cleansUpAfterStageFailure() async {
         let recorder = DragStageRecorder()
         let lifecycle = DeadlineAwareMenuBarDragLifecycle(
@@ -74,11 +89,22 @@ struct MenuBarInputDeadlineTests {
 
         await #expect(throws: TestInputError.injected) {
             try await lifecycle.perform(
+                dragStepCount: 3,
                 deadline: OperationDeadline(timeout: .seconds(1)),
                 post: recorder.record
             )
         }
-        #expect(recorder.stages == [.position, .press, .midpoint, .release, .restore])
+        #expect(
+            recorder.stages == [
+                .position,
+                .modifierDown,
+                .press,
+                .dragStep(0),
+                .release,
+                .modifierUp,
+                .restore,
+            ]
+        )
     }
 }
 

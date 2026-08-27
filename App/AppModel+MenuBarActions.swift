@@ -18,6 +18,7 @@ extension AppModel {
         Task { [weak self] in
             guard let self else { return }
             let wasCollapsed = isHiddenSectionCollapsed
+            var didAcceptVerifiedSnapshot = false
             await revealHiddenSectionForAction()
 
             do {
@@ -35,7 +36,9 @@ extension AppModel {
                     return
                 }
                 let plan = try MovePlanner().plan(item: itemID, to: destinationIndex, in: snapshot)
-                let outcome = await menuBarController.execute(plan)
+                let execution = await menuBarController.executeWithObservation(plan)
+                let outcome = acceptVerifiedExecution(execution)
+                didAcceptVerifiedSnapshot = execution.verifiedSnapshot != nil
                 menuBarActionState = .result(.move(outcome, itemName: itemName))
                 if outcome == .permissionRevoked {
                     handleAccessibilityRevocation()
@@ -51,8 +54,17 @@ extension AppModel {
                 )
                 await restoreHiddenSectionIfNeeded(wasCollapsed)
             }
-            refreshMenuBar()
+            if !didAcceptVerifiedSnapshot, accessibilityState == .granted {
+                refreshMenuBar()
+            }
         }
+    }
+
+    private func acceptVerifiedExecution(_ execution: VerifiedMoveResult) -> MoveExecutionOutcome {
+        if let snapshot = execution.verifiedSnapshot {
+            acceptVerifiedMenuBarSnapshot(snapshot)
+        }
+        return execution.outcome
     }
 
     func moveMenuBarItem(_ itemID: MenuBarItemID, to section: MenuBarSection) {

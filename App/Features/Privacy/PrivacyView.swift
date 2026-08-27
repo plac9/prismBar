@@ -16,8 +16,13 @@ struct PrivacyView: View {
                 )
                 .accessibilityIdentifier("privacy.header.hand.raised")
 
-                GroupBox {
+                PrismGlassSurface {
                     VStack(alignment: .leading, spacing: 16) {
+                        Label("One permission, one purpose", systemImage: "checkmark.shield")
+                            .font(.headline)
+
+                        Divider()
+
                         Text(
                             "Permission state is rechecked live and is never stored as trusted truth. " +
                                 PrivacyCopy.observation
@@ -47,25 +52,24 @@ struct PrivacyView: View {
                             symbol: "memorychip"
                         )
                     }
-                } label: {
-                    Label("One permission, one purpose", systemImage: "checkmark.shield")
-                        .font(.headline)
                 }
 
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Enforced boundaries")
-                        .font(.headline)
-                    PrivacyPrinciple(
-                        title: "No data exhaust",
-                        message: "Production logs contain outcomes, never observed menu labels or screen content.",
-                        symbol: "text.badge.xmark"
-                    )
-                    Divider()
-                    PrivacyPrinciple(
-                        title: "Isolated tools",
-                        message: "Tools run in sandboxed services without Accessibility, files, or network access.",
-                        symbol: "shippingbox.and.arrow.backward"
-                    )
+                PrismGlassSurface(tint: .blue) {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Enforced boundaries")
+                            .font(.headline)
+                        PrivacyPrinciple(
+                            title: "No data exhaust",
+                            message: "Production logs contain outcomes, never observed menu labels or screen content.",
+                            symbol: "text.badge.xmark"
+                        )
+                        Divider()
+                        PrivacyPrinciple(
+                            title: "Isolated tools",
+                            message: "Tools run in sandboxed services without Accessibility, files, or network access.",
+                            symbol: "shippingbox.and.arrow.backward"
+                        )
+                    }
                 }
             }
             .frame(maxWidth: 760, alignment: .leading)

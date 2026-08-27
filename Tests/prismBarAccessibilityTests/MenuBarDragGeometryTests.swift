@@ -22,6 +22,7 @@ struct MenuBarDragGeometryTests {
         #expect(gesture.start.horizontal == 312)
         #expect(gesture.end.horizontal == 101)
         #expect(gesture.end.vertical == 12)
+        #expect(gesture.path.last == gesture.end)
     }
 
     @Test("moving right drops just after the target")
@@ -56,6 +57,34 @@ struct MenuBarDragGeometryTests {
         #expect(after.end.horizontal > divider.minX)
         #expect(after.end.horizontal < divider.minX + divider.width)
         #expect(before.end.horizontal < after.end.horizontal)
+    }
+
+    @Test("long moves use a dense path with an exact endpoint")
+    func samplesLongMovesDensely() {
+        let gesture = MenuBarDragGeometry().gesture(
+            source: source,
+            destination: destination,
+            insertionEdge: .before
+        )
+
+        #expect(gesture.path.count > 2)
+        #expect(gesture.path.last == gesture.end)
+        for (previous, next) in zip([gesture.start] + gesture.path, gesture.path) {
+            #expect(abs(next.horizontal - previous.horizontal) <= 16)
+            #expect(abs(next.vertical - previous.vertical) <= 16)
+        }
+    }
+
+    @Test("short moves still include their exact endpoint")
+    func samplesShortMoves() {
+        let nearbyDestination = MenuBarItemFrame(minX: 302, minY: 0, width: 24, height: 24)
+        let gesture = MenuBarDragGeometry().gesture(
+            source: source,
+            destination: nearbyDestination,
+            insertionEdge: .after
+        )
+
+        #expect(gesture.path == [gesture.end])
     }
 }
 

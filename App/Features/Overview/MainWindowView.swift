@@ -13,8 +13,8 @@ struct MainWindowView: View {
         NavigationSplitView {
             VStack(spacing: 0) {
                 HStack(spacing: 10) {
-                    Image(systemName: "triangle")
-                        .font(.title2.weight(.semibold))
+                    Image(nsImage: PrismStatusIcon.image)
+                        .imageScale(.large)
                         .foregroundStyle(.tint)
                         .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 0) {
@@ -53,7 +53,10 @@ struct MainWindowView: View {
             }
             .navigationSplitViewColumnWidth(min: 190, ideal: 220, max: 260)
         } detail: {
-            detailView
+            ZStack {
+                PrismCanvasBackground()
+                detailView
+            }
         }
         .navigationTitle("prismBar")
         .toolbar {

@@ -22,28 +22,35 @@ struct OverviewView: View {
                 )
                 .accessibilityIdentifier("home.header.sparkles")
 
-                GroupBox("Readiness") {
-                    VStack(spacing: 0) {
-                        ReadinessRow(
-                            title: "Accessibility",
-                            value: accessibilityLabel,
-                            symbol: accessibilitySymbol,
-                            isReady: model.accessibilityState == .granted
-                        )
+                PrismGlassSurface {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Label("Readiness", systemImage: "checkmark.circle")
+                            .font(.headline)
+
                         Divider()
-                        ReadinessRow(
-                            title: "Menu Bar",
-                            value: menuBarLabel,
-                            symbol: "menubar.rectangle",
-                            isReady: menuBarPresentation?.isComplete == true
-                        )
-                        Divider()
-                        ReadinessRow(
-                            title: "Tools",
-                            value: pluginLabel,
-                            symbol: "wrench.and.screwdriver",
-                            isReady: model.pluginState == .ready
-                        )
+
+                        VStack(spacing: 0) {
+                            ReadinessRow(
+                                title: "Accessibility",
+                                value: accessibilityLabel,
+                                symbol: accessibilitySymbol,
+                                isReady: model.accessibilityState == .granted
+                            )
+                            Divider()
+                            ReadinessRow(
+                                title: "Menu Bar",
+                                value: menuBarLabel,
+                                symbol: "menubar.rectangle",
+                                isReady: menuBarPresentation?.isComplete == true
+                            )
+                            Divider()
+                            ReadinessRow(
+                                title: "Tools",
+                                value: pluginLabel,
+                                symbol: "wrench.and.screwdriver",
+                                isReady: model.pluginState == .ready
+                            )
+                        }
                     }
                 }
 
@@ -78,8 +85,11 @@ struct OverviewView: View {
     }
 
     private var permissionSurface: some View {
-        GroupBox {
+        PrismGlassSurface(tint: permissionTint) {
             VStack(alignment: .leading, spacing: 16) {
+                Label(actionTitle, systemImage: actionSymbol)
+                    .font(.headline)
+
                 Text(actionMessage)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -144,10 +154,11 @@ struct OverviewView: View {
                     }
                 }
             }
-        } label: {
-            Label(actionTitle, systemImage: actionSymbol)
-                .font(.headline)
         }
+    }
+
+    private var permissionTint: Color? {
+        model.accessibilityState == .granted ? .green : .orange
     }
 
     private var accessibilityLabel: String {

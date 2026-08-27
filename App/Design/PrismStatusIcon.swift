@@ -8,25 +8,32 @@ enum PrismStatusIcon {
     static let image: NSImage = {
         let size = NSSize(width: 18, height: 18)
         let image = NSImage(size: size, flipped: false) { bounds in
-            let prism = NSBezierPath()
-            prism.lineWidth = 1.3
-            prism.lineJoinStyle = .round
-            prism.lineCapStyle = .round
-            prism.move(to: NSPoint(x: 9, y: 15.7))
-            prism.line(to: NSPoint(x: 2.2, y: 3.1))
-            prism.line(to: NSPoint(x: 15.8, y: 3.1))
-            prism.close()
-            prism.move(to: NSPoint(x: 9, y: 15.2))
-            prism.line(to: NSPoint(x: 9, y: 6.3))
-            prism.move(to: NSPoint(x: 2.8, y: 3.5))
-            prism.line(to: NSPoint(x: 9, y: 6.3))
-            prism.line(to: NSPoint(x: 15.2, y: 3.5))
-            prism.move(to: NSPoint(x: 1.2, y: 9.2))
-            prism.line(to: NSPoint(x: 5.4, y: 9.2))
-            prism.move(to: NSPoint(x: 12.6, y: 9.2))
-            prism.line(to: NSPoint(x: 16.8, y: 11.1))
+            let silhouette = NSBezierPath()
+            silhouette.windingRule = .evenOdd
+            silhouette.move(to: NSPoint(x: 9, y: 16.2))
+            silhouette.line(to: NSPoint(x: 1.3, y: 2.4))
+            silhouette.line(to: NSPoint(x: 16.7, y: 2.4))
+            silhouette.close()
+            silhouette.move(to: NSPoint(x: 9, y: 12.3))
+            silhouette.line(to: NSPoint(x: 5.2, y: 5.2))
+            silhouette.line(to: NSPoint(x: 12.8, y: 5.2))
+            silhouette.close()
+
+            NSColor.labelColor.setFill()
+            silhouette.fill()
+
+            let refraction = NSBezierPath()
+            refraction.lineWidth = 1.45
+            refraction.lineJoinStyle = .round
+            refraction.lineCapStyle = .round
+            refraction.move(to: NSPoint(x: 0.8, y: 8.1))
+            refraction.line(to: NSPoint(x: 4.2, y: 8.1))
+            refraction.move(to: NSPoint(x: 13.8, y: 8.1))
+            refraction.line(to: NSPoint(x: 17.2, y: 10.3))
+            refraction.move(to: NSPoint(x: 13.8, y: 7.6))
+            refraction.line(to: NSPoint(x: 17.2, y: 5.9))
             NSColor.labelColor.setStroke()
-            prism.stroke()
+            refraction.stroke()
             return bounds.width > 0
         }
         image.isTemplate = true

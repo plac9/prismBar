@@ -20,8 +20,14 @@ struct ShortcutsView: View {
                 )
                 .accessibilityIdentifier("automation.header.bolt.badge.clock")
 
-                GroupBox {
+                PrismGlassSurface {
                     VStack(alignment: .leading, spacing: 0) {
+                        Label("prismBar commands", systemImage: "command")
+                            .font(.headline)
+                            .padding(.bottom, 8)
+
+                        Divider()
+
                         ForEach(shortcuts, id: \.action) { shortcut in
                             HStack(spacing: 16) {
                                 Image(systemName: shortcut.symbol)
@@ -48,26 +54,25 @@ struct ShortcutsView: View {
                             }
                         }
                     }
-                } label: {
-                    Label("prismBar commands", systemImage: "command")
-                        .font(.headline)
                 }
 
-                Label {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("No global keyboard monitoring")
-                            .font(.headline)
-                        Text(
-                            "These are standard app commands. prismBar does not install a global " +
-                                "keystroke monitor or request Input Monitoring access."
-                        )
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
+                PrismGlassSurface(tint: .blue) {
+                    Label {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("No global keyboard monitoring")
+                                .font(.headline)
+                            Text(
+                                "These are standard app commands. prismBar does not install a global " +
+                                    "keystroke monitor or request Input Monitoring access."
+                            )
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: "keyboard.badge.ellipsis")
+                            .font(.title2)
+                            .foregroundStyle(.tint)
                     }
-                } icon: {
-                    Image(systemName: "keyboard.badge.ellipsis")
-                        .font(.title2)
-                        .foregroundStyle(.tint)
                 }
             }
             .frame(maxWidth: 760, alignment: .leading)

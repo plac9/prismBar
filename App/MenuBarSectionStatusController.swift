@@ -54,7 +54,8 @@ final class MenuBarSectionStatusController: NSObject {
         primary.autosaveName = "com.laclairtech.prismbar.primary-control"
         primary.button?.image = PrismStatusIcon.image
         primary.button?.setAccessibilityLabel(MenuBarControllerIdentity.primaryControlLabel)
-        primary.button?.toolTip = "Open Prism Deck"
+        primary.button?.setAccessibilityHelp("Open Prism Deck to arrange menu bar items and launch tools")
+        primary.button?.toolTip = "Open Prism Deck to arrange menu bar items"
         primary.button?.target = self
         primary.button?.action = #selector(toggleCommandCenter(_:))
         primaryItem = primary

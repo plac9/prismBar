@@ -6,10 +6,11 @@ import prismBarCore
 
 enum MenuBarDragStage: Equatable, Sendable {
     case position
+    case modifierDown
     case press
-    case midpoint
-    case endpoint
+    case dragStep(Int)
     case release
+    case modifierUp
     case restore
 }
 
@@ -38,14 +39,19 @@ struct DeadlineAwareMenuBarDragLifecycle<Pauser: MenuBarDragPausing>: Sendable {
     }
 
     func perform(
+        dragStepCount: Int,
         deadline: OperationDeadline,
         post: @Sendable (MenuBarDragStage) -> Void
     ) async throws {
         var didStart = false
+        var didHoldModifier = false
         var didPress = false
         defer {
             if didPress {
                 post(.release)
+            }
+            if didHoldModifier {
+                post(.modifierUp)
             }
             if didStart {
                 post(.restore)
@@ -58,17 +64,19 @@ struct DeadlineAwareMenuBarDragLifecycle<Pauser: MenuBarDragPausing>: Sendable {
         try await pauser.pause(for: .milliseconds(25), deadline: deadline)
 
         try check(deadline)
+        post(.modifierDown)
+        didHoldModifier = true
         post(.press)
         didPress = true
         try await pauser.pause(for: .milliseconds(40), deadline: deadline)
 
-        try check(deadline)
-        post(.midpoint)
-        try await pauser.pause(for: .milliseconds(40), deadline: deadline)
-
-        try check(deadline)
-        post(.endpoint)
-        try await pauser.pause(for: .milliseconds(40), deadline: deadline)
+        for index in 0..<dragStepCount {
+            try check(deadline)
+            post(.dragStep(index))
+            let isEndpoint = index == dragStepCount - 1
+            let pause: Duration = isEndpoint ? .milliseconds(240) : .milliseconds(16)
+            try await pauser.pause(for: pause, deadline: deadline)
+        }
     }
 
     private func check(_ deadline: OperationDeadline) throws {

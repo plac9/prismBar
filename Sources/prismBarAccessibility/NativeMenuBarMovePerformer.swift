@@ -16,6 +16,7 @@ public struct MenuBarDragPoint: Equatable, Sendable {
 public struct MenuBarDragGesture: Equatable, Sendable {
     public let start: MenuBarDragPoint
     public let end: MenuBarDragPoint
+    public let path: [MenuBarDragPoint]
 }
 
 struct MenuBarInputSurface: Equatable, Sendable {
@@ -80,6 +81,8 @@ private enum NativeMenuBarSurfaceCatalog {
 }
 
 public struct MenuBarDragGeometry: Sendable {
+    private let maximumStepDistance = 16.0
+
     public init() {}
 
     public func gesture(
@@ -95,16 +98,28 @@ public struct MenuBarDragGeometry: Sendable {
             destination.minX + destination.width - edgeInset
         }
 
-        return MenuBarDragGesture(
-            start: MenuBarDragPoint(
-                horizontal: source.minX + source.width / 2,
-                vertical: source.minY + source.height / 2
-            ),
-            end: MenuBarDragPoint(
-                horizontal: endX,
-                vertical: destination.minY + destination.height / 2
-            )
+        let start = MenuBarDragPoint(
+            horizontal: source.minX + source.width / 2,
+            vertical: source.minY + source.height / 2
         )
+        let end = MenuBarDragPoint(
+            horizontal: endX,
+            vertical: destination.minY + destination.height / 2
+        )
+        return MenuBarDragGesture(start: start, end: end, path: path(from: start, to: end))
+    }
+
+    private func path(from start: MenuBarDragPoint, to end: MenuBarDragPoint) -> [MenuBarDragPoint] {
+        let horizontalDistance = abs(end.horizontal - start.horizontal)
+        let verticalDistance = abs(end.vertical - start.vertical)
+        let stepCount = max(1, Int(ceil(max(horizontalDistance, verticalDistance) / maximumStepDistance)))
+        return (1...stepCount).map { index in
+            let progress = Double(index) / Double(stepCount)
+            return MenuBarDragPoint(
+                horizontal: start.horizontal + (end.horizontal - start.horizontal) * progress,
+                vertical: start.vertical + (end.vertical - start.vertical) * progress
+            )
+        }
     }
 }
 
@@ -115,11 +130,25 @@ public enum NativeMenuBarMoveError: Error, Equatable, Sendable {
 public actor NativeMenuBarMovePerformer: MenuBarMovePerforming {
     private struct PreparedDrag: @unchecked Sendable {
         let moveToStart: CGEvent
+        let commandDown: CGEvent
         let mouseDown: CGEvent
-        let midpointDrag: CGEvent
-        let endpointDrag: CGEvent
+        let dragPath: [CGEvent]
+        let mouseUp: CGEvent
+        let commandUp: CGEvent
+        let restorePointer: CGEvent
+    }
+
+    private struct PreparedMouseEvents: @unchecked Sendable {
+        let moveToStart: CGEvent
+        let mouseDown: CGEvent
+        let dragPath: [CGEvent]
         let mouseUp: CGEvent
         let restorePointer: CGEvent
+    }
+
+    private struct PreparedCommandEvents: @unchecked Sendable {
+        let commandDown: CGEvent
+        let commandUp: CGEvent
     }
 
     private let geometry = MenuBarDragGeometry()
@@ -161,73 +190,100 @@ public actor NativeMenuBarMovePerformer: MenuBarMovePerforming {
     private func prepare(gesture: MenuBarDragGesture) throws -> PreparedDrag {
         guard let eventSource = CGEventSource(stateID: .hidSystemState),
               let currentPointer = CGEvent(source: nil)?.location,
-              let moveToStart = mouseEvent(
+              let mouseEvents = mouseEvents(
                   source: eventSource,
-                  type: .mouseMoved,
-                  point: gesture.start
+                  gesture: gesture,
+                  currentPointer: currentPointer
               ),
-              let mouseDown = mouseEvent(
-                  source: eventSource,
-                  type: .leftMouseDown,
-                  point: gesture.start
-              ),
-              let midpointDrag = mouseEvent(
-                  source: eventSource,
-                  type: .leftMouseDragged,
-                  point: midpoint(of: gesture)
-              ),
-              let endpointDrag = mouseEvent(
-                  source: eventSource,
-                  type: .leftMouseDragged,
-                  point: gesture.end
-              ),
-              let mouseUp = mouseEvent(
-                  source: eventSource,
-                  type: .leftMouseUp,
-                  point: gesture.end
-              ),
-              let restorePointer = CGEvent(
-                  mouseEventSource: eventSource,
-                  mouseType: .mouseMoved,
-                  mouseCursorPosition: currentPointer,
-                  mouseButton: .left
-              )
+              let commandEvents = commandEvents(source: eventSource)
         else {
             throw NativeMenuBarMoveError.eventCreationFailed
         }
 
         let commandFlag = CGEventFlags.maskCommand
-        mouseDown.flags = commandFlag
-        midpointDrag.flags = commandFlag
-        endpointDrag.flags = commandFlag
-        mouseUp.flags = commandFlag
+        commandEvents.commandDown.flags = commandFlag
+        mouseEvents.mouseDown.flags = commandFlag
+        mouseEvents.dragPath.forEach { $0.flags = commandFlag }
+        mouseEvents.mouseUp.flags = commandFlag
 
         return PreparedDrag(
+            moveToStart: mouseEvents.moveToStart,
+            commandDown: commandEvents.commandDown,
+            mouseDown: mouseEvents.mouseDown,
+            dragPath: mouseEvents.dragPath,
+            mouseUp: mouseEvents.mouseUp,
+            commandUp: commandEvents.commandUp,
+            restorePointer: mouseEvents.restorePointer
+        )
+    }
+
+    private func mouseEvents(
+        source: CGEventSource,
+        gesture: MenuBarDragGesture,
+        currentPointer: CGPoint
+    ) -> PreparedMouseEvents? {
+        guard let moveToStart = mouseEvent(source: source, type: .mouseMoved, point: gesture.start),
+              let mouseDown = mouseEvent(source: source, type: .leftMouseDown, point: gesture.start),
+              let dragPath = dragEvents(source: source, path: gesture.path),
+              let mouseUp = mouseEvent(source: source, type: .leftMouseUp, point: gesture.end),
+              let restorePointer = CGEvent(
+                  mouseEventSource: source,
+                  mouseType: .mouseMoved,
+                  mouseCursorPosition: currentPointer,
+                  mouseButton: .left
+              )
+        else {
+            return nil
+        }
+        return PreparedMouseEvents(
             moveToStart: moveToStart,
             mouseDown: mouseDown,
-            midpointDrag: midpointDrag,
-            endpointDrag: endpointDrag,
+            dragPath: dragPath,
             mouseUp: mouseUp,
             restorePointer: restorePointer
         )
+    }
+
+    private func commandEvents(source: CGEventSource) -> PreparedCommandEvents? {
+        // MARK: Apple Platform Behavior Override
+        // What: Post a bounded Command key-down and key-up around the native mouse drag.
+        // Why: macOS 27 does not consistently treat mouse-event flags alone as the Command-drag
+        // gesture required to move a status item across multiple positions.
+        // Re-evaluate: Remove this override when a public macOS API moves status items directly,
+        // or when physical release testing proves mouse-event flags alone are reliable again.
+        guard let commandDown = CGEvent(keyboardEventSource: source, virtualKey: 0x37, keyDown: true),
+              let commandUp = CGEvent(keyboardEventSource: source, virtualKey: 0x37, keyDown: false)
+        else {
+            return nil
+        }
+        return PreparedCommandEvents(commandDown: commandDown, commandUp: commandUp)
+    }
+
+    private func dragEvents(source: CGEventSource, path: [MenuBarDragPoint]) -> [CGEvent]? {
+        let events = path.compactMap { point in
+            mouseEvent(source: source, type: .leftMouseDragged, point: point)
+        }
+        return events.count == path.count ? events : nil
     }
 
     private func perform(
         _ drag: PreparedDrag,
         deadline: OperationDeadline
     ) async throws {
-        try await lifecycle.perform(deadline: deadline) { stage in
+        try await lifecycle.perform(dragStepCount: drag.dragPath.count, deadline: deadline) { stage in
             switch stage {
             case .position:
                 drag.moveToStart.post(tap: .cghidEventTap)
+            case .modifierDown:
+                drag.commandDown.post(tap: .cghidEventTap)
             case .press:
                 drag.mouseDown.post(tap: .cghidEventTap)
-            case .midpoint:
-                drag.midpointDrag.post(tap: .cghidEventTap)
-            case .endpoint:
-                drag.endpointDrag.post(tap: .cghidEventTap)
+            case let .dragStep(index):
+                drag.dragPath[index].post(tap: .cghidEventTap)
             case .release:
                 drag.mouseUp.post(tap: .cghidEventTap)
+            case .modifierUp:
+                drag.commandUp.post(tap: .cghidEventTap)
             case .restore:
                 drag.restorePointer.post(tap: .cghidEventTap)
             }
@@ -247,10 +303,4 @@ public actor NativeMenuBarMovePerformer: MenuBarMovePerforming {
         )
     }
 
-    private func midpoint(of gesture: MenuBarDragGesture) -> MenuBarDragPoint {
-        MenuBarDragPoint(
-            horizontal: (gesture.start.horizontal + gesture.end.horizontal) / 2,
-            vertical: (gesture.start.vertical + gesture.end.vertical) / 2
-        )
-    }
 }

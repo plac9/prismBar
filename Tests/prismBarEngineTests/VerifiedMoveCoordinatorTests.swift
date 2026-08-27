@@ -18,9 +18,10 @@ struct VerifiedMoveCoordinatorTests {
         let performer = RecordingMovePerformer()
         let coordinator = VerifiedMoveCoordinator(reader: reader, performer: performer)
 
-        let outcome = await coordinator.execute(plan)
+        let result = await coordinator.executeWithObservation(plan)
 
-        #expect(outcome == .success)
+        #expect(result.outcome == .success)
+        #expect(result.verifiedSnapshot == expected)
         #expect(await performer.executionCount == 1)
     }
 
@@ -198,8 +199,8 @@ struct VerifiedMoveCoordinatorTests {
         #expect(await performer.executionCount == 0)
     }
 
-    @Test("does not claim a noncooperative observation stopped before it returns")
-    func waitsForNoncooperativeObservationBeforeTimeoutResult() async throws {
+    @Test("hard-times out a noncooperative observation without producing input")
+    func hardTimesOutNoncooperativeObservation() async throws {
         let initial = snapshot(names: ["one", "two"], generation: 1)
         let plan = try MovePlanner().plan(item: id("two"), to: 0, in: initial)
         let performer = RecordingMovePerformer()
@@ -216,7 +217,10 @@ struct VerifiedMoveCoordinatorTests {
 
         #expect(await coordinator.execute(plan) == .timedOut)
 
-        #expect(start.duration(to: clock.now) >= .milliseconds(40))
+        #expect(start.duration(to: clock.now) < .milliseconds(25))
+        #expect(await performer.executionCount == 0)
+
+        try await Task.sleep(for: .milliseconds(60))
         #expect(await performer.executionCount == 0)
     }
 
@@ -277,7 +281,6 @@ struct VerifiedMoveCoordinatorTests {
         #expect(await coordinator.execute(plan) == .itemUnavailable)
         #expect(await performer.executionCount == 0)
     }
-
 }
 
 private actor SnapshotSequenceReader: MenuBarSnapshotReading {
@@ -377,7 +380,6 @@ private struct FailingMovePerformer: MenuBarMovePerforming {
         throw error
     }
 }
-
 private actor CountingFailingMovePerformer: MenuBarMovePerforming {
     private(set) var executionCount = 0
     let error: any Error & Sendable

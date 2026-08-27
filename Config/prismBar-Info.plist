@@ -24,12 +24,8 @@
 	<string>public.app-category.utilities</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
-	<key>NSHighResolutionCapable</key>
-	<true/>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright 2026 Patrick LaClair and LaClair Technologies</string>
-	<key>NSSupportsAutomaticGraphicsSwitching</key>
-	<true/>
 	<key>PrismSourceRepositoryURL</key>
 	<string>https://github.com/plac9/prismBar</string>
 	<key>PrismSourceRevision</key>

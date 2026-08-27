@@ -40,8 +40,13 @@ struct PluginsView: View {
     }
 
     private func pluginCard(_ registration: BundledPluginRegistration) -> some View {
-        GroupBox {
+        PrismGlassSurface {
             VStack(alignment: .leading, spacing: 14) {
+                Label("Available tools", systemImage: "shippingbox")
+                    .font(.headline)
+
+                Divider()
+
                 toolIdentity(registration)
 
                 Text("prismCalc runs outside the prismBar process with no Accessibility, network, or file access. " +
@@ -54,9 +59,6 @@ struct PluginsView: View {
                 Divider()
                 toolActions
             }
-        } label: {
-            Text("Available tools")
-                .font(.headline)
         }
     }
 

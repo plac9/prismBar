@@ -14,6 +14,7 @@ struct PrismDeckView: View {
     private let openSettings: () -> Void
     @State private var mode = PrismDeckMode.bar
     @State private var isResetConfirmationPresented = false
+    @State private var isItemListExpanded = false
 
     init(
         model: AppModel,
@@ -135,13 +136,19 @@ private extension PrismDeckView {
 
                 actionStatus
 
-                ScrollView {
-                    LazyVStack(spacing: 6) {
-                        ForEach(snapshot.items.filter { $0.role == .item }) { item in
-                            itemRow(item, snapshot: snapshot)
+                PrismRailView(snapshot: snapshot)
+
+                DisclosureGroup("Item details and keyboard controls", isExpanded: $isItemListExpanded) {
+                    ScrollView {
+                        LazyVStack(spacing: 6) {
+                            ForEach(snapshot.items.filter { $0.role == .item }) { item in
+                                itemRow(item, snapshot: snapshot)
+                            }
                         }
                     }
+                    .frame(maxHeight: 180)
                 }
+                .font(.caption)
 
                 HStack(spacing: 8) {
                     Button(
@@ -212,11 +219,7 @@ private extension PrismDeckView {
                 }
             }
             .padding(14)
-            .background(.background.secondary, in: .rect(cornerRadius: 16))
-            .overlay {
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(.separator, lineWidth: 0.5)
-            }
+            .glassEffect(.regular, in: .rect(cornerRadius: 16))
 
             if !model.isPluginEnabled {
                 Button("Enable prismCalc", systemImage: "power") {

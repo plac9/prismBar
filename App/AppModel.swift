@@ -10,26 +10,6 @@ import prismBarCore
 import prismBarEngine
 import prismPluginKit
 
-enum MenuBarLoadingState: Equatable {
-    case waitingForPermission
-    case loading
-    case ready
-    case unavailable
-}
-enum MenuBarActionState: Equatable {
-    case idle
-    case moving(itemID: MenuBarItemID?)
-    case result(MenuBarActionResult)
-}
-enum PluginLoadingState: Equatable {
-    case idle
-    case loading
-    case ready
-    case unavailable
-    case paused
-    case disabled
-}
-
 @MainActor
 @Observable
 final class AppModel {
@@ -63,6 +43,7 @@ final class AppModel {
         }
         return false
     }
+
     private init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         let registry = try? PluginCatalog.makeRegistry()
@@ -172,6 +153,12 @@ final class AppModel {
                 menuBarState = .unavailable
             }
         }
+    }
+
+    func acceptVerifiedMenuBarSnapshot(_ snapshot: MenuBarSnapshot) {
+        topologyRevision += 1
+        menuBarSnapshot = snapshot
+        menuBarState = .ready
     }
 
     private func invalidateMenuBar() {

@@ -60,8 +60,13 @@ struct MenuBarView: View {
 
 private extension MenuBarView {
     private var menuBarControls: some View {
-        GroupBox {
-            VStack(spacing: 12) {
+        PrismGlassSurface {
+            VStack(alignment: .leading, spacing: 12) {
+                Label("Menu bar controls", systemImage: "slider.horizontal.3")
+                    .font(.headline)
+
+                Divider()
+
                 HStack(spacing: 10) {
                     Button(
                         model.isHiddenSectionCollapsed ? "Reveal Hidden Items" : "Fold Hidden Items",
@@ -135,9 +140,6 @@ private extension MenuBarView {
                     .disabled(selectedItemIDs.isEmpty || model.isMenuBarActionInProgress)
                 }
             }
-        } label: {
-            Label("Menu bar controls", systemImage: "slider.horizontal.3")
-                .font(.headline)
         }
     }
 
@@ -155,6 +157,8 @@ private extension MenuBarView {
                     )
                     .foregroundStyle(.orange)
                 }
+
+                PrismRailView(snapshot: snapshot)
 
                 List {
                     Section("Visible") {
