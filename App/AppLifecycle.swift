@@ -6,45 +6,33 @@ import AppKit
 import SwiftUI
 
 @MainActor
+final class AppLifecycleDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_: Notification) {
+        AppModel.shared.refreshAccessibility()
+    }
+
+    func applicationDidBecomeActive(_: Notification) {
+        AppModel.shared.refreshAccessibility()
+    }
+}
+
+@MainActor
 final class AppWindowController: NSObject, NSWindowDelegate {
     static let shared = AppWindowController()
 
-    private static let windowIdentifier = NSUserInterfaceItemIdentifier(
-        "com.laclairtech.prismbar.main-window"
+    private static let workspaceFrameName = NSWindow.FrameAutosaveName(
+        "com.laclairtech.prismbar.workspace-frame"
     )
-    private static let frameAutosaveName = NSWindow.FrameAutosaveName(
-        "com.laclairtech.prismbar.main-window-frame"
+    private static let prismCalcFrameName = NSWindow.FrameAutosaveName(
+        "com.laclairtech.prismbar.prismcalc-frame"
+    )
+    private static let settingsFrameName = NSWindow.FrameAutosaveName(
+        "com.laclairtech.prismbar.settings-frame"
     )
     private var isObservingLaunch = false
-
-    private lazy var window: NSWindow = {
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 920, height: 640),
-            styleMask: [.titled, .closable, .miniaturizable, .resizable],
-            backing: .buffered,
-            defer: false
-        )
-        window.identifier = Self.windowIdentifier
-        window.title = "prismBar"
-        window.titleVisibility = .hidden
-        window.titlebarAppearsTransparent = true
-        window.titlebarSeparatorStyle = .none
-        window.styleMask.insert(.fullSizeContentView)
-        window.toolbarStyle = .unified
-        window.contentMinSize = NSSize(width: 760, height: 520)
-        window.contentViewController = NSHostingController(rootView: MainWindowRootView())
-        window.setContentSize(NSSize(width: 920, height: 640))
-        window.isReleasedWhenClosed = false
-        window.isRestorable = true
-        window.autorecalculatesKeyViewLoop = true
-        window.delegate = self
-        if !window.setFrameUsingName(Self.frameAutosaveName) {
-            window.center()
-        }
-        window.setFrameAutosaveName(Self.frameAutosaveName)
-        window.recalculateKeyViewLoop()
-        return window
-    }()
+    private var workspaceWindow: NSWindow?
+    private var prismCalcWindow: NSWindow?
+    private var settingsWindow: NSWindow?
 
     override private init() {
         super.init()
@@ -59,22 +47,55 @@ final class AppWindowController: NSObject, NSWindowDelegate {
             name: NSApplication.didFinishLaunchingNotification,
             object: nil
         )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(applicationDidBecomeActive(_:)),
-            name: NSApplication.didBecomeActiveNotification,
-            object: nil
-        )
     }
 
-    func show() {
-        NSApplication.shared.setActivationPolicy(.regular)
-        window.makeKeyAndOrderFront(nil)
-        NSApplication.shared.activate()
+    func showWorkspace() {
+        let window = workspaceWindow ?? makeWindow(
+            title: "prismBar",
+            size: NSSize(width: 920, height: 640),
+            minimumSize: NSSize(width: 760, height: 520),
+            frameName: Self.workspaceFrameName,
+            rootView: AnyView(MainWindowView().environment(AppModel.shared))
+        )
+        workspaceWindow = window
+        show(window)
+    }
+
+    func showPrismCalc() {
+        AppModel.shared.loadPluginIfNeeded()
+        let window = prismCalcWindow ?? makeWindow(
+            title: "prismCalc",
+            size: NSSize(width: 360, height: 520),
+            minimumSize: NSSize(width: 320, height: 440),
+            frameName: Self.prismCalcFrameName,
+            rootView: AnyView(PrismCalcUtilityView(model: AppModel.shared))
+        )
+        prismCalcWindow = window
+        show(window)
+    }
+
+    func showSettings() {
+        let window = settingsWindow ?? makeWindow(
+            title: "prismBar Settings",
+            size: NSSize(width: 560, height: 420),
+            minimumSize: NSSize(width: 520, height: 380),
+            frameName: Self.settingsFrameName,
+            rootView: AnyView(SettingsRootView().environment(AppModel.shared))
+        )
+        settingsWindow = window
+        show(window)
     }
 
     func windowWillClose(_: Notification) {
-        NSApplication.shared.setActivationPolicy(.accessory)
+        Task { @MainActor in
+            await Task.yield()
+            let hasVisibleWindow = NSApplication.shared.windows.contains {
+                $0.isVisible && $0.canBecomeMain
+            }
+            if !hasVisibleWindow {
+                NSApplication.shared.setActivationPolicy(.accessory)
+            }
+        }
     }
 
     @objc private func applicationDidFinishLaunching(_: Notification) {
@@ -84,18 +105,42 @@ final class AppWindowController: NSObject, NSWindowDelegate {
             object: nil
         )
         isObservingLaunch = false
-        AppModel.shared.refreshAccessibility()
-        show()
+        showWorkspace()
     }
 
-    @objc private func applicationDidBecomeActive(_: Notification) {
-        AppModel.shared.refreshAccessibility()
+    private func show(_ window: NSWindow) {
+        NSApplication.shared.setActivationPolicy(.regular)
+        window.makeKeyAndOrderFront(nil)
+        NSApplication.shared.activate()
     }
-}
 
-private struct MainWindowRootView: View {
-    var body: some View {
-        MainWindowView()
-            .environment(AppModel.shared)
+    private func makeWindow(
+        title: String,
+        size: NSSize,
+        minimumSize: NSSize,
+        frameName: NSWindow.FrameAutosaveName,
+        rootView: AnyView
+    ) -> NSWindow {
+        let window = NSWindow(
+            contentRect: NSRect(origin: .zero, size: size),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
+            backing: .buffered,
+            defer: false
+        )
+        window.title = title
+        window.titleVisibility = .hidden
+        window.titlebarAppearsTransparent = true
+        window.titlebarSeparatorStyle = .none
+        window.toolbarStyle = .unified
+        window.contentMinSize = minimumSize
+        window.contentViewController = NSHostingController(rootView: rootView)
+        window.isReleasedWhenClosed = false
+        window.isRestorable = true
+        window.delegate = self
+        if !window.setFrameUsingName(frameName) {
+            window.center()
+        }
+        window.setFrameAutosaveName(frameName)
+        return window
     }
 }

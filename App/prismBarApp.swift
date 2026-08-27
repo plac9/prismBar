@@ -6,6 +6,8 @@ import SwiftUI
 
 @main
 struct prismBarApp: App {
+    @NSApplicationDelegateAdaptor(AppLifecycleDelegate.self) private var appLifecycle
+
     init() {
         MenuBarSectionStatusController.shared.installIfNeeded()
         AppWindowController.shared.startObservingLaunch()

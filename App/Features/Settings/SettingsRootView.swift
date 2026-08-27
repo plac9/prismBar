@@ -65,8 +65,8 @@ private struct GeneralSettingsView: View {
 
                         Spacer()
 
-                        Button("Open Command Center", systemImage: "rectangle.on.rectangle") {
-                            AppWindowController.shared.show()
+                        Button("Open Workspace", systemImage: "rectangle.on.rectangle") {
+                            AppWindowController.shared.showWorkspace()
                         }
                         .buttonStyle(.glass)
                     }

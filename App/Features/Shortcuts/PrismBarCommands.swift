@@ -9,9 +9,16 @@ struct PrismBarCommands: Commands {
     @Bindable var model: AppModel
 
     var body: some Commands {
+        CommandGroup(replacing: .appSettings) {
+            Button("Settings…") {
+                AppWindowController.shared.showSettings()
+            }
+            .keyboardShortcut(",", modifiers: .command)
+        }
+
         CommandMenu("prismBar") {
             Button("Open prismBar") {
-                AppWindowController.shared.show()
+                AppWindowController.shared.showWorkspace()
             }
             .keyboardShortcut("o", modifiers: [.command, .shift])
 
