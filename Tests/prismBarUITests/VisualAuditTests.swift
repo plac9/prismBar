@@ -8,10 +8,13 @@ import XCTest
 final class VisualAuditTests: XCTestCase {
     func testCapturesPrivacySafeShippingSurfaces() {
         let application = XCUIApplication()
+        application.launchArguments = ["--prismbar-ui-audit"]
         application.launch()
 
         let workspace = application.windows["prismBar"]
         XCTAssertTrue(workspace.waitForExistence(timeout: 5))
+        XCTAssertEqual(workspace.frame.width, 920, accuracy: 1)
+        XCTAssertEqual(workspace.frame.height, 640, accuracy: 1)
 
         let destinations = [
             ("Home", "home.header.sparkles", "01-home"),
@@ -30,6 +33,9 @@ final class VisualAuditTests: XCTestCase {
                 application.descendants(matching: .any)[headerIdentifier]
                     .waitForExistence(timeout: 5)
             )
+            if destination == "About" {
+                XCTAssertFalse(application.staticTexts["Local development"].exists)
+            }
             attach(workspace.screenshot(), named: attachmentName)
         }
 

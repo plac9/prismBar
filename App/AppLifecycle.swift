@@ -20,6 +20,10 @@ final class AppLifecycleDelegate: NSObject, NSApplicationDelegate {
 final class AppWindowController: NSObject, NSWindowDelegate {
     static let shared = AppWindowController()
 
+    private static let usesDeterministicAuditFrames = ProcessInfo.processInfo.arguments.contains(
+        "--prismbar-ui-audit"
+    )
+
     private static let workspaceFrameName = NSWindow.FrameAutosaveName(
         "com.laclairtech.prismbar.workspace-frame"
     )
@@ -135,12 +139,21 @@ final class AppWindowController: NSObject, NSWindowDelegate {
         window.contentMinSize = minimumSize
         window.contentViewController = NSHostingController(rootView: rootView)
         window.isReleasedWhenClosed = false
-        window.isRestorable = true
         window.delegate = self
-        if !window.setFrameUsingName(frameName) {
+
+        // MARK: Apple Platform Behavior Override
+        // Privacy-safe visual evidence must not inherit a user's persisted window geometry.
+        if Self.usesDeterministicAuditFrames {
+            window.isRestorable = false
+            window.setFrame(NSRect(origin: .zero, size: size), display: false)
             window.center()
+        } else {
+            window.isRestorable = true
+            if !window.setFrameUsingName(frameName) {
+                window.center()
+            }
+            window.setFrameAutosaveName(frameName)
         }
-        window.setFrameAutosaveName(frameName)
         return window
     }
 }

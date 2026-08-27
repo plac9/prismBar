@@ -10,6 +10,11 @@ test -x scripts/generate-assurance-report.sh || {
   exit 1
 }
 
+test -x scripts/capture-ui-audit.sh || {
+  printf 'Assurance contract failed: UI audit capture workflow is missing or not executable.\n' >&2
+  exit 1
+}
+
 bash -n scripts/generate-assurance-report.sh
 
 for required in \
@@ -31,6 +36,18 @@ for required in \
   '{{PUBLIC_STATUS}}'; do
   rg -Fq -- "$required" scripts/generate-assurance-report.sh docs/assurance-report.template.html || {
     printf 'Assurance contract failed: missing %s.\n' "$required" >&2
+    exit 1
+  }
+done
+
+for required in \
+  'git status --porcelain=v1' \
+  'PRISM_SOURCE_REVISION=$revision' \
+  'VisualAuditTests' \
+  'xcresulttool export attachments' \
+  'generate-ui-audit-report.sh'; do
+  rg -Fq -- "$required" scripts/capture-ui-audit.sh || {
+    printf 'Assurance contract failed: UI capture workflow is missing %s.\n' "$required" >&2
     exit 1
   }
 done
