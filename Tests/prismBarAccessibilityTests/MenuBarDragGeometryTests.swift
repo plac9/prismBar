@@ -3,6 +3,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 @testable import prismBarAccessibility
+import CoreGraphics
 import prismBarCore
 import Testing
 
@@ -85,6 +86,19 @@ struct MenuBarDragGeometryTests {
         )
 
         #expect(gesture.path == [gesture.end])
+    }
+}
+
+@Suite("Menu bar event timing")
+struct MenuBarEventTimingTests {
+    @Test("refreshes a prepared event at the moment it is posted")
+    func refreshesPreparedEventTimestamp() throws {
+        let event = try #require(CGEvent(source: nil))
+        event.timestamp = 1
+
+        MenuBarEventTimestampRefresher().refresh(event, now: 42)
+
+        #expect(event.timestamp == 42)
     }
 }
 

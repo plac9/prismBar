@@ -5,6 +5,7 @@
 import AppKit
 @preconcurrency import ApplicationServices
 import CoreGraphics
+import Dispatch
 import Foundation
 import prismBarCore
 
@@ -17,6 +18,15 @@ public struct MenuBarDragGesture: Equatable, Sendable {
     public let start: MenuBarDragPoint
     public let end: MenuBarDragPoint
     public let path: [MenuBarDragPoint]
+}
+
+struct MenuBarEventTimestampRefresher: Sendable {
+    func refresh(
+        _ event: CGEvent,
+        now: CGEventTimestamp = DispatchTime.now().uptimeNanoseconds
+    ) {
+        event.timestamp = now
+    }
 }
 
 struct MenuBarInputSurface: Equatable, Sendable {
@@ -270,22 +280,27 @@ public actor NativeMenuBarMovePerformer: MenuBarMovePerforming {
         _ drag: PreparedDrag,
         deadline: OperationDeadline
     ) async throws {
+        let timestampRefresher = MenuBarEventTimestampRefresher()
+        let postFresh: @Sendable (CGEvent) -> Void = { event in
+            timestampRefresher.refresh(event)
+            event.post(tap: .cghidEventTap)
+        }
         try await lifecycle.perform(dragStepCount: drag.dragPath.count, deadline: deadline) { stage in
             switch stage {
             case .position:
-                drag.moveToStart.post(tap: .cghidEventTap)
+                postFresh(drag.moveToStart)
             case .modifierDown:
-                drag.commandDown.post(tap: .cghidEventTap)
+                postFresh(drag.commandDown)
             case .press:
-                drag.mouseDown.post(tap: .cghidEventTap)
+                postFresh(drag.mouseDown)
             case let .dragStep(index):
-                drag.dragPath[index].post(tap: .cghidEventTap)
+                postFresh(drag.dragPath[index])
             case .release:
-                drag.mouseUp.post(tap: .cghidEventTap)
+                postFresh(drag.mouseUp)
             case .modifierUp:
-                drag.commandUp.post(tap: .cghidEventTap)
+                postFresh(drag.commandUp)
             case .restore:
-                drag.restorePointer.post(tap: .cghidEventTap)
+                postFresh(drag.restorePointer)
             }
         }
     }
