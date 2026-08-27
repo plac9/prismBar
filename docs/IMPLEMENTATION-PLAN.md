@@ -118,8 +118,8 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Exercise plugin decoding and calculator commands with deterministic hostile-input corpora.
 - [x] Run static analysis plus Address Sanitizer and Thread Sanitizer across the Swift modules.
 - [x] Reconcile the current source controls against the threat model and verify reciprocal signing on the preserved Developer ID archive.
-- [ ] Repeat long-duration host, permission, movement, and plugin lifecycle stress tests on the final clean revision. Revision `5dc0be646aff441153efeab19ed19b48eafc31f1` remains historical evidence only because the movement engine and interface have changed.
-- [ ] Produce and inspect the required revision-bound dark HTML assurance report for the final clean revision.
+- [x] Repeat long-duration host, permission, movement, and plugin lifecycle stress tests on clean revision `2a3c087fda0faddcd1e7ee33d67900b0d0e5681c`: 2 complete cycles across 1,130 seconds, including 40 UI-test executions with zero failures. Physical signed-app movement stress remains a release gate.
+- [x] Produce and inspect the revision-bound dark HTML assurance report for clean revision `2a3c087fda0faddcd1e7ee33d67900b0d0e5681c`; automated and visual evidence pass while physical, distribution, and publication gates remain on hold.
 
 ## Phase 10: Signed physical release proof
 
