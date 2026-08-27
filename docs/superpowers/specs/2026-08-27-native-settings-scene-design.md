@@ -2,7 +2,7 @@
 
 ## Status
 
-Approved direction awaiting written-spec review.
+Approved by Patrick LaClair on 2026-08-27.
 
 ## Purpose
 
