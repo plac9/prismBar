@@ -24,7 +24,7 @@ fi
 keychain_profile="$2"
 [[ "$keychain_profile" =~ ^[A-Za-z0-9._-]+$ ]] || fail 'the Keychain profile name contains unsupported characters'
 
-for dependency in codesign ditto find hdiutil jq shasum spctl xcodebuild xcrun; do
+for dependency in codesign diskutil ditto find jq shasum spctl xcodebuild xcrun; do
   command -v "$dependency" >/dev/null 2>&1 || fail "$dependency is unavailable"
 done
 
@@ -130,11 +130,10 @@ disk_image_root="$staging_root/disk-image"
 mkdir -p "$disk_image_root"
 ditto "$application_path" "$disk_image_root/prismBar.app"
 ln -s /Applications "$disk_image_root/Applications"
-hdiutil create \
-  -fs APFS \
-  -format UDZO \
-  -volname prismBar \
-  -srcfolder "$disk_image_root" \
+diskutil image create from \
+  --format UDZO \
+  --volumeName prismBar \
+  "$disk_image_root" \
   "$disk_image_path"
 
 codesign --force \

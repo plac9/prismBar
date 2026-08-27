@@ -23,7 +23,7 @@ for required in \
   'notarytool submit' \
   'stapler staple' \
   'stapler validate' \
-  'hdiutil create' \
+  'diskutil image create from' \
   'codesign --force' \
   "--sign 'Developer ID Application: Patrick LaClair (N8A5T2PZY9)'" \
   'spctl --assess' \
@@ -34,6 +34,11 @@ for required in \
     exit 1
   }
 done
+
+if rg -n 'hdiutil create' scripts/notarize-release-candidate.sh; then
+  printf 'Notarization contract failed: deprecated hdiutil creation remains.\n' >&2
+  exit 1
+fi
 
 if rg -n -- '--apple-id|--password|--issuer|--key-id|--key ' scripts/notarize-release-candidate.sh; then
   printf 'Notarization contract failed: raw notarization credentials are forbidden.\n' >&2

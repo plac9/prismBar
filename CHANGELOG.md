@@ -40,6 +40,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 
 ### Fixed
 
+- Replaced deprecated disk-image creation with the native macOS 27 `diskutil image` workflow.
 - Enforced a hard observation deadline even when an Accessibility reader does not cooperate with cancellation.
 - Made native menu bar movement use a dense bounded Command-drag with guaranteed mouse, modifier, and pointer cleanup.
 - Synchronized verified post-move topology directly into the interface instead of waiting for a second refresh.
