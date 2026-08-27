@@ -10,7 +10,6 @@ struct prismBarApp: App {
 
     init() {
         MenuBarSectionStatusController.shared.installIfNeeded()
-        AppWindowController.shared.startObservingLaunch()
     }
 
     var body: some Scene {

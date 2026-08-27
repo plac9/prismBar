@@ -8,11 +8,19 @@ import SwiftUI
 @MainActor
 final class AppLifecycleDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_: Notification) {
+        AppWindowController.shared.showWorkspace()
         AppModel.shared.refreshAccessibility()
     }
 
     func applicationDidBecomeActive(_: Notification) {
         AppModel.shared.refreshAccessibility()
+    }
+
+    func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag {
+            AppWindowController.shared.showWorkspace()
+        }
+        return true
     }
 }
 
@@ -33,24 +41,12 @@ final class AppWindowController: NSObject, NSWindowDelegate {
     private static let settingsFrameName = NSWindow.FrameAutosaveName(
         "com.laclairtech.prismbar.settings-frame"
     )
-    private var isObservingLaunch = false
     private var workspaceWindow: NSWindow?
     private var prismCalcWindow: NSWindow?
     private var settingsWindow: NSWindow?
 
     override private init() {
         super.init()
-    }
-
-    func startObservingLaunch() {
-        guard !isObservingLaunch else { return }
-        isObservingLaunch = true
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(applicationDidFinishLaunching(_:)),
-            name: NSApplication.didFinishLaunchingNotification,
-            object: nil
-        )
     }
 
     func showWorkspace() {
@@ -100,16 +96,6 @@ final class AppWindowController: NSObject, NSWindowDelegate {
                 NSApplication.shared.setActivationPolicy(.accessory)
             }
         }
-    }
-
-    @objc private func applicationDidFinishLaunching(_: Notification) {
-        NotificationCenter.default.removeObserver(
-            self,
-            name: NSApplication.didFinishLaunchingNotification,
-            object: nil
-        )
-        isObservingLaunch = false
-        showWorkspace()
     }
 
     private func show(_ window: NSWindow) {
