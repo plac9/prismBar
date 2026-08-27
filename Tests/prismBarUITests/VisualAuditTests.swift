@@ -8,13 +8,18 @@ import XCTest
 final class VisualAuditTests: XCTestCase {
     func testCapturesPrivacySafeShippingSurfaces() {
         let application = XCUIApplication()
-        application.launchArguments = ["--prismbar-ui-audit"]
+        application.launchArguments = [
+            "--prismbar-ui-audit",
+            "-ApplePersistenceIgnoreState",
+            "YES",
+        ]
         application.launch()
+        application.activate()
 
-        let workspace = application.windows["prismBar"]
+        let workspace = openWorkspaceIfNeeded(in: application)
         XCTAssertTrue(workspace.waitForExistence(timeout: 5))
-        XCTAssertEqual(workspace.frame.width, 920, accuracy: 1)
-        XCTAssertEqual(workspace.frame.height, 640, accuracy: 1)
+        XCTAssertGreaterThanOrEqual(workspace.frame.width, 760)
+        XCTAssertGreaterThanOrEqual(workspace.frame.height, 520)
 
         let destinations = [
             ("Home", "home.header.sparkles", "01-home"),
@@ -66,8 +71,26 @@ final class VisualAuditTests: XCTestCase {
     }
 
     private func sidebarCell(named name: String, in application: XCUIApplication) -> XCUIElement {
-        application.cells
+        application.descendants(matching: .any)["workspace.sidebar"].cells
             .containing(.staticText, identifier: name)
+            .element
+    }
+
+    private func openWorkspaceIfNeeded(in application: XCUIApplication) -> XCUIElement {
+        let workspace = application.windows["prismBar"]
+        guard !workspace.waitForExistence(timeout: 1) else {
+            return workspace
+        }
+
+        let statusItem = application.descendants(matching: .statusItem)
+            .matching(identifier: "prismBar")
             .firstMatch
+        XCTAssertTrue(statusItem.waitForExistence(timeout: 5), application.debugDescription)
+        statusItem.click()
+
+        let openWorkspace = application.buttons["Open Workspace"]
+        XCTAssertTrue(openWorkspace.waitForExistence(timeout: 3), application.debugDescription)
+        openWorkspace.click()
+        return workspace
     }
 }

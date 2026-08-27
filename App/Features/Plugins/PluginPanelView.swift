@@ -18,9 +18,9 @@ struct PluginsView: View {
                     eyebrow: "Tools",
                     title: "Tools that stay out of your way.",
                     message: "Enable and inspect focused utilities here, then open each tool in its own window. " +
-                        "The plugin framework keeps every tool isolated and capability-limited."
+                        "The plugin framework keeps every tool isolated and capability-limited.",
+                    identifier: "tools.header.wrench.and.screwdriver"
                 )
-                .accessibilityIdentifier("tools.header.wrench.and.screwdriver")
 
                 if let registration = model.bundledPluginRegistrations.first {
                     pluginCard(registration)

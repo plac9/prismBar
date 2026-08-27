@@ -16,9 +16,9 @@ struct ShortcutsView: View {
                     eyebrow: "Automation",
                     title: "Fast paths, on your terms.",
                     message: "Use standard app commands while prismBar is frontmost. " +
-                        "No background key monitoring is required."
+                        "No background key monitoring is required.",
+                    identifier: "automation.header.bolt.badge.clock"
                 )
-                .accessibilityIdentifier("automation.header.bolt.badge.clock")
 
                 PrismContentSurface {
                     VStack(alignment: .leading, spacing: 0) {

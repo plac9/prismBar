@@ -101,6 +101,7 @@ struct PageHeader: View {
     let eyebrow: String
     let title: String
     let message: String
+    let identifier: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -111,6 +112,7 @@ struct PageHeader: View {
             Text(title)
                 .font(.system(.largeTitle, design: .rounded, weight: .bold))
                 .accessibilityAddTraits(.isHeader)
+                .accessibilityIdentifier(identifier)
 
             Text(message)
                 .font(.body)

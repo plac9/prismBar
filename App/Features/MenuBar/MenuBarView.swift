@@ -20,9 +20,9 @@ struct MenuBarView: View {
                     eyebrow: "Organization",
                     title: "Menu Bar",
                     message: "Move directly to any position in a section. Every action is checked " +
-                        "against a fresh macOS topology before it is reported as complete."
+                        "against a fresh macOS topology before it is reported as complete.",
+                    identifier: "menuBar.header.menubar.rectangle"
                 )
-                .accessibilityIdentifier("menuBar.header.menubar.rectangle")
 
                 if model.accessibilityState == .granted {
                     menuBarControls

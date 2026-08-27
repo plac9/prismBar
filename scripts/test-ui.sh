@@ -7,21 +7,7 @@ cd "$repository_root"
 test_selection="${1:-prismBarUITests}"
 
 if [ "$test_selection" = "--source-audit" ]; then
-  if rg -n 'PrismBackdrop|PrismLightField|PrismRay|PrismMark|GlassCard|GlassEffectContainer' \
-      App/Features App/Design/PrismVisuals.swift; then
-    echo "Obsolete decorative glass or page artwork remains." >&2
-    exit 1
-  fi
-  if ! rg -q '\.glassEffect\(' App/Design/PrismVisuals.swift; then
-    echo "The centralized native glass surface is missing." >&2
-    exit 1
-  fi
-  if rg -n '\.glassEffect\(' App/Features \
-      --glob '!**/PrismDeckView.swift' \
-      --glob '!**/PrismRailView.swift'; then
-    echo "An unsanctioned feature-level glass effect bypasses the shared surface." >&2
-    exit 1
-  fi
+  ./scripts/audit-liquid-glass.sh
   if rg -n 'resultSymbol\(for: message\)|isSuccessfulResult|message\.hasPrefix' App; then
     echo "Menu action feedback is still classified from display text." >&2
     exit 1
@@ -55,7 +41,7 @@ if [ "$test_selection" = "--source-audit" ]; then
     echo "Manual AppKit ownership remains for a SwiftUI application window." >&2
     exit 1
   fi
-  echo "UI source audit passed: native glass is centralized with bounded floating-surface exceptions."
+  echo "UI source audit passed: native navigation, content materials, and interactive glass are separated."
   exit 0
 fi
 

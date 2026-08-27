@@ -12,9 +12,9 @@ struct PrivacyView: View {
                     symbol: "hand.raised",
                     eyebrow: "Private by construction",
                     title: "Your menu bar stays on your Mac.",
-                    message: PrivacyCopy.observation + " " + PrivacyCopy.boundary
+                    message: PrivacyCopy.observation + " " + PrivacyCopy.boundary,
+                    identifier: "privacy.header.hand.raised"
                 )
-                .accessibilityIdentifier("privacy.header.hand.raised")
 
                 PrismContentSurface {
                     VStack(alignment: .leading, spacing: 16) {

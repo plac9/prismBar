@@ -16,9 +16,9 @@ struct AboutView: View {
                     symbol: "info.circle",
                     eyebrow: "LaClair Technologies",
                     title: "prismBar",
-                    message: "A clean-room, public-source menu bar organizer built exclusively for macOS 27."
+                    message: "A clean-room, public-source menu bar organizer built exclusively for macOS 27.",
+                    identifier: "about.header.info.circle"
                 )
-                .accessibilityIdentifier("about.header.info.circle")
 
                 PrismContentSurface {
                     VStack(alignment: .leading, spacing: 18) {

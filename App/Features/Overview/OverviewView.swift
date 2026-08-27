@@ -18,9 +18,9 @@ struct OverviewView: View {
                     eyebrow: "Home",
                     title: "Your menu bar, in focus.",
                     message: "Organize once, move directly, and recover confidently. " +
-                        "Every change is checked against the menu bar macOS actually presents."
+                        "Every change is checked against the menu bar macOS actually presents.",
+                    identifier: "home.header.sparkles"
                 )
-                .accessibilityIdentifier("home.header.sparkles")
 
                 PrismContentSurface {
                     VStack(alignment: .leading, spacing: 4) {

@@ -38,6 +38,7 @@ struct MainWindowView: View {
                 detailView
             }
             .backgroundExtensionEffect()
+            .accessibilityElement(children: .contain)
             .accessibilityIdentifier("workspace.prismaticCanvas")
         }
         .navigationTitle("prismBar")
