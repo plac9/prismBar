@@ -6,38 +6,57 @@ import AppKit
 import SwiftUI
 
 struct PrismCanvasBackground: View {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         ZStack {
-            Color(nsColor: .windowBackgroundColor)
+            canvasBase
 
-            LinearGradient(
-                colors: [
-                    Color.accentColor.opacity(colorScheme == .dark ? 0.16 : 0.10),
-                    .clear,
-                    Color.indigo.opacity(colorScheme == .dark ? 0.12 : 0.07),
-                ],
-                startPoint: .topTrailing,
-                endPoint: .bottomLeading
-            )
+            if !reduceTransparency {
+                AngularGradient(
+                    colors: [
+                        Color(red: 0.14, green: 0.55, blue: 1.00).opacity(0.30),
+                        Color(red: 0.44, green: 0.84, blue: 1.00).opacity(0.18),
+                        Color(red: 0.48, green: 0.42, blue: 1.00).opacity(0.22),
+                        .clear,
+                        Color(red: 0.14, green: 0.55, blue: 1.00).opacity(0.30),
+                    ],
+                    center: .topLeading,
+                    startAngle: .degrees(-30),
+                    endAngle: .degrees(250)
+                )
+                .blur(radius: 54)
 
-            RadialGradient(
-                colors: [
-                    Color.cyan.opacity(colorScheme == .dark ? 0.10 : 0.07),
-                    .clear,
-                ],
-                center: .topLeading,
-                startRadius: 20,
-                endRadius: 520
-            )
+                LinearGradient(
+                    colors: [
+                        .clear,
+                        canvasBase.opacity(0.30),
+                        canvasBase.opacity(0.88),
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+
+                Rectangle()
+                    .fill(.ultraThinMaterial)
+                    .opacity(0.26)
+            }
         }
         .ignoresSafeArea()
         .accessibilityHidden(true)
     }
+
+    private var canvasBase: Color {
+        colorScheme == .dark
+            ? Color(red: 0.045, green: 0.065, blue: 0.095)
+            : Color(red: 0.925, green: 0.955, blue: 0.985)
+    }
 }
 
-struct PrismGlassSurface<Content: View>: View {
+struct PrismContentSurface<Content: View>: View {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
     private let tint: Color?
     private let content: Content
 
@@ -51,13 +70,29 @@ struct PrismGlassSurface<Content: View>: View {
 
     var body: some View {
         content
-            .padding(16)
-            .glassEffect(glass, in: .rect(cornerRadius: 20))
+            .padding(18)
+            .background {
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(reduceTransparency ? AnyShapeStyle(opaqueSurface) : AnyShapeStyle(.regularMaterial))
+                    .overlay {
+                        if let tint {
+                            LinearGradient(
+                                colors: [tint.opacity(0.13), .clear],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                            .clipShape(.rect(cornerRadius: 20))
+                        }
+                    }
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(.separator.opacity(0.42), lineWidth: 0.5)
+            }
     }
 
-    private var glass: Glass {
-        guard let tint else { return .regular }
-        return .regular.tint(tint.opacity(0.16))
+    private var opaqueSurface: Color {
+        Color(nsColor: .controlBackgroundColor)
     }
 }
 
@@ -74,7 +109,7 @@ struct PageHeader: View {
                 .foregroundStyle(.secondary)
 
             Text(title)
-                .font(.largeTitle.bold())
+                .font(.system(.largeTitle, design: .rounded, weight: .bold))
                 .accessibilityAddTraits(.isHeader)
 
             Text(message)

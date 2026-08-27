@@ -36,7 +36,9 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 
 ### Changed
 
-- Adopted centralized native macOS 27 Liquid Glass surfaces across the workspace and Settings.
+- Rebuilt the workspace around one adaptive Prism Field canvas, a native floating sidebar, standard-material content,
+  and interactive Liquid Glass reserved for controls and draggable Prism Rail items.
+- Added a CI contract that rejects decorative content-layer Liquid Glass regressions.
 - Migrated the workspace, prismCalc utility, and Settings lifecycle to native SwiftUI scenes while preserving the AppKit status-item popover boundary.
 - Replaced the status-item artwork with a template-rendered prism identity shared by the app UI.
 
@@ -48,4 +50,5 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 - Replaced deprecated disk-image creation with the native macOS 27 `diskutil image` workflow.
 - Enforced a hard observation deadline even when an Accessibility reader does not cooperate with cancellation.
 - Made native menu bar movement use a dense bounded Command-drag with guaranteed mouse, modifier, and pointer cleanup.
+- Kept same-section direct moves stable while unrelated menu bar sources appear or disappear during preflight.
 - Synchronized verified post-move topology directly into the interface instead of waiting for a second refresh.

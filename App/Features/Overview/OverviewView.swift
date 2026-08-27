@@ -22,7 +22,7 @@ struct OverviewView: View {
                 )
                 .accessibilityIdentifier("home.header.sparkles")
 
-                PrismGlassSurface {
+                PrismContentSurface {
                     VStack(alignment: .leading, spacing: 4) {
                         Label("Readiness", systemImage: "checkmark.circle")
                             .font(.headline)
@@ -85,7 +85,7 @@ struct OverviewView: View {
     }
 
     private var permissionSurface: some View {
-        PrismGlassSurface(tint: permissionTint) {
+        PrismContentSurface(tint: permissionTint) {
             VStack(alignment: .leading, spacing: 16) {
                 Label(actionTitle, systemImage: actionSymbol)
                     .font(.headline)

@@ -20,7 +20,7 @@ struct ShortcutsView: View {
                 )
                 .accessibilityIdentifier("automation.header.bolt.badge.clock")
 
-                PrismGlassSurface {
+                PrismContentSurface {
                     VStack(alignment: .leading, spacing: 0) {
                         Label("prismBar commands", systemImage: "command")
                             .font(.headline)
@@ -56,7 +56,7 @@ struct ShortcutsView: View {
                     }
                 }
 
-                PrismGlassSurface(tint: .blue) {
+                PrismContentSurface(tint: .blue) {
                     Label {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("No global keyboard monitoring")

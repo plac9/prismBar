@@ -29,7 +29,11 @@ struct PrismRailView: View {
             lane(for: .hidden)
         }
         .padding(12)
-        .glassEffect(.regular, in: .rect(cornerRadius: 14))
+        .background(.regularMaterial, in: .rect(cornerRadius: 16))
+        .overlay {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(.separator.opacity(0.38), lineWidth: 0.5)
+        }
         .accessibilityIdentifier("prismRail")
         .onChange(of: snapshot.generation) {
             dragTokens = Self.makeDragTokens(for: snapshot)
@@ -135,13 +139,16 @@ private extension PrismRailView {
             }
 
         if canMove(item), let token = dragTokens[item.id] {
-            content.draggable(token) {
-                railItemContent(item)
-                    .padding(4)
-                    .background(.regularMaterial, in: .capsule)
-            }
+            content
+                .glassEffect(.regular.interactive(), in: .capsule)
+                .draggable(token) {
+                    railItemContent(item)
+                        .padding(4)
+                        .background(.regularMaterial, in: .capsule)
+                }
         } else {
             content
+                .background(.thinMaterial, in: .capsule)
         }
     }
 
@@ -158,7 +165,10 @@ private extension PrismRailView {
         }
         .padding(.horizontal, 9)
         .frame(height: 32)
-        .background(itemBackground(item), in: .capsule)
+        .background {
+            Capsule()
+                .fill(itemBackground(item))
+        }
         .overlay {
             Capsule()
                 .stroke(itemStroke(item), lineWidth: targetedItemID == item.id ? 2 : 0.5)

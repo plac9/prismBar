@@ -20,7 +20,7 @@ struct AboutView: View {
                 )
                 .accessibilityIdentifier("about.header.info.circle")
 
-                PrismGlassSurface {
+                PrismContentSurface {
                     VStack(alignment: .leading, spacing: 18) {
                         Label("Build", systemImage: "hammer")
                             .font(.headline)
@@ -36,7 +36,7 @@ struct AboutView: View {
                     }
                 }
 
-                PrismGlassSurface(tint: .blue) {
+                PrismContentSurface(tint: .blue) {
                     VStack(alignment: .leading, spacing: 16) {
                         Label {
                             VStack(alignment: .leading, spacing: 4) {

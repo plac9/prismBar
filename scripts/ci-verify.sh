@@ -23,6 +23,7 @@ done
 ./scripts/audit-tool-versions.sh
 ./scripts/audit-licensing.sh
 ./scripts/audit-public-safety.sh
+./scripts/audit-liquid-glass.sh
 Tests/ReleaseWorkflowTests/notarization_contract.sh
 Tests/ReleaseWorkflowTests/assurance_contract.sh
 
@@ -103,7 +104,7 @@ jq -n \
     completedAt: $completedAt,
     scopes: [
       "toolchain contract",
-      "licensing and public safety",
+      "licensing, public safety, and Liquid Glass structure",
       "Git history secret scan",
       "Swift lint",
       "debug and release tests",

@@ -180,43 +180,43 @@ private extension PrismDeckView {
                 .font(.callout)
                 .foregroundStyle(.secondary)
 
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 12) {
-                    Image(systemName: "plus.forwardslash.minus")
-                        .font(.title2.weight(.semibold))
-                        .foregroundStyle(.tint)
-                        .frame(width: 38, height: 38)
-                        .background(.background.secondary, in: .rect(cornerRadius: 10))
+            PrismContentSurface {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "plus.forwardslash.minus")
+                            .font(.title2.weight(.semibold))
+                            .foregroundStyle(.tint)
+                            .frame(width: 38, height: 38)
+                            .background(.background.secondary, in: .rect(cornerRadius: 10))
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("prismCalc")
-                            .font(.headline)
-                        Text(toolStatusTitle)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("prismCalc")
+                                .font(.headline)
+                            Text(toolStatusTitle)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
                     }
 
-                    Spacer()
-                }
-
-                Text("A private calculator powered by an isolated, signed tool service.")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-
-                HStack {
-                    Label("Local only", systemImage: "lock.shield")
-                        .font(.caption.weight(.medium))
+                    Text("A private calculator powered by an isolated, signed tool service.")
+                        .font(.callout)
                         .foregroundStyle(.secondary)
-                    Spacer()
-                    Button("Open prismCalc", systemImage: "arrow.up.forward.app") {
-                        openPrismCalc()
+
+                    HStack {
+                        Label("Local only", systemImage: "lock.shield")
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button("Open prismCalc", systemImage: "arrow.up.forward.app") {
+                            openPrismCalc()
+                        }
+                        .buttonStyle(.glassProminent)
+                        .disabled(!model.isPluginEnabled)
                     }
-                    .buttonStyle(.glassProminent)
-                    .disabled(!model.isPluginEnabled)
                 }
             }
-            .padding(14)
-            .glassEffect(.regular, in: .rect(cornerRadius: 16))
 
             if !model.isPluginEnabled {
                 Button("Enable prismCalc", systemImage: "power") {

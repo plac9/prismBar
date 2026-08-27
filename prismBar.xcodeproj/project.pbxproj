@@ -43,6 +43,7 @@
 		C0522F43C20205737E92FE31 /* PrismDeckTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A31F5C43CC8171F9EC4B8 /* PrismDeckTests.swift */; };
 		C53909CC424B09D0C2210692 /* AboutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4AFC1F58957D7941D311EC5 /* AboutTests.swift */; };
 		CE3C57B543CBD6AECD63561D /* PluginPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0F54F091A7C16DF376F2 /* PluginPanelView.swift */; };
+		D1710DA94CF4C0E750EEBA4F /* WorkspaceVisualStructureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F94844597D55920442A36A2 /* WorkspaceVisualStructureTests.swift */; };
 		D9B7872CF4A511B07328CA42 /* prismBarEngine in Frameworks */ = {isa = PBXBuildFile; productRef = F163278A06D1EDC2E5F2385E /* prismBarEngine */; };
 		DD537356A91D55381A1A1A56 /* AppLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 315A0592B925D2DB82D37406 /* AppLifecycle.swift */; };
 		DD8426C4530DC0C44B08D0C9 /* PrismDeckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DD7849C14D7A756FFCC474 /* PrismDeckView.swift */; };
@@ -108,6 +109,7 @@
 		59DD7849C14D7A756FFCC474 /* PrismDeckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismDeckView.swift; sourceTree = "<group>"; };
 		6419CB2641AFB03C2890E55D /* NOTICE */ = {isa = PBXFileReference; path = NOTICE; sourceTree = "<group>"; };
 		6A119DE84BE83C7F3F0E19DF /* PluginService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginService.swift; sourceTree = "<group>"; };
+		6F94844597D55920442A36A2 /* WorkspaceVisualStructureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceVisualStructureTests.swift; sourceTree = "<group>"; };
 		72367E88666AEFDC8C0C684C /* MainWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowView.swift; sourceTree = "<group>"; };
 		7378E53EB6132FCE8C0FE07C /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		74D21E1BE361A7B6B790F767 /* VisualAuditTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualAuditTests.swift; sourceTree = "<group>"; };
@@ -285,6 +287,7 @@
 				75ABFACBE8B5FA2F47CAF31F /* LaunchTests.swift */,
 				109A31F5C43CC8171F9EC4B8 /* PrismDeckTests.swift */,
 				74D21E1BE361A7B6B790F767 /* VisualAuditTests.swift */,
+				6F94844597D55920442A36A2 /* WorkspaceVisualStructureTests.swift */,
 			);
 			path = prismBarUITests;
 			sourceTree = "<group>";
@@ -565,6 +568,7 @@
 				53A67AB1D743C9191CAD41ED /* LaunchTests.swift in Sources */,
 				C0522F43C20205737E92FE31 /* PrismDeckTests.swift in Sources */,
 				E9D571B8238F9A3B29D7EA68 /* VisualAuditTests.swift in Sources */,
+				D1710DA94CF4C0E750EEBA4F /* WorkspaceVisualStructureTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

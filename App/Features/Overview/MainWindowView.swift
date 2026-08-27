@@ -11,52 +11,34 @@ struct MainWindowView: View {
 
     var body: some View {
         NavigationSplitView {
-            VStack(spacing: 0) {
-                HStack(spacing: 10) {
-                    Image(nsImage: PrismStatusIcon.image)
-                        .imageScale(.large)
-                        .foregroundStyle(.tint)
-                        .accessibilityHidden(true)
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text("prismBar")
-                            .font(.headline)
-                        Text("Menu bar workspace")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer(minLength: 0)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
-
-                Divider()
-
-                List(selection: $selection) {
-                    Section {
-                        ForEach(WorkspaceDestination.primary) { destination in
-                            Label(destination.title, systemImage: destination.symbol)
-                                .tag(destination)
-                                .padding(.vertical, 4)
-                        }
-                    }
-
-                    Section("Information") {
-                        ForEach(WorkspaceDestination.information) { destination in
-                            Label(destination.title, systemImage: destination.symbol)
-                                .tag(destination)
-                                .padding(.vertical, 4)
-                        }
+            List(selection: $selection) {
+                Section {
+                    ForEach(WorkspaceDestination.primary) { destination in
+                        Label(destination.title, systemImage: destination.symbol)
+                            .tag(destination)
+                            .padding(.vertical, 4)
                     }
                 }
-                .listStyle(.sidebar)
-                .accessibilityIdentifier("workspace.sidebar")
+
+                Section("Information") {
+                    ForEach(WorkspaceDestination.information) { destination in
+                        Label(destination.title, systemImage: destination.symbol)
+                            .tag(destination)
+                            .padding(.vertical, 4)
+                    }
+                }
             }
+            .listStyle(.sidebar)
+            .navigationTitle("prismBar")
+            .accessibilityIdentifier("workspace.sidebar")
             .navigationSplitViewColumnWidth(min: 190, ideal: 220, max: 260)
         } detail: {
             ZStack {
                 PrismCanvasBackground()
                 detailView
             }
+            .backgroundExtensionEffect()
+            .accessibilityIdentifier("workspace.prismaticCanvas")
         }
         .navigationTitle("prismBar")
         .toolbar {

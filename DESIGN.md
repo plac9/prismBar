@@ -3,12 +3,12 @@ version: alpha
 name: prismBar Prism Deck
 description: Native macOS 27 design contract for prismBar command, workspace, and tool surfaces
 colors:
-  primary: "#0067D9"
-  refractedBlue: "#38A8FF"
-  refractedViolet: "#6750D8"
-  refractedCyan: "#007C91"
-  lightContent: "#F5F5F7"
-  lightPrimaryText: "#1D1D1F"
+  primary: "#248CFF"
+  refractedBlue: "#70D6FF"
+  refractedCyan: "#38A8FF"
+  refractedViolet: "#7A6BFF"
+  graphiteCanvas: "#0B1118"
+  frostCanvas: "#ECF4FB"
 typography:
   pageTitle:
     fontFamily: SF Pro Display
@@ -56,8 +56,8 @@ components:
     padding: "{spacing.sm}"
     typography: "{typography.body}"
   tool-badge:
-    textColor: "{colors.lightPrimaryText}"
-    backgroundColor: "{colors.lightContent}"
+    textColor: "{colors.graphiteCanvas}"
+    backgroundColor: "{colors.frostCanvas}"
     rounded: "{rounded.pill}"
     padding: "{spacing.xs}"
     typography: "{typography.detail}"
@@ -78,9 +78,9 @@ prismBar should feel like a compact macOS instrument: immediately understandable
 
 # Colors
 
-`primary` is the product action tint for enabled primary controls and selected tool identity. Refracted blue, violet, and cyan form the prism spectrum. Use them only for the app mark, a narrow decorative prism edge, or a short transition between product modes. They are not page backgrounds, status colors, or replacements for semantic system colors.
+`primary` is the product action tint for enabled primary controls and selected tool identity. Refracted blue and violet form the prism spectrum. Their one large-scale use is the low-chroma Prism Field canvas behind workspace content. The field stays beneath content, fades toward the semantic canvas base, and extends under the native sidebar so system Liquid Glass has meaningful color to refract. Spectrum colors never replace semantic status colors or text.
 
-Content backgrounds, primary text, secondary text, separators, warnings, destructive states, success, and keyboard focus use native semantic macOS values. The light and dark content tokens document visual targets for design tooling, not hardcoded appearance overrides. SwiftUI implementations must use semantic system values and follow the active system appearance.
+Content surfaces, primary text, secondary text, separators, warnings, destructive states, success, and keyboard focus use native semantic macOS values. Graphite and frost are the adaptive Prism Field bases. Reduce Transparency removes the refracted field and uses an opaque semantic content surface.
 
 # Typography
 
@@ -94,7 +94,7 @@ Use the spacing tokens as rhythm, not as fixed geometry that defeats platform ad
 
 # Elevation & Depth
 
-macOS owns elevation through native windows, menus, popovers, sheets, and Liquid Glass. Do not paint a translucent full-window background, stack blur cards, or add decorative drop shadows. Content grouping uses semantic fills, separators, list selection, and whitespace. A prism spectrum may appear as a one-pixel or two-pixel identity edge, never as a readability layer.
+macOS owns elevation through native windows, menus, popovers, sheets, and Liquid Glass. The workspace has one Prism Field content canvas. Persistent groups use standard macOS materials, separators, list selection, and whitespace. Liquid Glass is reserved for navigation and interactive controls, including draggable Prism Rail chips. Do not stack glass cards or add decorative drop shadows.
 
 # Shapes
 
@@ -129,7 +129,7 @@ The Prism Deck mode control is a standard segmented picker. Menu-item rows use n
 
 - Do not embed a working calculator in Settings or the Tools management page.
 - Do not advertise arbitrary third-party plugin installation.
-- Do not simulate Liquid Glass with custom blur, shine, translucency, or stacked material cards.
+- Do not use custom Liquid Glass in persistent content surfaces or stack material cards.
 - Do not use thaw, ice, cube, droplet, or melting imagery.
 - Do not expose observed menu titles, process identity, paths, coordinates, Accessibility values, or plugin payloads in logs or diagnostics.
-- Do not use spectral colors as status semantics or on large content backgrounds.
+- Do not use spectral colors as status semantics or inside dense content surfaces.

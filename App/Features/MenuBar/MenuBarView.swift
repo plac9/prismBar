@@ -61,7 +61,7 @@ struct MenuBarView: View {
 
 private extension MenuBarView {
     private var menuBarControls: some View {
-        PrismGlassSurface {
+        PrismContentSurface {
             VStack(alignment: .leading, spacing: 12) {
                 Label("Menu bar controls", systemImage: "slider.horizontal.3")
                     .font(.headline)
@@ -193,6 +193,12 @@ private extension MenuBarView {
                     }
                 }
                 .listStyle(.inset)
+                .scrollContentBackground(.hidden)
+                .background(.regularMaterial, in: .rect(cornerRadius: 16))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(.separator.opacity(0.38), lineWidth: 0.5)
+                }
                 .frame(minHeight: 220)
             } else {
                 ContentUnavailableView {

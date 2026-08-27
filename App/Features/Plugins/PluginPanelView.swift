@@ -42,7 +42,7 @@ struct PluginsView: View {
     }
 
     private func pluginCard(_ registration: BundledPluginRegistration) -> some View {
-        PrismGlassSurface {
+        PrismContentSurface {
             VStack(alignment: .leading, spacing: 14) {
                 Label("Available tools", systemImage: "shippingbox")
                     .font(.headline)
