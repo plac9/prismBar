@@ -45,6 +45,17 @@
             parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "419BBA190B6658B3769D50CE"
+               BuildableName = "prismBarAppTests.xctest"
+               BlueprintName = "prismBarAppTests"
+               ReferencedContainer = "container:prismBar.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "DDF06A9425D497F142896BED"
                BuildableName = "prismBarUITests.xctest"
                BlueprintName = "prismBarUITests"

@@ -34,6 +34,14 @@ final class LaunchTests: XCTestCase {
         menuBarDestination.click()
 
         XCTAssertTrue(application.staticTexts["Accessibility required"].waitForExistence(timeout: 5))
+        XCTAssertTrue(
+            application.buttons["menuBar.primaryRecovery"]
+                .waitForExistence(timeout: 3)
+        )
+        XCTAssertTrue(
+            application.buttons["menuBar.checkAccess"]
+                .waitForExistence(timeout: 3)
+        )
     }
 
     func testChangingDestinationsDoesNotResizeOrDisplaceTheWindow() {

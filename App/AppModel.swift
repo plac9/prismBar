@@ -125,7 +125,11 @@ final class AppModel {
         }
     }
 
-    func refreshMenuBar() {
+    func refreshMenuBar(preservingActionResult: Bool = false) {
+        if !preservingActionResult {
+            menuBarActionState = .idle
+        }
+
         guard accessibilityState == .granted else {
             invalidateMenuBar()
             return

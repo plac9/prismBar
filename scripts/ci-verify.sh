@@ -41,9 +41,6 @@ if ! git diff --quiet -- prismBar.xcodeproj; then
   exit 1
 fi
 
-swiftlint lint --strict
-swift test
-swift test -c release
 verification_root="${CI_VERIFICATION_ROOT:-$(mktemp -d "${TMPDIR:-/tmp}/prismbar-ci.XXXXXX")}"
 if [ -z "${CI_VERIFICATION_ROOT:-}" ]; then
   cleanup() {
@@ -52,6 +49,21 @@ if [ -z "${CI_VERIFICATION_ROOT:-}" ]; then
   }
   trap cleanup EXIT INT TERM
 fi
+
+swiftlint lint --strict
+swift test
+swift test -c release
+
+xcodebuild \
+  -project prismBar.xcodeproj \
+  -scheme prismBar \
+  -destination 'platform=macOS,arch=arm64' \
+  -derivedDataPath "$verification_root/AppTests" \
+  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGNING_REQUIRED=NO \
+  "PRISM_SOURCE_REVISION=$revision" \
+  test \
+  '-only-testing:prismBarAppTests'
 
 swift test --sanitize=address --scratch-path \
   "${CI_ADDRESS_SANITIZER_DIR:-$verification_root/SwiftPM-ASan}"
@@ -95,6 +107,7 @@ jq -n \
       "Git history secret scan",
       "Swift lint",
       "debug and release tests",
+      "hosted application state tests",
       "Address Sanitizer",
       "Thread Sanitizer",
       "Xcode static analysis",

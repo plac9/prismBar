@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import AppKit
 import prismBarCore
 import prismBarEngine
 import SwiftUI
@@ -194,11 +195,20 @@ private extension MenuBarView {
                 .listStyle(.inset)
                 .frame(minHeight: 220)
             } else {
-                ContentUnavailableView(
-                    unavailableTitle,
-                    systemImage: "menubar.rectangle",
-                    description: Text(unavailableDescription)
-                )
+                ContentUnavailableView {
+                    Label(unavailableTitle, systemImage: "menubar.rectangle")
+                } description: {
+                    Text(unavailableDescription)
+                } actions: {
+                    if model.accessibilityState != .granted {
+                        primaryPermissionRecoveryButton
+
+                        Button("Check Again", systemImage: "arrow.clockwise") {
+                            model.refreshAccessibility()
+                        }
+                        .accessibilityIdentifier("menuBar.checkAccess")
+                    }
+                }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
@@ -315,8 +325,42 @@ private extension MenuBarView {
     }
 
     private var unavailableDescription: String {
-        model.accessibilityState == .granted
-            ? "prismBar is building a fresh local topology."
-            : "Return to Overview to grant or refresh Accessibility access."
+        switch model.accessibilityState {
+        case .granted:
+            "prismBar is building a fresh local topology."
+        case .requiresStableInstall:
+            "Install the signed app in Applications, then check access again."
+        case .identityMismatch:
+            "Install the current signed prismBar build before granting access."
+        case .notRequested:
+            "Allow Accessibility to organize the menu bar without reading screen pixels."
+        case .denied:
+            "Review prismBar in Device Control and Data Access, then check again."
+        }
+    }
+
+    @ViewBuilder
+    private var primaryPermissionRecoveryButton: some View {
+        switch model.accessibilityState {
+        case .requiresStableInstall, .identityMismatch:
+            Button("Show in Finder", systemImage: "finder") {
+                NSWorkspace.shared.activateFileViewerSelecting([
+                    URL(fileURLWithPath: "/Applications/prismBar.app"),
+                ])
+            }
+            .accessibilityIdentifier("menuBar.primaryRecovery")
+        case .notRequested:
+            Button("Allow Access", systemImage: "hand.raised") {
+                model.requestAccessibility()
+            }
+            .accessibilityIdentifier("menuBar.primaryRecovery")
+        case .denied:
+            Button("Review Access", systemImage: "hand.raised") {
+                model.requestAccessibility()
+            }
+            .accessibilityIdentifier("menuBar.primaryRecovery")
+        case .granted:
+            EmptyView()
+        }
     }
 }

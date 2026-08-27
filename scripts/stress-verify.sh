@@ -45,6 +45,16 @@ trap cleanup EXIT INT TERM
 
 while [ "$(date '+%s')" -lt "$deadline_epoch" ]; do
   swift test --scratch-path "$stress_scratch/SwiftPM"
+  xcodebuild \
+    -project prismBar.xcodeproj \
+    -scheme prismBar \
+    -destination 'platform=macOS,arch=arm64' \
+    -derivedDataPath "$stress_scratch/AppTests-DerivedData" \
+    CODE_SIGNING_ALLOWED=NO \
+    CODE_SIGNING_REQUIRED=NO \
+    "PRISM_SOURCE_REVISION=$revision" \
+    test \
+    '-only-testing:prismBarAppTests'
   PRISM_SOURCE_REVISION="$revision" \
     UI_DERIVED_DATA_DIR="$stress_scratch/UI-DerivedData" \
     ./scripts/test-ui.sh
@@ -78,6 +88,7 @@ jq -n \
     scopes: [
       "host and window lifecycle",
       "permission state and refresh",
+      "action feedback lifecycle",
       "synthetic movement invariants",
       "plugin commands and isolation",
       "plugin crash, hang, timeout, and recovery",

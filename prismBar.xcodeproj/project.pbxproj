@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01B5BF2BBC8F97D97D789529 /* AppModelActionFeedbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA48AA25661199CF523152D5 /* AppModelActionFeedbackTests.swift */; };
 		058E0E5D91058313EDE6A007 /* PrismStatusIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24DA04C9442819CB0ACBD9C3 /* PrismStatusIcon.swift */; };
 		23C7CD3092A6C22746D5E360 /* prismPluginKit in Frameworks */ = {isa = PBXBuildFile; productRef = 59E02B0BFBF75C5AD8B9BD1E /* prismPluginKit */; };
 		24D6BDA4F82765035F4809EF /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A756F325D68C0D906A6D4318 /* MenuBarView.swift */; };
@@ -53,6 +54,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		3784D5CDE3FD6F5527CCEA89 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 45586A27C38A8FA4AF5E3910 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2B5A286FB1B6A98296153BEF;
+			remoteInfo = prismBar;
+		};
 		58C870E0144F9E6E219CFB7B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 45586A27C38A8FA4AF5E3910 /* Project object */;
@@ -111,6 +119,7 @@
 		965655B6F8C2B531AB8DB3CA /* ServiceMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceMain.swift; sourceTree = "<group>"; };
 		9D8BAE01F43F46DF5610002B /* MenuBarSectionStatusController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarSectionStatusController.swift; sourceTree = "<group>"; };
 		A756F325D68C0D906A6D4318 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
+		AA48AA25661199CF523152D5 /* AppModelActionFeedbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModelActionFeedbackTests.swift; sourceTree = "<group>"; };
 		B4AFC1F58957D7941D311EC5 /* AboutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutTests.swift; sourceTree = "<group>"; };
 		B99796874F6C0C859873DF49 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		BB0E9A57FF0B8B5227635A91 /* SettingsRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRootView.swift; sourceTree = "<group>"; };
@@ -121,6 +130,7 @@
 		DB6BE812961FA45556F1A760 /* PrivacyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyView.swift; sourceTree = "<group>"; };
 		DF27A6A8B0FFD6B7F0BC226A /* PrismCalcUtilityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismCalcUtilityView.swift; sourceTree = "<group>"; };
 		ED2184D0F302BEBEA3AD3520 /* prismBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = prismBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EE5604D54BCB73D186D8E912 /* prismBarAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = prismBarAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F277020FA698706F25C0B310 /* prismCalcPluginService.xpc */ = {isa = PBXFileReference; explicitFileType = "wrapper.xpc-service"; includeInIndex = 0; path = prismCalcPluginService.xpc; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF2F6970047364DDA27C5F2C /* ShortcutsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -218,6 +228,7 @@
 		79B5390E0207009FEC8E19E6 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				9462D9B83ECB0BA77921B04B /* prismBarAppTests */,
 				9D37D4AA5D5AB1544CE4903A /* prismBarUITests */,
 			);
 			path = Tests;
@@ -237,6 +248,14 @@
 				3DA42353B48097F47E64CF57 /* prismBar */,
 			);
 			name = Packages;
+			sourceTree = "<group>";
+		};
+		9462D9B83ECB0BA77921B04B /* prismBarAppTests */ = {
+			isa = PBXGroup;
+			children = (
+				AA48AA25661199CF523152D5 /* AppModelActionFeedbackTests.swift */,
+			);
+			path = prismBarAppTests;
 			sourceTree = "<group>";
 		};
 		9943D0DC4530D7325413DA83 /* Shortcuts */ = {
@@ -299,6 +318,7 @@
 			isa = PBXGroup;
 			children = (
 				ED2184D0F302BEBEA3AD3520 /* prismBar.app */,
+				EE5604D54BCB73D186D8E912 /* prismBarAppTests.xctest */,
 				132DB0E7D319E4672B6E1A58 /* prismBarUITests.xctest */,
 				F277020FA698706F25C0B310 /* prismCalcPluginService.xpc */,
 			);
@@ -359,6 +379,24 @@
 			productReference = ED2184D0F302BEBEA3AD3520 /* prismBar.app */;
 			productType = "com.apple.product-type.application";
 		};
+		419BBA190B6658B3769D50CE /* prismBarAppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D0A39AD366337503F058DBEA /* Build configuration list for PBXNativeTarget "prismBarAppTests" */;
+			buildPhases = (
+				422FC7E89CCA257427906863 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C817195E06CCCE5874668DC5 /* PBXTargetDependency */,
+			);
+			name = prismBarAppTests;
+			packageProductDependencies = (
+			);
+			productName = prismBarAppTests;
+			productReference = EE5604D54BCB73D186D8E912 /* prismBarAppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		BEBC396C61513B29546F3173 /* prismCalcPluginService */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9897A35F382F14F6325AB572 /* Build configuration list for PBXNativeTarget "prismCalcPluginService" */;
@@ -410,6 +448,10 @@
 						DevelopmentTeam = N8A5T2PZY9;
 						ProvisioningStyle = Automatic;
 					};
+					419BBA190B6658B3769D50CE = {
+						DevelopmentTeam = N8A5T2PZY9;
+						ProvisioningStyle = Automatic;
+					};
 					BEBC396C61513B29546F3173 = {
 						DevelopmentTeam = N8A5T2PZY9;
 						ProvisioningStyle = Automatic;
@@ -441,6 +483,7 @@
 				2B5A286FB1B6A98296153BEF /* prismBar */,
 				BEBC396C61513B29546F3173 /* prismCalcPluginService */,
 				DDF06A9425D497F142896BED /* prismBarUITests */,
+				419BBA190B6658B3769D50CE /* prismBarAppTests */,
 			);
 		};
 /* End PBXProject section */
@@ -467,6 +510,14 @@
 			files = (
 				B9A46C4C763328F81D998C81 /* PluginService.swift in Sources */,
 				4C4F9058AA0DC0F2C69F0EF0 /* ServiceMain.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		422FC7E89CCA257427906863 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				01B5BF2BBC8F97D97D789529 /* AppModelActionFeedbackTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -526,6 +577,11 @@
 			target = 2B5A286FB1B6A98296153BEF /* prismBar */;
 			targetProxy = F55C3EDE8A1B54FA44049CCA /* PBXContainerItemProxy */;
 		};
+		C817195E06CCCE5874668DC5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2B5A286FB1B6A98296153BEF /* prismBar */;
+			targetProxy = 3784D5CDE3FD6F5527CCEA89 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -546,6 +602,24 @@
 				TEST_TARGET_NAME = prismBar;
 			};
 			name = Debug;
+		};
+		20905F1AB47FAEC1A8C7C0AD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.laclairtech.prismbar.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/prismBar.app/Contents/MacOS/prismBar";
+			};
+			name = Release;
 		};
 		3611232CCA4E16D1BB7F8ACB /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -584,6 +658,24 @@
 				PRODUCT_NAME = prismBar;
 				SDKROOT = macosx;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+			};
+			name = Debug;
+		};
+		76FE6FDD05DE185B8EF2F806 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.laclairtech.prismbar.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/prismBar.app/Contents/MacOS/prismBar";
 			};
 			name = Debug;
 		};
@@ -823,6 +915,15 @@
 			buildConfigurations = (
 				5C5F32D3EFF31E820E6568E7 /* Debug */,
 				D84E076A9EFC30D79F803532 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D0A39AD366337503F058DBEA /* Build configuration list for PBXNativeTarget "prismBarAppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				76FE6FDD05DE185B8EF2F806 /* Debug */,
+				20905F1AB47FAEC1A8C7C0AD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

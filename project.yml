@@ -88,6 +88,7 @@ targets:
     scheme:
       gatherCoverageData: true
       testTargets:
+        - prismBarAppTests
         - prismBarUITests
 
   prismCalcPluginService:
@@ -133,3 +134,16 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.laclairtech.prismbar.uitests
         CODE_SIGNING_ALLOWED: NO
+
+  prismBarAppTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "27.0"
+    sources:
+      - path: Tests/prismBarAppTests
+    dependencies:
+      - target: prismBar
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.laclairtech.prismbar.tests
+        GENERATE_INFOPLIST_FILE: YES
