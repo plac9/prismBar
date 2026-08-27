@@ -5,6 +5,14 @@ set -euo pipefail
 repository_root="$(git rev-parse --show-toplevel)"
 cd "$repository_root"
 
+if [ -n "$(git status --porcelain=v1)" ]; then
+  printf 'CI verification requires a clean committed revision.\n' >&2
+  exit 1
+fi
+
+revision="$(git rev-parse HEAD)"
+started_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+
 for dependency in actionlint gitleaks jq rg swift swiftlint xcodebuild xcodegen; do
   if ! command -v "$dependency" >/dev/null 2>&1; then
     printf 'CI dependency is unavailable: %s\n' "$dependency" >&2
@@ -16,6 +24,7 @@ done
 ./scripts/audit-licensing.sh
 ./scripts/audit-public-safety.sh
 Tests/ReleaseWorkflowTests/notarization_contract.sh
+Tests/ReleaseWorkflowTests/assurance_contract.sh
 
 if [ "$(uname -m)" != "arm64" ] || [[ "$(xcrun --sdk macosx --show-sdk-version)" != 27.* ]]; then
   printf 'CI requires the Apple silicon Xcode 27 runner.\n' >&2
@@ -66,4 +75,33 @@ xcodebuild "${common_build_arguments[@]}" -configuration Release build
 ./scripts/audit-release-bundle.sh \
   "$derived_data_directory/Build/Products/Release/prismBar.app"
 
+evidence_directory="$repository_root/build/ci"
+evidence_path="$evidence_directory/prismBar-ci-$revision.json"
+mkdir -p "$evidence_directory"
+jq -n \
+  --arg revision "$revision" \
+  --arg startedAt "$started_at" \
+  --arg completedAt "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
+  '{
+    schemaVersion: 1,
+    product: "prismBar",
+    sourceRevision: $revision,
+    sourceState: "clean local commit",
+    startedAt: $startedAt,
+    completedAt: $completedAt,
+    scopes: [
+      "toolchain contract",
+      "licensing and public safety",
+      "Git history secret scan",
+      "Swift lint",
+      "debug and release tests",
+      "Address Sanitizer",
+      "Thread Sanitizer",
+      "Xcode static analysis",
+      "unsigned release bundle audit"
+    ],
+    result: "passed"
+  }' > "$evidence_path"
+
 printf 'CI verification passed without signing or publishing artifacts.\n'
+printf 'Evidence: %s\n' "$evidence_path"

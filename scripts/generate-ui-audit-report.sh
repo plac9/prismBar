@@ -8,6 +8,13 @@ if [ "$#" -ne 1 ]; then
 fi
 
 repository_root="$(git rev-parse --show-toplevel)"
+cd "$repository_root"
+if [ -n "$(git status --porcelain=v1)" ]; then
+  printf 'UI audit evidence requires a clean committed revision.\n' >&2
+  exit 1
+fi
+
+revision="$(git rev-parse HEAD)"
 audit_root="$(cd "$1" && pwd -P)"
 expected_prefix="$repository_root/build/ui-audit-"
 
@@ -64,5 +71,28 @@ if [ "$attachment_count" -ne 8 ] || [ ! -s "$report" ]; then
   exit 1
 fi
 
+evidence_directory="$repository_root/build/ui-audit"
+evidence_report="$evidence_directory/prismBar-ui-audit-$revision.html"
+evidence_path="$evidence_directory/prismBar-ui-audit-$revision.json"
+mkdir -p "$evidence_directory"
+sed "s|src=\"screenshots/|src=\"../$(basename "$audit_root")/screenshots/|g" \
+  "$report" > "$evidence_report"
+jq -n \
+  --arg revision "$revision" \
+  --arg generatedAt "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
+  --argjson screenshotCount "$attachment_count" \
+  '{
+    schemaVersion: 1,
+    product: "prismBar",
+    sourceRevision: $revision,
+    sourceState: "clean local commit",
+    generatedAt: $generatedAt,
+    screenshotCount: $screenshotCount,
+    privacyBoundary: "prismBar-owned surfaces with synthetic content only",
+    result: "passed"
+  }' > "$evidence_path"
+
 printf 'UI audit report generated with %s privacy-safe screenshots: %s\n' \
   "$attachment_count" "$report"
+printf 'Revision-bound report: %s\n' "$evidence_report"
+printf 'Evidence: %s\n' "$evidence_path"

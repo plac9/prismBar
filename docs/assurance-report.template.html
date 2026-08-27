@@ -7,7 +7,7 @@
   <style>
     :root { color-scheme: dark; --ink:#eef7ff; --muted:#9bb0c8; --line:#203653;
       --panel:rgba(8,20,39,.82); --blue:#4fa8ff; --cyan:#58e4ff; --good:#70e6ad;
-      --wait:#ffc66d; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif; }
+      --wait:#ffc66d; --bad:#ff8f8f; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif; }
     * { box-sizing:border-box; }
     body { margin:0; min-height:100vh; color:var(--ink); background:
       radial-gradient(circle at 10% 0%,rgba(38,147,255,.24),transparent 36rem),
@@ -24,7 +24,7 @@
     p,li,td,th { line-height:1.5; } .muted { color:var(--muted); } code { color:var(--cyan); }
     .badges { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
     .badge { padding:6px 10px; border:1px solid var(--line); border-radius:999px; font-size:13px; }
-    .pass { color:var(--good); } .pending { color:var(--wait); }
+    .pass { color:var(--good); } .hold { color:var(--wait); } .fail { color:var(--bad); }
     .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
     .card { border-radius:20px; padding:20px; } .card p:last-child { margin-bottom:0; }
     table { width:100%; border-collapse:collapse; overflow:hidden; border-radius:18px; background:var(--panel); }
@@ -43,7 +43,7 @@
     <p>Exact shipping surfaces, native interaction, privacy boundaries, and release gates for revision <code>{{REVISION}}</code>.</p>
     <div class="badges"><span class="badge pass">Native SwiftUI</span><span class="badge pass">Liquid Glass</span>
       <span class="badge pass">Local only</span><span class="badge pass">MPL-2.0</span>
-      <span class="badge pending">Physical release proof pending</span></div>
+      <span class="badge {{PHYSICAL_CLASS}}">{{PHYSICAL_STATUS}}</span></div>
   </div></header>
 
   <h2>Shipping surface audit</h2>
@@ -83,9 +83,11 @@
   <h2>Release truth</h2>
   <table><thead><tr><th>Gate</th><th>Automated status</th></tr></thead><tbody>
     <tr><td>Exact product identity, macOS 27 arm64 baseline, licensing, privacy manifest</td><td class="pass">Implemented and automated</td></tr>
-    <tr><td>Core, sanitizer, analyzer, release-bundle, UI, plugin crash and hang tests</td><td class="pending">Final clean-revision gate pending</td></tr>
-    <tr><td>VoiceOver, larger text, installed Accessibility grant, movement, displays, spaces, sleep, wake, logout, reboot</td><td class="pending">Requires physical signed-app matrix</td></tr>
-    <tr><td>Public revision match, notarization, staple, clean-account Gatekeeper, publication</td><td class="pending">Owner-gated release work</td></tr>
+    <tr><td>Core, sanitizer, analyzer, release-bundle, plugin recovery, UI, and endurance tests</td><td class="{{AUTOMATED_CLASS}}">{{AUTOMATED_STATUS}}</td></tr>
+    <tr><td>Privacy-safe visual audit of every shipping destination</td><td class="{{UI_AUDIT_CLASS}}">{{UI_AUDIT_STATUS}} {{UI_AUDIT_LINK}}</td></tr>
+    <tr><td>VoiceOver, larger text, installed Accessibility grant, movement, displays, spaces, sleep, wake, logout, and reboot</td><td class="{{PHYSICAL_CLASS}}">{{PHYSICAL_STATUS}}</td></tr>
+    <tr><td>Developer ID archive, notarization, stapling, installation, and Gatekeeper</td><td class="{{DISTRIBUTION_CLASS}}">{{DISTRIBUTION_STATUS}}</td></tr>
+    <tr><td>Exact public source revision and publication approval</td><td class="{{PUBLIC_CLASS}}">{{PUBLIC_STATUS}}</td></tr>
   </tbody></table>
 
   <footer>Generated {{GENERATED_AT}} from a clean Git revision. This report contains no observed menu labels, screenshots, environment values, credentials, or personal filesystem paths.</footer>
