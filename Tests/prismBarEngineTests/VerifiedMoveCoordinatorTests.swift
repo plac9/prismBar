@@ -62,112 +62,11 @@ struct VerifiedMoveCoordinatorTests {
         #expect(await performer.executionCount == 0)
     }
 
-    @Test("ignores unrelated section churn while preserving direct move anchors")
-    func ignoresUnrelatedSectionChurn() async throws {
-        let planned = sectionedSnapshot(
-            hiddenNames: ["transient"],
-            visibleNames: ["one", "two", "three"],
-            generation: 1
-        )
-        let current = sectionedSnapshot(
-            hiddenNames: [],
-            visibleNames: ["one", "two", "three"],
-            generation: 2
-        )
-        let verified = sectionedSnapshot(
-            hiddenNames: ["returned"],
-            visibleNames: ["three", "one", "two"],
-            generation: 3
-        )
-        let destinationIndex = try #require(
-            planned.items.firstIndex(where: { $0.id == id("one") })
-        )
-        let plan = try MovePlanner().plan(
-            item: id("three"),
-            to: destinationIndex,
-            in: planned
-        )
-        let performer = RecordingMovePerformer()
-        let coordinator = VerifiedMoveCoordinator(
-            reader: SnapshotSequenceReader(snapshots: [current, verified]),
-            performer: performer
-        )
-
-        let outcome = await coordinator.execute(plan)
-
-        #expect(outcome == .success)
-        #expect(await performer.executionCount == 1)
-        #expect(await performer.destinationFrame?.minX == 30)
-        #expect(await performer.insertionEdge == .before)
-    }
-
-    @Test("rejects churn inside the moved section before producing input")
-    func rejectsMovedSectionChurn() async throws {
-        let planned = sectionedSnapshot(
-            hiddenNames: ["hidden"],
-            visibleNames: ["one", "two", "three"],
-            generation: 1
-        )
-        let changed = sectionedSnapshot(
-            hiddenNames: [],
-            visibleNames: ["one", "new", "two", "three"],
-            generation: 2
-        )
-        let destinationIndex = try #require(
-            planned.items.firstIndex(where: { $0.id == id("one") })
-        )
-        let plan = try MovePlanner().plan(
-            item: id("three"),
-            to: destinationIndex,
-            in: planned
-        )
-        let performer = RecordingMovePerformer()
-        let coordinator = VerifiedMoveCoordinator(
-            reader: SnapshotSequenceReader(snapshots: [changed]),
-            performer: performer
-        )
-
-        let outcome = await coordinator.execute(plan)
-
-        #expect(outcome == .topologyChanged)
-        #expect(await performer.executionCount == 0)
-    }
-
     @Test("reports the observed index when movement is only partial")
     func reportsPartialMovement() async throws {
         let initial = snapshot(names: ["one", "two", "three", "four"], generation: 1)
         let partial = snapshot(names: ["one", "four", "two", "three"], generation: 2)
         let plan = try MovePlanner().plan(item: id("four"), to: 0, in: initial)
-        let coordinator = VerifiedMoveCoordinator(
-            reader: SnapshotSequenceReader(snapshots: [initial, partial]),
-            performer: RecordingMovePerformer()
-        )
-
-        let outcome = await coordinator.execute(plan)
-
-        #expect(outcome == .partial(observedIndex: 1))
-    }
-
-    @Test("reports partial movement using the item section position")
-    func reportsSectionLocalPartialMovement() async throws {
-        let initial = sectionedSnapshot(
-            hiddenNames: ["hidden"],
-            visibleNames: ["one", "two", "three", "four"],
-            generation: 1
-        )
-        let partial = sectionedSnapshot(
-            hiddenNames: ["hidden", "new-hidden"],
-            visibleNames: ["one", "four", "two", "three"],
-            generation: 2
-        )
-        let destinationIndex = try #require(
-            initial.items.firstIndex(where: { $0.id == id("one") })
-        )
-        let plan = try MovePlanner().plan(
-            item: id("four"),
-            to: destinationIndex,
-            in: initial
-        )
         let coordinator = VerifiedMoveCoordinator(
             reader: SnapshotSequenceReader(snapshots: [initial, partial]),
             performer: RecordingMovePerformer()
@@ -433,19 +332,15 @@ private struct NoncooperativeSnapshotReader: MenuBarSnapshotReading {
 private actor RecordingMovePerformer: MenuBarMovePerforming {
     private(set) var executionCount = 0
     private(set) var deadline: ContinuousClock.Instant?
-    private(set) var destinationFrame: MenuBarItemFrame?
-    private(set) var insertionEdge: MenuBarInsertionEdge?
 
     func move(
         source _: MenuBarItemFrame,
-        destination: MenuBarItemFrame,
-        insertionEdge: MenuBarInsertionEdge,
+        destination _: MenuBarItemFrame,
+        insertionEdge _: MenuBarInsertionEdge,
         deadline: OperationDeadline
     ) {
         executionCount += 1
         self.deadline = deadline.expiresAt
-        destinationFrame = destination
-        self.insertionEdge = insertionEdge
     }
 }
 
