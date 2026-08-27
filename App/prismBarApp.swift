@@ -17,7 +17,10 @@ struct prismBarApp: App {
         WindowGroup("prismBar", id: PrismSceneID.workspace) {
             MainWindowView()
                 .environment(AppModel.shared)
-                .background(SceneActionRegistrationView())
+                .background {
+                    SceneActionRegistrationView()
+                    UIAuditWindowConfiguration()
+                }
                 .frame(minWidth: 760, minHeight: 520)
         }
         .defaultSize(width: 920, height: 640)

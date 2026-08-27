@@ -48,7 +48,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 - Preserved distinct Accessibility identifiers for page headers inside the extended Prism Field canvas.
 - Restored the native macOS Settings command and made both Command-comma and Prism Deck reuse one adaptive Settings window.
 - Restored Escape-key dismissal and repeat opening for the Prism Deck status-item popover.
-- Made visual assurance tolerate persisted user window geometry, enforce the shipping minimum size, and embed the exact audited source revision.
+- Made visual assurance normalize an isolated 920 x 640 review window, leave normal window restoration untouched, and embed the exact audited source revision.
 - Replaced deprecated disk-image creation with the native macOS 27 `diskutil image` workflow.
 - Enforced a hard observation deadline even when an Accessibility reader does not cooperate with cancellation.
 - Made native menu bar movement use a dense bounded Command-drag with guaranteed mouse, modifier, and pointer cleanup.

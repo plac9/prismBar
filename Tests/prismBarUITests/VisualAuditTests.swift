@@ -18,8 +18,8 @@ final class VisualAuditTests: XCTestCase {
 
         let workspace = openWorkspaceIfNeeded(in: application)
         XCTAssertTrue(workspace.waitForExistence(timeout: 5))
-        XCTAssertGreaterThanOrEqual(workspace.frame.width, 760)
-        XCTAssertGreaterThanOrEqual(workspace.frame.height, 520)
+        XCTAssertEqual(workspace.frame.width, 920, accuracy: 24)
+        XCTAssertEqual(workspace.frame.height, 640, accuracy: 24)
 
         let destinations = [
             ("Home", "home.header.sparkles", "01-home"),
