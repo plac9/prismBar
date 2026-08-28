@@ -42,11 +42,12 @@ jq -r '
         "01-home": "Home",
         "02-menu-bar": "Menu Bar",
         "03-tools": "Tools",
-        "04-automation": "Automation",
-        "05-privacy": "Privacy",
-        "06-about": "About",
-        "07-settings": "Settings",
-        "08-status-item": "Status Item"
+        "04-prism-calc": "prismCalc",
+        "05-automation": "Automation",
+        "06-privacy": "Privacy",
+        "07-about": "About",
+        "08-settings": "Settings",
+        "09-status-item": "Status Item"
       }[.] // .;
   [.[].attachments[] | select(.exportedFileName | endswith(".png"))]
   | sort_by(.suggestedHumanReadableName)
@@ -66,8 +67,8 @@ jq -r '
 ' "$manifest" > "$report"
 
 attachment_count="$(jq '[.[].attachments[] | select(.exportedFileName | endswith(".png"))] | length' "$manifest")"
-if [ "$attachment_count" -ne 8 ] || [ ! -s "$report" ]; then
-  printf 'UI audit report is incomplete: expected 8 screenshots, found %s.\n' "$attachment_count" >&2
+if [ "$attachment_count" -ne 9 ] || [ ! -s "$report" ]; then
+  printf 'UI audit report is incomplete: expected 9 screenshots, found %s.\n' "$attachment_count" >&2
   exit 1
 fi
 

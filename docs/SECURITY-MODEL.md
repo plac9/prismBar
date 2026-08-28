@@ -114,6 +114,7 @@ prismBar must provide useful menu bar control without becoming a route for infor
 - Release builds come from a clean signed commit and generate an SBOM and checksums.
 - Release automation requires an explicit dedicated keychain and certificate fingerprint, and rejects login and system keychains so signing cannot fall back to interactive personal credentials.
 - Routine UI tests and visual captures force local ad-hoc signing, so development automation cannot search the login Keychain or request its password.
+- The privacy-safe ready-state plugin fixture is compiled only into Debug builds; release builds retain the reciprocal signed-host and signed-service requirement with no fixture path.
 - Binary contents, entitlements, linked libraries, and network strings are audited before notarization.
 - CI builds the unsigned Release application and rejects unexpected executables, non-system libraries, local paths, credential-shaped strings, bundle-identifier drift, or entitlement drift.
 

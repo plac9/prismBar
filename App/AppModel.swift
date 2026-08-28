@@ -64,6 +64,14 @@ final class AppModel {
         )
         accessibilityState = .requiresStableInstall
         refreshAccessibility()
+
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--prismbar-ui-audit") {
+            isPluginEnabled = true
+            pluginState = .ready
+            pluginPanel = UIAuditPluginFixture.panel
+        }
+        #endif
     }
 
     func refreshAccessibility() {
