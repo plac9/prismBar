@@ -10,9 +10,18 @@ fail() {
   exit 1
 }
 
-for dependency in codesign jq shasum xcodebuild xcodegen; do
+[ "$#" -eq 4 ] && [ "$1" = '--signing-keychain' ] && [ "$3" = '--signing-identity' ] || {
+  printf 'Usage: %s --signing-keychain PATH --signing-identity CERTIFICATE_SHA1\n' "$0" >&2
+  exit 64
+}
+
+for dependency in codesign jq rg security shasum xcodebuild xcodegen; do
   command -v "$dependency" >/dev/null 2>&1 || fail "$dependency is unavailable"
 done
+
+# shellcheck source=scripts/release-signing-keychain.sh
+source scripts/release-signing-keychain.sh
+validate_release_signing_keychain "$2" "$4"
 
 if [ -n "$(git status --porcelain=v1)" ]; then
   fail 'the repository must be clean so the artifact maps to one source revision'
@@ -52,7 +61,8 @@ xcodebuild archive \
   -archivePath "$archive_path" \
   CODE_SIGN_STYLE=Manual \
   DEVELOPMENT_TEAM=N8A5T2PZY9 \
-  CODE_SIGN_IDENTITY='Developer ID Application: Patrick LaClair (N8A5T2PZY9)' \
+  CODE_SIGN_IDENTITY="$release_signing_identity" \
+  OTHER_CODE_SIGN_FLAGS="--keychain $release_signing_keychain" \
   PRISM_SOURCE_REVISION="$source_revision"
 
 codesign --verify --deep --strict --verbose=4 "$application_path"

@@ -12,21 +12,28 @@ fail() {
 
 if [ "${1:-}" = '--source-audit' ]; then
   [ "$#" -eq 1 ] || fail 'source audit accepts no additional arguments'
-  printf 'Notarization source audit passed: Keychain-profile authentication and signed disk-image validation are required.\n'
+  printf 'Notarization source audit passed: dedicated-Keychain authentication and signed disk-image validation are required.\n'
   exit 0
 fi
 
-[ "$#" -eq 2 ] && [ "$1" = '--keychain-profile' ] || {
-  printf 'Usage: %s --keychain-profile PROFILE\n' "$0" >&2
+[ "$#" -eq 6 ] && \
+  [ "$1" = '--keychain-profile' ] && \
+  [ "$3" = '--signing-keychain' ] && \
+  [ "$5" = '--signing-identity' ] || {
+  printf 'Usage: %s --keychain-profile PROFILE --signing-keychain PATH --signing-identity CERTIFICATE_SHA1\n' "$0" >&2
   exit 64
 }
 
 keychain_profile="$2"
 [[ "$keychain_profile" =~ ^[A-Za-z0-9._-]+$ ]] || fail 'the Keychain profile name contains unsupported characters'
 
-for dependency in codesign diskutil ditto find jq shasum spctl xcodebuild xcrun; do
+for dependency in codesign diskutil ditto find jq rg security shasum spctl xcodebuild xcrun; do
   command -v "$dependency" >/dev/null 2>&1 || fail "$dependency is unavailable"
 done
+
+# shellcheck source=scripts/release-signing-keychain.sh
+source scripts/release-signing-keychain.sh
+validate_release_signing_keychain "$4" "$6"
 
 [ -z "$(git status --porcelain=v1)" ] || fail 'the repository must be clean'
 [ "$(git branch --show-current)" = 'main' ] || fail 'release candidates must come from main'
@@ -111,6 +118,7 @@ ditto -c -k --keepParent "$application_path" "$application_submission_path"
 xcrun notarytool submit \
   "$application_submission_path" \
   --keychain-profile "$keychain_profile" \
+  --keychain "$release_signing_keychain" \
   --wait \
   --output-format json > "$application_result_path"
 
@@ -137,7 +145,8 @@ diskutil image create from \
   "$disk_image_path"
 
 codesign --force \
-  --sign 'Developer ID Application: Patrick LaClair (N8A5T2PZY9)' \
+  --keychain "$release_signing_keychain" \
+  --sign "$release_signing_identity" \
   --timestamp \
   "$disk_image_path"
 codesign --verify --strict --verbose=4 "$disk_image_path"
@@ -145,6 +154,7 @@ codesign --verify --strict --verbose=4 "$disk_image_path"
 xcrun notarytool submit \
   "$disk_image_path" \
   --keychain-profile "$keychain_profile" \
+  --keychain "$release_signing_keychain" \
   --wait \
   --output-format json > "$disk_image_result_path"
 

@@ -12,6 +12,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 - Privacy-safe visual audit captures for every shipping workspace surface and the status item.
 - Revision-bound CI, visual, endurance, distribution, public-source, and physical acceptance states in the assurance report.
 - A source-backed macOS 27 compatibility matrix with explicit safeguards and unresolved physical acceptance gates.
+- A dedicated release-keychain contract that prevents archive and notarization workflows from searching the interactive login Keychain.
 - Clean-room repository with independent Git history.
 - Product, architecture, security, privacy, design, licensing, and plugin contracts.
 - MPL-2.0 public-source licensing foundation.

@@ -10,13 +10,17 @@ test -x scripts/notarize-release-candidate.sh || {
   exit 1
 }
 
-bash -n scripts/notarize-release-candidate.sh
+bash -n scripts/notarize-release-candidate.sh scripts/release-signing-keychain.sh
 
 # The contract fragments are intentionally literal shell source.
 # shellcheck disable=SC2016
 for required in \
   'git status --porcelain=v1' \
   'sourceRevision' \
+  '--signing-keychain' \
+  '--signing-identity' \
+  'validate_release_signing_keychain' \
+  '--keychain "$release_signing_keychain"' \
   '[ ! -L "$output_directory" ]' \
   '[ ! -L "$output" ]' \
   'ditto -c -k --keepParent' \
@@ -25,7 +29,7 @@ for required in \
   'stapler validate' \
   'diskutil image create from' \
   'codesign --force' \
-  "--sign 'Developer ID Application: Patrick LaClair (N8A5T2PZY9)'" \
+  '--sign "$release_signing_identity"' \
   'spctl --assess' \
   'audit-release-bundle.sh' \
   'audit-live-signing-boundaries.sh'; do
@@ -52,7 +56,10 @@ if ./scripts/notarize-release-candidate.sh --source-audit unexpected >/dev/null 
   exit 1
 fi
 
-if ./scripts/notarize-release-candidate.sh --keychain-profile 'unsafe/profile' >/dev/null 2>&1; then
+if ./scripts/notarize-release-candidate.sh \
+  --keychain-profile 'unsafe/profile' \
+  --signing-keychain '/tmp/release.keychain-db' \
+  --signing-identity '0000000000000000000000000000000000000000' >/dev/null 2>&1; then
   printf 'Notarization contract failed: unsafe Keychain profile name was accepted.\n' >&2
   exit 1
 fi
