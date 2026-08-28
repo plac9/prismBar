@@ -19,6 +19,10 @@ final class SceneActionRouter {
         self.openWindow = openWindow
         guard let pendingWindowID else { return }
         self.pendingWindowID = nil
+
+        if pendingWindowID != PrismSceneID.workspace {
+            closeBootstrapWorkspace()
+        }
         openWindow(id: pendingWindowID)
     }
 
@@ -57,6 +61,12 @@ final class SceneActionRouter {
 
         fileMenu.performActionForItem(at: newWorkspaceIndex)
         return true
+    }
+
+    private func closeBootstrapWorkspace() {
+        NSApplication.shared.windows
+            .filter { $0.isVisible && $0.title == "prismBar" }
+            .forEach { $0.close() }
     }
 }
 

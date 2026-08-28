@@ -49,7 +49,7 @@ final class PrismDeckTests: XCTestCase {
 
         let utility = application.windows["prismCalc"]
         XCTAssertTrue(utility.waitForExistence(timeout: 5), application.debugDescription)
-        XCTAssertFalse(workspace.exists)
+        XCTAssertTrue(workspace.waitForNonExistence(timeout: 3), application.debugDescription)
 
         clickWhenEnabled(application.buttons["Seven"])
         clickWhenEnabled(application.buttons["Add"])
