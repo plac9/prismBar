@@ -22,7 +22,8 @@ final class SceneActionRouter {
         openWindow(id: pendingWindowID)
     }
 
-    func openWorkspace() {
+    @discardableResult
+    func openWorkspace() -> Bool {
         presentWindow(id: PrismSceneID.workspace)
     }
 
@@ -31,19 +32,20 @@ final class SceneActionRouter {
         presentWindow(id: PrismSceneID.prismCalc)
     }
 
-    private func presentWindow(id: String) {
+    @discardableResult
+    private func presentWindow(id: String) -> Bool {
         NSApplication.shared.setActivationPolicy(.regular)
         NSApplication.shared.activate()
         if let openWindow {
             openWindow(id: id)
-            return
+            return true
         }
 
         pendingWindowID = id == PrismSceneID.workspace ? nil : id
-        openInitialWorkspace()
+        return openInitialWorkspace()
     }
 
-    private func openInitialWorkspace() {
+    private func openInitialWorkspace() -> Bool {
         let newWorkspaceTitle = "New prismBar Window"
         guard let fileMenu = NSApplication.shared.mainMenu?.items
             .first(where: { $0.title == "File" })?
@@ -51,9 +53,10 @@ final class SceneActionRouter {
             let newWorkspaceIndex = fileMenu.items.firstIndex(where: {
                 $0.title == newWorkspaceTitle
             })
-        else { return }
+        else { return false }
 
         fileMenu.performActionForItem(at: newWorkspaceIndex)
+        return true
     }
 }
 

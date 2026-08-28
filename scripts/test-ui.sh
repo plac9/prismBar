@@ -33,6 +33,10 @@ if [ "$test_selection" = "--source-audit" ]; then
     echo "The workspace must be owned by a SwiftUI WindowGroup scene." >&2
     exit 1
   fi
+  if ! rg -q '\.defaultLaunchBehavior\(\.suppressed\)' App/prismBarApp.swift; then
+    echo "The workspace scene must not appear until the user requests it." >&2
+    exit 1
+  fi
   if ! rg -q 'UtilityWindow\("prismCalc", id: PrismSceneID\.prismCalc\)' App/prismBarApp.swift; then
     echo "prismCalc must be owned by a SwiftUI utility scene." >&2
     exit 1

@@ -28,6 +28,7 @@ struct prismBarApp: App {
         .commands {
             PrismBarCommands(model: AppModel.shared)
         }
+        .defaultLaunchBehavior(.suppressed)
 
         UtilityWindow("prismCalc", id: PrismSceneID.prismCalc) {
             PrismCalcUtilityView(model: AppModel.shared)

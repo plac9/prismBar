@@ -7,7 +7,7 @@ import XCTest
 @MainActor
 final class PrismDeckTests: XCTestCase {
     func testStatusItemOpensPrismDeckWithWorkspaceClosed() {
-        let application = XCUIApplication()
+        let application = prismBarApplication(opensWorkspace: false)
         application.launch()
 
         let workspace = closeWorkspaceIfNeeded(in: application)
@@ -31,7 +31,7 @@ final class PrismDeckTests: XCTestCase {
     }
 
     func testToolsModeOpensPrismCalcUtilityWithoutWorkspace() {
-        let application = XCUIApplication()
+        let application = prismBarApplication(opensWorkspace: false)
         application.launch()
 
         let workspace = closeWorkspaceIfNeeded(in: application)
@@ -62,7 +62,7 @@ final class PrismDeckTests: XCTestCase {
     }
 
     func testPrismDeckOpensSettingsWithoutWorkspace() {
-        let application = XCUIApplication()
+        let application = prismBarApplication(opensWorkspace: false)
         application.launch()
 
         let workspace = closeWorkspaceIfNeeded(in: application)

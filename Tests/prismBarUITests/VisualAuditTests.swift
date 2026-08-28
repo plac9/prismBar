@@ -7,12 +7,9 @@ import XCTest
 @MainActor
 final class VisualAuditTests: XCTestCase {
     func testCapturesPrivacySafeShippingSurfaces() {
-        let application = XCUIApplication()
-        application.launchArguments = [
-            "--prismbar-ui-audit",
-            "-ApplePersistenceIgnoreState",
-            "YES",
-        ]
+        let application = prismBarApplication(
+            additionalLaunchArguments: ["--prismbar-ui-audit"]
+        )
         application.launch()
         application.activate()
 

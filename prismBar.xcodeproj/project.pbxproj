@@ -45,6 +45,8 @@
 		CE10DE72024A0C37C262FC19 /* UIAuditWindowConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A97AC1465267631E11123FA /* UIAuditWindowConfiguration.swift */; };
 		CE3C57B543CBD6AECD63561D /* PluginPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CB0F54F091A7C16DF376F2 /* PluginPanelView.swift */; };
 		D1710DA94CF4C0E750EEBA4F /* WorkspaceVisualStructureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F94844597D55920442A36A2 /* WorkspaceVisualStructureTests.swift */; };
+		D5EBF57D885E1E8723E334FD /* UITestApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191C333200AB22AB1F3BD6DD /* UITestApplication.swift */; };
+		D90EA618B13266052A72F806 /* AppLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF4DD93279456074BB6F7FD /* AppLifecycleTests.swift */; };
 		D9B7872CF4A511B07328CA42 /* prismBarEngine in Frameworks */ = {isa = PBXBuildFile; productRef = F163278A06D1EDC2E5F2385E /* prismBarEngine */; };
 		DD537356A91D55381A1A1A56 /* AppLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 315A0592B925D2DB82D37406 /* AppLifecycle.swift */; };
 		DD8426C4530DC0C44B08D0C9 /* PrismDeckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DD7849C14D7A756FFCC474 /* PrismDeckView.swift */; };
@@ -97,6 +99,7 @@
 		109A31F5C43CC8171F9EC4B8 /* PrismDeckTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismDeckTests.swift; sourceTree = "<group>"; };
 		11CF65631A1A62948D2CAF8A /* LICENSE */ = {isa = PBXFileReference; path = LICENSE; sourceTree = "<group>"; };
 		132DB0E7D319E4672B6E1A58 /* prismBarUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = prismBarUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		191C333200AB22AB1F3BD6DD /* UITestApplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestApplication.swift; sourceTree = "<group>"; };
 		24DA04C9442819CB0ACBD9C3 /* PrismStatusIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismStatusIcon.swift; sourceTree = "<group>"; };
 		2CAE72ACFC08C1C6F47C155D /* PrivacyCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyCopy.swift; sourceTree = "<group>"; };
 		315A0592B925D2DB82D37406 /* AppLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLifecycle.swift; sourceTree = "<group>"; };
@@ -137,6 +140,7 @@
 		DF27A6A8B0FFD6B7F0BC226A /* PrismCalcUtilityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismCalcUtilityView.swift; sourceTree = "<group>"; };
 		ED2184D0F302BEBEA3AD3520 /* prismBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = prismBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE5604D54BCB73D186D8E912 /* prismBarAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = prismBarAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EEF4DD93279456074BB6F7FD /* AppLifecycleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLifecycleTests.swift; sourceTree = "<group>"; };
 		F277020FA698706F25C0B310 /* prismCalcPluginService.xpc */ = {isa = PBXFileReference; explicitFileType = "wrapper.xpc-service"; includeInIndex = 0; path = prismCalcPluginService.xpc; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF2F6970047364DDA27C5F2C /* ShortcutsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -259,6 +263,7 @@
 		9462D9B83ECB0BA77921B04B /* prismBarAppTests */ = {
 			isa = PBXGroup;
 			children = (
+				EEF4DD93279456074BB6F7FD /* AppLifecycleTests.swift */,
 				AA48AA25661199CF523152D5 /* AppModelActionFeedbackTests.swift */,
 			);
 			path = prismBarAppTests;
@@ -288,6 +293,7 @@
 				B4AFC1F58957D7941D311EC5 /* AboutTests.swift */,
 				75ABFACBE8B5FA2F47CAF31F /* LaunchTests.swift */,
 				109A31F5C43CC8171F9EC4B8 /* PrismDeckTests.swift */,
+				191C333200AB22AB1F3BD6DD /* UITestApplication.swift */,
 				74D21E1BE361A7B6B790F767 /* VisualAuditTests.swift */,
 				6F94844597D55920442A36A2 /* WorkspaceVisualStructureTests.swift */,
 			);
@@ -526,6 +532,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D90EA618B13266052A72F806 /* AppLifecycleTests.swift in Sources */,
 				01B5BF2BBC8F97D97D789529 /* AppModelActionFeedbackTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -571,6 +578,7 @@
 				C53909CC424B09D0C2210692 /* AboutTests.swift in Sources */,
 				53A67AB1D743C9191CAD41ED /* LaunchTests.swift in Sources */,
 				C0522F43C20205737E92FE31 /* PrismDeckTests.swift in Sources */,
+				D5EBF57D885E1E8723E334FD /* UITestApplication.swift in Sources */,
 				E9D571B8238F9A3B29D7EA68 /* VisualAuditTests.swift in Sources */,
 				D1710DA94CF4C0E750EEBA4F /* WorkspaceVisualStructureTests.swift in Sources */,
 			);

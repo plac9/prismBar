@@ -7,7 +7,7 @@ import XCTest
 @MainActor
 final class WorkspaceVisualStructureTests: XCTestCase {
     func testWorkspaceUsesOneExtendedPrismaticContentCanvas() {
-        let application = XCUIApplication()
+        let application = prismBarApplication()
         application.launch()
 
         let canvas = application.descendants(matching: .any)["workspace.prismaticCanvas"]

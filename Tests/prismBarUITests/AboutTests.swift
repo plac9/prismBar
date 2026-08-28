@@ -7,7 +7,7 @@ import XCTest
 @MainActor
 final class AboutTests: XCTestCase {
     func testProvidesSourceAndBundledLicenseActions() {
-        let application = XCUIApplication()
+        let application = prismBarApplication()
         application.launch()
 
         let aboutDestination = application.outlines["Sidebar"].cells

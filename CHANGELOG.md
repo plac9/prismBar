@@ -44,6 +44,8 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 
 ### Fixed
 
+- Made normal launch menu-bar-first and isolated windowless Prism Deck UI tests from workspace restoration.
+- Added an explicit, bounded workspace-launch path for UI tests that intentionally exercise the full app scene.
 - Made Prism Deck bootstrap the first SwiftUI workspace after a cold, windowless launch.
 - Preserved distinct Accessibility identifiers for page headers inside the extended Prism Field canvas.
 - Restored the native macOS Settings command and made both Command-comma and Prism Deck reuse one adaptive Settings window.

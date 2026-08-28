@@ -8,7 +8,7 @@ import XCTest
 @MainActor
 final class LaunchTests: XCTestCase {
     func testMainWindowUsesExactProductName() {
-        let application = XCUIApplication()
+        let application = prismBarApplication()
         application.launch()
 
         let mainWindow = application.windows["prismBar"]
@@ -17,7 +17,7 @@ final class LaunchTests: XCTestCase {
     }
 
     func testPermissionRecoveryControlIsAccessible() {
-        let application = XCUIApplication()
+        let application = prismBarApplication()
         application.launch()
 
         let refreshButton = application.buttons["accessibility.refresh"]
@@ -26,7 +26,7 @@ final class LaunchTests: XCTestCase {
     }
 
     func testMenuBarDestinationHasARecoveryStateWithoutPermission() {
-        let application = XCUIApplication()
+        let application = prismBarApplication()
         application.launch()
 
         let menuBarDestination = sidebarCell(named: "Menu Bar", in: application)
@@ -45,7 +45,7 @@ final class LaunchTests: XCTestCase {
     }
 
     func testChangingDestinationsDoesNotResizeOrDisplaceTheWindow() {
-        let application = XCUIApplication()
+        let application = prismBarApplication()
         application.launch()
 
         let mainWindow = application.windows["prismBar"]
@@ -64,7 +64,7 @@ final class LaunchTests: XCTestCase {
     }
 
     func testAutomationDestinationExposesPrivacyPreservingCommands() {
-        let application = XCUIApplication()
+        let application = prismBarApplication()
         application.launch()
 
         let automationDestination = sidebarCell(named: "Automation", in: application)
@@ -76,7 +76,7 @@ final class LaunchTests: XCTestCase {
     }
 
     func testPrivacyTruthNamesLocalObservationAndDataBoundary() {
-        let application = XCUIApplication()
+        let application = prismBarApplication()
         application.launch()
 
         let privacyDestination = sidebarCell(named: "Privacy", in: application)
@@ -98,7 +98,7 @@ final class LaunchTests: XCTestCase {
     }
 
     func testEveryDestinationExposesItsShippingSurface() {
-        let application = XCUIApplication()
+        let application = prismBarApplication()
         application.launch()
 
         let destinations = [
@@ -129,7 +129,7 @@ final class LaunchTests: XCTestCase {
     }
 
     func testEveryDestinationHasAContextualHeader() {
-        let application = XCUIApplication()
+        let application = prismBarApplication()
         application.launch()
 
         let destinations = [
@@ -162,8 +162,9 @@ final class LaunchTests: XCTestCase {
         ]
 
         for launchArguments in variants {
-            let application = XCUIApplication()
-            application.launchArguments = launchArguments
+            let application = prismBarApplication(
+                additionalLaunchArguments: launchArguments
+            )
             application.launch()
 
             let mainWindow = application.windows["prismBar"]
@@ -194,7 +195,7 @@ final class LaunchTests: XCTestCase {
     }
 
     func testNativeSettingsCommandReusesOneAdaptiveWindow() {
-        let application = XCUIApplication()
+        let application = prismBarApplication()
         application.launch()
 
         application.typeKey(",", modifierFlags: .command)
@@ -213,7 +214,7 @@ final class LaunchTests: XCTestCase {
     }
 
     func testKeyboardCommandReopensTheMainWindow() {
-        let application = XCUIApplication()
+        let application = prismBarApplication()
         application.launch()
 
         let mainWindow = application.windows["prismBar"]
@@ -228,7 +229,7 @@ final class LaunchTests: XCTestCase {
     }
 
     func testToolsWorkspaceLaunchesPrismCalcWithoutEmbeddingCalculator() {
-        let application = XCUIApplication()
+        let application = prismBarApplication()
         application.launch()
 
         let toolsDestination = sidebarCell(named: "Tools", in: application)
@@ -253,7 +254,7 @@ final class LaunchTests: XCTestCase {
     }
 
     func testHungPluginTimesOutWithoutHangingHostAndRecovers() throws {
-        let application = XCUIApplication()
+        let application = prismBarApplication()
         application.launch()
         try openReadyPlugin(in: application)
 
@@ -280,7 +281,7 @@ final class LaunchTests: XCTestCase {
     }
 
     func testCrashedPluginDoesNotCrashHostAndRecovers() throws {
-        let application = XCUIApplication()
+        let application = prismBarApplication()
         application.launch()
         try openReadyPlugin(in: application)
 
