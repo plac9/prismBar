@@ -34,13 +34,28 @@ final class BundledPluginClient {
 
     private let codec = PluginWireCodec()
     private let policy: BundledPluginPolicy
+    private let codeSigningRequirement: String?
     private var authenticated = false
     private var connection: NSXPCConnection?
     private var consecutiveFailures = 0
     private var isRequestInFlight = false
 
-    init(registration: BundledPluginRegistration) throws {
+    init(
+        registration: BundledPluginRegistration,
+        permitsAdHocUITesting: Bool = ProcessInfo.processInfo.arguments.contains(
+            "--prismbar-ui-testing"
+        )
+    ) throws {
         policy = try registration.makePolicy(teamIdentifier: "N8A5T2PZY9")
+        #if DEBUG
+        if permitsAdHocUITesting {
+            codeSigningRequirement = nil
+        } else {
+            codeSigningRequirement = policy.codeSigningRequirement
+        }
+        #else
+        codeSigningRequirement = policy.codeSigningRequirement
+        #endif
     }
 
     func loadPanel() async throws -> PluginPanelUpdate {
@@ -146,7 +161,9 @@ final class BundledPluginClient {
         }
 
         let connection = NSXPCConnection(serviceName: policy.pluginIdentifier)
-        connection.setCodeSigningRequirement(policy.codeSigningRequirement)
+        if let codeSigningRequirement {
+            connection.setCodeSigningRequirement(codeSigningRequirement)
+        }
         connection.remoteObjectInterface = NSXPCInterface(with: PluginXPCServiceProtocol.self)
         connection.interruptionHandler = { [weak self, weak connection] in
             Task { @MainActor in

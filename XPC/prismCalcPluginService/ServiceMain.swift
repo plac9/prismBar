@@ -21,10 +21,12 @@ private final class ServiceDelegate: NSObject, NSXPCListenerDelegate {
         _: NSXPCListener,
         shouldAcceptNewConnection connection: NSXPCConnection
     ) -> Bool {
+        #if !DEBUG
         let hostRequirement =
             #"identifier "com.laclairtech.prismbar" and anchor apple generic "# +
             #"and certificate leaf[subject.OU] = "N8A5T2PZY9""#
         connection.setCodeSigningRequirement(hostRequirement)
+        #endif
         connection.exportedInterface = NSXPCInterface(with: PluginXPCServiceProtocol.self)
         connection.exportedObject = PluginService()
         connection.activate()

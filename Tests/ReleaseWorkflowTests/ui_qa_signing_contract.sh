@@ -17,4 +17,22 @@ for script in scripts/test-ui.sh scripts/capture-ui-audit.sh; do
   done
 done
 
+for required in \
+  '#if DEBUG' \
+  '--prismbar-ui-testing' \
+  'permitsAdHocUITesting'; do
+  rg -Fq -- "$required" \
+    App/AppModel.swift App/PluginClient.swift App/UIAuditWindowConfiguration.swift \
+    XPC/prismCalcPluginService/ServiceMain.swift || {
+    printf 'UI QA signing contract is missing the DEBUG-only plugin trust gate: %s.\n' \
+      "$required" >&2
+    exit 1
+  }
+done
+
+rg -Fq -- '#if !DEBUG' XPC/prismCalcPluginService/ServiceMain.swift || {
+  printf 'UI QA signing contract requires a DEBUG-only reciprocal trust seam.\n' >&2
+  exit 1
+}
+
 printf 'UI QA signing contract passed: routine UI automation cannot consult the login Keychain.\n'
