@@ -54,7 +54,7 @@ struct PrismRailView: View {
 private extension PrismRailView {
     var header: some View {
         HStack(spacing: 8) {
-            Label("Prism Rail", systemImage: "arrow.left.arrow.right")
+            Label(PrismRailPresentation.title, systemImage: "arrow.left.arrow.right")
                 .font(.callout.weight(.semibold))
 
             Text("Drag to place")

@@ -35,6 +35,11 @@ struct PresentationCatalogTests {
         #expect(PrismDeckMode.tools.title == "Tools")
     }
 
+    @Test("uses the approved compact menu bar control name")
+    func railName() {
+        #expect(PrismRailPresentation.title == "Rail")
+    }
+
     @Test("registers prismCalc as the first closed tool identifier")
     func toolIdentifiers() {
         #expect(PrismToolID.allCases == [.prismCalc])

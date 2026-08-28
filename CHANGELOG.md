@@ -8,7 +8,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 
 ### Added
 
-- Prism Rail drag-to-place controls for direct, verified multi-position menu bar moves.
+- Rail drag-to-place controls for direct, verified multi-position menu bar moves.
 - Privacy-safe visual audit captures for every shipping workspace surface and the status item.
 - Revision-bound CI, visual, endurance, distribution, public-source, and physical acceptance states in the assurance report.
 - Clean-room repository with independent Git history.
@@ -37,13 +37,15 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 ### Changed
 
 - Rebuilt the workspace around one adaptive Prism Field canvas, a native floating sidebar, standard-material content,
-  and interactive Liquid Glass reserved for controls and draggable Prism Rail items.
+  and interactive Liquid Glass reserved for controls and draggable Rail items.
 - Added a CI contract that rejects decorative content-layer Liquid Glass regressions.
 - Migrated the workspace, prismCalc utility, and Settings lifecycle to native SwiftUI scenes while preserving the AppKit status-item popover boundary.
 - Replaced the status-item artwork with a template-rendered prism identity shared by the app UI.
 
 ### Fixed
 
+- Made visual audit tests fail when system UI obscures a shipping surface instead of accepting occluded screenshots.
+- Restored the approved user-facing `Rail` name while keeping internal Prism Rail type identifiers stable.
 - Made normal launch menu-bar-first and isolated windowless Prism Deck UI tests from workspace restoration.
 - Added an explicit, bounded workspace-launch path for UI tests that intentionally exercise the full app scene.
 - Made Prism Deck bootstrap the first SwiftUI workspace after a cold, windowless launch.

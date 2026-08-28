@@ -6,7 +6,12 @@ import XCTest
 
 @MainActor
 final class VisualAuditTests: XCTestCase {
+    private var systemUIOcclusionDetected = false
+
     func testCapturesPrivacySafeShippingSurfaces() {
+        let interruptionMonitor = installSystemUIOcclusionMonitor()
+        defer { removeUIInterruptionMonitor(interruptionMonitor) }
+
         let application = prismBarApplication(
             additionalLaunchArguments: ["--prismbar-ui-audit"]
         )
@@ -35,6 +40,7 @@ final class VisualAuditTests: XCTestCase {
                 application.descendants(matching: .any)[headerIdentifier]
                     .waitForExistence(timeout: 5)
             )
+            assertShippingSurfaceIsUnobscured()
             if destination == "About" {
                 XCTAssertFalse(application.staticTexts["Local development"].exists)
             }
@@ -46,6 +52,7 @@ final class VisualAuditTests: XCTestCase {
             .matching(identifier: "com_apple_SwiftUI_Settings_window")
             .firstMatch
         XCTAssertTrue(settings.waitForExistence(timeout: 5))
+        assertShippingSurfaceIsUnobscured()
         attach(settings.screenshot(), named: "07-settings")
 
         application.typeKey("w", modifierFlags: .command)
@@ -57,7 +64,25 @@ final class VisualAuditTests: XCTestCase {
             .matching(identifier: "prismBar")
             .firstMatch
         XCTAssertTrue(statusItem.waitForExistence(timeout: 5))
+        assertShippingSurfaceIsUnobscured()
         attach(statusItem.screenshot(), named: "08-status-item")
+    }
+
+    private func installSystemUIOcclusionMonitor() -> NSObjectProtocol {
+        systemUIOcclusionDetected = false
+        return addUIInterruptionMonitor(
+            withDescription: "Reject system UI occlusion"
+        ) { [weak self] _ in
+            self?.systemUIOcclusionDetected = true
+            return false
+        }
+    }
+
+    private func assertShippingSurfaceIsUnobscured() {
+        XCTAssertFalse(
+            systemUIOcclusionDetected,
+            "System UI is obscuring the shipping surface"
+        )
     }
 
     private func attach(_ screenshot: XCUIScreenshot, named name: String) {

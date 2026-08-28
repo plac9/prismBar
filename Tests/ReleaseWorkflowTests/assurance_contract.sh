@@ -53,6 +53,16 @@ for required in \
 done
 
 for required in \
+  'addUIInterruptionMonitor' \
+  'systemUIOcclusionDetected' \
+  'System UI is obscuring the shipping surface'; do
+  rg -Fq -- "$required" Tests/prismBarUITests/VisualAuditTests.swift || {
+    printf 'Assurance contract failed: visual capture does not reject %s.\n' "$required" >&2
+    exit 1
+  }
+done
+
+for required in \
   'git status --porcelain=v1' \
   'build/ci' \
   'sourceState' \

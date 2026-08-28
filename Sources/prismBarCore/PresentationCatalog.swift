@@ -58,6 +58,10 @@ public enum PrismDeckMode: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
+public enum PrismRailPresentation {
+    public static let title = "Rail"
+}
+
 public enum PrismToolID: String, CaseIterable, Identifiable, Sendable {
     case prismCalc = "com.laclairtech.prismbar.plugin.prismcalc"
 
