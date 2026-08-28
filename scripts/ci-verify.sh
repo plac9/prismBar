@@ -24,6 +24,7 @@ done
 ./scripts/audit-licensing.sh
 ./scripts/audit-public-safety.sh
 ./scripts/audit-liquid-glass.sh
+./scripts/audit-macos-27-compatibility.sh
 Tests/ReleaseWorkflowTests/notarization_contract.sh
 Tests/ReleaseWorkflowTests/assurance_contract.sh
 

@@ -38,6 +38,8 @@ See [LICENSE](LICENSE), [NOTICE](NOTICE), [dependency and license inventory](doc
 
 The repository-grounded [security threat model](prismBar-threat-model.md) covers Accessibility authority, menu movement, XPC isolation, local privacy, and release provenance.
 
+The [macOS 27 compatibility matrix](docs/MACOS-27-COMPATIBILITY.md) maps current Apple guidance and public menu bar failure reports to prismBar safeguards and unresolved physical release gates.
+
 Generate a self-contained dark UI and security assurance report from a clean revision with
 `./scripts/generate-assurance-report.sh`. The report is written to ignored `build/` evidence and
 contains no screenshots or observed menu metadata.

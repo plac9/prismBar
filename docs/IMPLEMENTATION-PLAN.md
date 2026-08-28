@@ -98,6 +98,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Build onboarding, empty, unavailable, revoked, error, and recovery surfaces.
 - [x] Integrate the native system window background, semantic content surfaces, and standard interactive glass controls.
 - [x] Adopt system Liquid Glass components and remove decorative legacy styling.
+- [x] Record current Apple guidance and public macOS 27 menu bar failure reports in a maintained compatibility matrix with explicit safeguards and physical gates.
 - [x] Implement keyboard navigation, help, focus, and accessibility actions.
 - [x] Verify every shipping destination remains operational in light, dark, increased contrast, reduced transparency, and reduced motion launch variants.
 - [ ] Complete physical VoiceOver, text-size, and visual accessibility verification.
