@@ -61,6 +61,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 - Replaced deprecated disk-image creation with the native macOS 27 `diskutil image` workflow.
 - Stopped routine UI tests and visual captures from consulting the login Keychain by enforcing local ad-hoc signing.
 - Made visual assurance prove the intended ready-state Tools and prismCalc surfaces while keeping the real ad-hoc plugin connection fail closed.
+- Captured the prismCalc utility as the active key window so its interactive Liquid Glass state is reviewed at full fidelity.
 - Enforced a hard observation deadline even when an Accessibility reader does not cooperate with cancellation.
 - Made native menu bar movement use a dense bounded Command-drag with guaranteed mouse, modifier, and pointer cleanup.
 - Kept same-section direct moves stable while unrelated menu bar sources appear or disappear during preflight.

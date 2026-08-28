@@ -91,6 +91,7 @@ final class VisualAuditTests: XCTestCase {
         let utility = application.windows["prismCalc"]
         XCTAssertTrue(utility.waitForExistence(timeout: 5))
         XCTAssertTrue(application.descendants(matching: .any)["plugin.panel"].waitForExistence(timeout: 5))
+        utility.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.03)).click()
         assertShippingSurfaceIsUnobscured()
         attach(utility.screenshot(), named: "04-prism-calc")
         let closeButton = utility.buttons["_XCUI:CloseWindow"]
