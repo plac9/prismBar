@@ -51,6 +51,13 @@ Run revision-bound automated lifecycle soak verification with `./scripts/stress-
 repeats the complete Swift and native UI suites for 15 minutes by default, records only sanitized
 aggregate evidence under ignored `build/`, and keeps physical signed-app movement as a separate gate.
 
+After the exact notarized candidate is installed in `/Applications`, initialize physical acceptance
+with `./scripts/record-physical-acceptance.sh --initialize`. Record one observed gate at a time with
+`--confirm GATE --observed-on-physical-macos-27`, inspect progress with `--status`, and withdraw an
+invalid observation with `--invalidate GATE`. Every update revalidates the clean source revision,
+Developer ID identity, Team ID, Gatekeeper result, notarization ticket, and installed executable hash.
+There is no blanket confirmation mode.
+
 ## Status
 
 Architecture is locked and the clean-room implementation is in progress. No release claim should be inferred until the physical macOS 27, signing, notarization, security, privacy, and accessibility gates in `docs/IMPLEMENTATION-PLAN.md` pass.

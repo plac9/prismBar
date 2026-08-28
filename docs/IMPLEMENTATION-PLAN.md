@@ -127,6 +127,7 @@ The project is complete only when every gate below has authoritative evidence fr
 
 - [x] Verify Apple identifier and signing configuration for `com.laclairtech.prismbar`.
 - [x] Require an explicit dedicated release keychain and certificate fingerprint so archive and notarization cannot fall back to the interactive login Keychain.
+- [x] Add a fail-closed physical acceptance recorder that revalidates exact installed provenance and requires one explicit physical observation per gate.
 - [ ] Archive the final clean revision with Xcode 27 using Developer ID and Hardened Runtime.
 - [ ] Verify nested signing order and exact entitlement allowlists on that archive.
 - [ ] Package, notarize, staple, and validate the distribution artifact.
