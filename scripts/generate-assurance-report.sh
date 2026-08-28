@@ -87,7 +87,7 @@ if [ -f "$ui_audit_evidence" ]; then
       .result == "passed" and .screenshotCount == 9
     ' "$ui_audit_evidence" >/dev/null && [ -s "$ui_audit_report" ]; then
     ui_audit_class='pass'
-    ui_audit_status='Eight exact-revision shipping surfaces reviewed'
+    ui_audit_status='Nine exact-revision shipping surfaces reviewed'
     ui_audit_link="<a href=\"../ui-audit/prismBar-ui-audit-$revision.html\">Open visual audit</a>"
   else
     ui_audit_class='fail'

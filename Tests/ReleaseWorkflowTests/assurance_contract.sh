@@ -85,6 +85,12 @@ for required in \
   }
 done
 
+rg -Fq -- 'Nine exact-revision shipping surfaces reviewed' \
+  scripts/generate-assurance-report.sh || {
+  printf 'Assurance contract failed: visual audit count copy is stale.\n' >&2
+  exit 1
+}
+
 for required in \
   'git status --porcelain=v1' \
   'PRISM_SOURCE_REVISION="$revision"' \
