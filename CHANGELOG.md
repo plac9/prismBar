@@ -59,6 +59,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 - Restored Escape-key dismissal and repeat opening for the Prism Deck status-item popover.
 - Made visual assurance normalize an isolated 920 x 640 review window, leave normal window restoration untouched, and embed the exact audited source revision.
 - Replaced deprecated disk-image creation with the native macOS 27 `diskutil image` workflow.
+- Stopped routine UI tests and visual captures from consulting the login Keychain by enforcing local ad-hoc signing.
 - Enforced a hard observation deadline even when an Accessibility reader does not cooperate with cancellation.
 - Made native menu bar movement use a dense bounded Command-drag with guaranteed mouse, modifier, and pointer cleanup.
 - Kept same-section direct moves stable while unrelated menu bar sources appear or disappear during preflight.

@@ -99,5 +99,8 @@ DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode-beta.app/Contents/Developer}
     -destination 'platform=macOS,arch=arm64' \
     -derivedDataPath "$ui_derived_data_directory" \
     "PRISM_SOURCE_REVISION=${PRISM_SOURCE_REVISION:-local-development}" \
+    CODE_SIGN_STYLE=Manual \
+    CODE_SIGN_IDENTITY=- \
+    DEVELOPMENT_TEAM= \
     test \
     "-only-testing:$test_selection"

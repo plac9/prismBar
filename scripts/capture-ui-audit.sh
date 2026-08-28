@@ -63,6 +63,9 @@ xcodebuild \
   -derivedDataPath "$capture_root/DerivedData" \
   -resultBundlePath "$result_bundle" \
   "PRISM_SOURCE_REVISION=$revision" \
+  CODE_SIGN_STYLE=Manual \
+  CODE_SIGN_IDENTITY=- \
+  DEVELOPMENT_TEAM= \
   test '-only-testing:prismBarUITests/VisualAuditTests'
 
 xcrun xcresulttool export attachments \
