@@ -36,7 +36,8 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 
 ### Changed
 
-- Rebuilt the workspace around one adaptive Prism Field canvas, a native floating sidebar, standard-material content,
+- Replaced repeated material-backed content cards with open native sections and restrained semantic accent rules.
+- Rebuilt the workspace around one adaptive Prism Field canvas, a native floating sidebar, open content sections,
   and interactive Liquid Glass reserved for controls and draggable Rail items.
 - Added a CI contract that rejects decorative content-layer Liquid Glass regressions.
 - Migrated the workspace, prismCalc utility, and Settings lifecycle to native SwiftUI scenes while preserving the AppKit status-item popover boundary.

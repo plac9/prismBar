@@ -16,7 +16,7 @@ struct PrivacyView: View {
                     identifier: "privacy.header.hand.raised"
                 )
 
-                PrismContentSurface {
+                PrismContentSection {
                     VStack(alignment: .leading, spacing: 16) {
                         Label("One permission, one purpose", systemImage: "checkmark.shield")
                             .font(.headline)
@@ -54,7 +54,7 @@ struct PrivacyView: View {
                     }
                 }
 
-                PrismContentSurface(tint: .blue) {
+                PrismContentSection(tint: .blue) {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Enforced boundaries")
                             .font(.headline)

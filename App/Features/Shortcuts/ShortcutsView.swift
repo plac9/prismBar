@@ -20,7 +20,7 @@ struct ShortcutsView: View {
                     identifier: "automation.header.bolt.badge.clock"
                 )
 
-                PrismContentSurface {
+                PrismContentSection {
                     VStack(alignment: .leading, spacing: 0) {
                         Label("prismBar commands", systemImage: "command")
                             .font(.headline)
@@ -56,7 +56,7 @@ struct ShortcutsView: View {
                     }
                 }
 
-                PrismContentSurface(tint: .blue) {
+                PrismContentSection(tint: .blue) {
                     Label {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("No global keyboard monitoring")

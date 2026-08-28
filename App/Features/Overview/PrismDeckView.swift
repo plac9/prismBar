@@ -180,7 +180,7 @@ private extension PrismDeckView {
                 .font(.callout)
                 .foregroundStyle(.secondary)
 
-            PrismContentSurface {
+            PrismContentSection {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack(spacing: 12) {
                         Image(systemName: "plus.forwardslash.minus")

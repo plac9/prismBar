@@ -61,7 +61,7 @@ struct MenuBarView: View {
 
 private extension MenuBarView {
     private var menuBarControls: some View {
-        PrismContentSurface {
+        PrismContentSection {
             VStack(alignment: .leading, spacing: 12) {
                 Label("Menu bar controls", systemImage: "slider.horizontal.3")
                     .font(.headline)

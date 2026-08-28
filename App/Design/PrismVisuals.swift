@@ -2,7 +2,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-import AppKit
 import SwiftUI
 
 struct PrismCanvasBackground: View {
@@ -54,9 +53,7 @@ struct PrismCanvasBackground: View {
     }
 }
 
-struct PrismContentSurface<Content: View>: View {
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-
+struct PrismContentSection<Content: View>: View {
     private let tint: Color?
     private let content: Content
 
@@ -70,29 +67,21 @@ struct PrismContentSurface<Content: View>: View {
 
     var body: some View {
         content
-            .padding(18)
-            .background {
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(reduceTransparency ? AnyShapeStyle(opaqueSurface) : AnyShapeStyle(.regularMaterial))
-                    .overlay {
-                        if let tint {
-                            LinearGradient(
-                                colors: [tint.opacity(0.13), .clear],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                            .clipShape(.rect(cornerRadius: 20))
-                        }
-                    }
+            .padding(.vertical, 16)
+            .padding(.leading, tint == nil ? 0 : 16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .overlay(alignment: .top) {
+                Divider()
             }
-            .overlay {
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(.separator.opacity(0.42), lineWidth: 0.5)
+            .overlay(alignment: .leading) {
+                if let tint {
+                    Capsule()
+                        .fill(tint.gradient)
+                        .frame(width: 3)
+                        .padding(.vertical, 16)
+                        .accessibilityHidden(true)
+                }
             }
-    }
-
-    private var opaqueSurface: Color {
-        Color(nsColor: .controlBackgroundColor)
     }
 }
 

@@ -28,8 +28,12 @@ rg -Fq '.backgroundExtensionEffect()' App/Features/Overview/MainWindowView.swift
   fail 'the content canvas no longer extends beneath the native sidebar'
 }
 
-rg -Fq 'struct PrismContentSurface' App/Design/PrismVisuals.swift || {
-  fail 'the standard-material content surface is missing'
+rg -Fq 'struct PrismContentSection' App/Design/PrismVisuals.swift || {
+  fail 'the native content section is missing'
 }
 
-printf 'Liquid Glass audit passed: native navigation, standard-material content, and interactive custom glass remain separated.\n'
+if rg -q '\.regularMaterial' App/Design/PrismVisuals.swift; then
+  fail 'persistent content sections still create repeated material cards'
+fi
+
+printf 'Liquid Glass audit passed: native navigation, open content sections, and interactive custom glass remain separated.\n'

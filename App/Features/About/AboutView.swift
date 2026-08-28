@@ -20,7 +20,7 @@ struct AboutView: View {
                     identifier: "about.header.info.circle"
                 )
 
-                PrismContentSurface {
+                PrismContentSection {
                     VStack(alignment: .leading, spacing: 18) {
                         Label("Build", systemImage: "hammer")
                             .font(.headline)
@@ -36,7 +36,7 @@ struct AboutView: View {
                     }
                 }
 
-                PrismContentSurface(tint: .blue) {
+                PrismContentSection(tint: .blue) {
                     VStack(alignment: .leading, spacing: 16) {
                         Label {
                             VStack(alignment: .leading, spacing: 4) {

@@ -94,7 +94,7 @@ Use the spacing tokens as rhythm, not as fixed geometry that defeats platform ad
 
 # Elevation & Depth
 
-macOS owns elevation through native windows, menus, popovers, sheets, and Liquid Glass. The workspace has one Prism Field content canvas. Persistent groups use standard macOS materials, separators, list selection, and whitespace. Liquid Glass is reserved for navigation and interactive controls, including draggable Rail chips. Do not stack glass cards or add decorative drop shadows.
+macOS owns elevation through native windows, menus, popovers, sheets, and Liquid Glass. The workspace has one Prism Field content canvas. Persistent groups use open native sections, separators, list selection, and whitespace. Liquid Glass is reserved for navigation and interactive controls, including draggable Rail chips. Do not stack glass cards or add decorative drop shadows.
 
 # Shapes
 
