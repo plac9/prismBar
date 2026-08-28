@@ -240,7 +240,7 @@ final class LaunchTests: XCTestCase {
         XCTAssertTrue(panelTitle.waitForExistence(timeout: 7), application.debugDescription)
         let health = application.descendants(matching: .any)["plugin.health"]
         XCTAssertTrue(health.waitForExistence(timeout: 3))
-        XCTAssertEqual(health.label, "Plugin health: Verified and ready")
+        XCTAssertEqual(health.value as? String, "Plugin health: Verified and ready")
 
         XCTAssertFalse(application.staticTexts["Calculator result"].exists)
 
@@ -269,7 +269,7 @@ final class LaunchTests: XCTestCase {
         utility.buttons["Seven"].click()
         XCTAssertTrue(utility.staticTexts["prismCalc unavailable"].waitForExistence(timeout: 5))
         XCTAssertEqual(
-            workspace.descendants(matching: .any)["plugin.health"].label,
+            workspace.descendants(matching: .any)["plugin.health"].value as? String,
             "Plugin health: Connection needs attention"
         )
         XCTAssertNotEqual(application.state, .notRunning)
@@ -294,7 +294,7 @@ final class LaunchTests: XCTestCase {
 
         XCTAssertTrue(utility.staticTexts["prismCalc unavailable"].waitForExistence(timeout: 5))
         XCTAssertEqual(
-            workspace.descendants(matching: .any)["plugin.health"].label,
+            workspace.descendants(matching: .any)["plugin.health"].value as? String,
             "Plugin health: Connection needs attention"
         )
         XCTAssertNotEqual(application.state, .notRunning)

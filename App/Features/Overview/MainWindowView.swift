@@ -37,8 +37,8 @@ struct MainWindowView: View {
                 PrismCanvasBackground()
                 detailView
             }
-            .backgroundExtensionEffect()
             .accessibilityElement(children: .contain)
+            .accessibilityLabel("Workspace content")
             .accessibilityIdentifier("workspace.prismaticCanvas")
         }
         .navigationTitle("prismBar")
@@ -46,7 +46,7 @@ struct MainWindowView: View {
             ToolbarItem(placement: .primaryAction) {
                 Label(connectionLabel, systemImage: connectionSymbol)
                     .font(.callout.weight(.medium))
-                    .foregroundStyle(connectionColor)
+                    .foregroundStyle(.primary)
                     .accessibilityIdentifier("toolbar.connection")
             }
 
@@ -92,7 +92,4 @@ struct MainWindowView: View {
         model.accessibilityState == .granted ? "checkmark.shield.fill" : "exclamationmark.shield.fill"
     }
 
-    private var connectionColor: Color {
-        model.accessibilityState == .granted ? .green : .orange
-    }
 }

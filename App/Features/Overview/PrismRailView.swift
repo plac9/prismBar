@@ -132,7 +132,7 @@ private extension PrismRailView {
 
     @ViewBuilder
     func railItem(_ item: MenuBarItem, section: MenuBarSection) -> some View {
-        let content = railItemContent(item)
+        let content = railItemContent(item, section: section)
             .dropDestination(for: String.self) { tokens, _ in
                 performDrop(tokens: tokens, targetItemID: item.id, section: section)
             } isTargeted: { isTargeted in
@@ -143,7 +143,7 @@ private extension PrismRailView {
             content
                 .glassEffect(.regular.interactive(), in: .capsule)
                 .draggable(token) {
-                    railItemContent(item)
+                    railItemContent(item, section: section)
                         .padding(4)
                         .background(.regularMaterial, in: .capsule)
                 }
@@ -153,8 +153,11 @@ private extension PrismRailView {
         }
     }
 
-    func railItemContent(_ item: MenuBarItem) -> some View {
-        HStack(spacing: 5) {
+    func railItemContent(_ item: MenuBarItem, section: MenuBarSection) -> some View {
+        let laneItems = items(in: section)
+        let position = (laneItems.firstIndex(where: { $0.id == item.id }) ?? 0) + 1
+
+        return HStack(spacing: 5) {
             Image(systemName: canMove(item) ? "line.3.horizontal" : "lock.fill")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.secondary)
@@ -176,8 +179,41 @@ private extension PrismRailView {
         }
         .contentShape(.capsule)
         .help(canMove(item) ? "Drag \(item.displayName) to a new position" : "This item cannot be moved")
+        .accessibilityElement(children: .combine)
         .accessibilityLabel(item.displayName)
-        .accessibilityValue(canMove(item) ? "Draggable" : "Unavailable")
+        .accessibilityValue(
+            canMove(item)
+                ? "\(sectionTitle(section)) section, position \(position) of \(laneItems.count), draggable"
+                : "\(sectionTitle(section)) section, unavailable"
+        )
+        .accessibilityActions {
+            railAccessibilityActions(item, section: section, laneItems: laneItems)
+        }
+    }
+
+    @ViewBuilder
+    func railAccessibilityActions(
+        _ item: MenuBarItem,
+        section: MenuBarSection,
+        laneItems: [MenuBarItem]
+    ) -> some View {
+        if canMove(item) {
+            Button(section == .hidden ? "Show" : "Hide") {
+                model.moveMenuBarItem(item.id, to: section == .hidden ? .visible : .hidden)
+            }
+
+            if let firstItem = laneItems.first, firstItem.id != item.id {
+                Button("Move to First Position") {
+                    model.moveMenuBarItem(item.id, to: firstItem.position)
+                }
+            }
+
+            if let lastItem = laneItems.last, lastItem.id != item.id {
+                Button("Move to Last Position") {
+                    model.moveMenuBarItem(item.id, to: lastItem.position)
+                }
+            }
+        }
     }
 
     func emptyLane(_ section: MenuBarSection) -> some View {

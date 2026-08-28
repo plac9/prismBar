@@ -82,7 +82,7 @@ final class VisualAuditTests: XCTestCase {
     private func captureReadyPrismCalc(in application: XCUIApplication) {
         let health = application.descendants(matching: .any)["plugin.health"]
         XCTAssertTrue(health.waitForExistence(timeout: 5))
-        XCTAssertEqual(health.label, "Plugin health: Verified and ready")
+        XCTAssertEqual(health.value as? String, "Plugin health: Verified and ready")
 
         let openButton = application.buttons["Open prismCalc"]
         XCTAssertTrue(openButton.isEnabled)

@@ -7,20 +7,16 @@ import SwiftUI
 
 struct SettingsRootView: View {
     var body: some View {
-        ZStack {
-            PrismCanvasBackground()
-
-            TabView {
-                Tab("General", systemImage: "gearshape") {
-                    GeneralSettingsView()
-                }
-
-                Tab("Privacy", systemImage: "hand.raised") {
-                    PrivacySettingsView()
-                }
+        TabView {
+            Tab("General", systemImage: "gearshape") {
+                GeneralSettingsView()
             }
-            .padding(.top, 8)
+
+            Tab("Privacy", systemImage: "hand.raised") {
+                PrivacySettingsView()
+            }
         }
+        .padding(.top, 8)
     }
 }
 
@@ -69,15 +65,14 @@ private struct GeneralSettingsView: View {
                 Text("prismBar checks the current signed app each time. Permission state is never cached as truth.")
             }
 
-            Section("Not requested") {
+            Section("Not required") {
                 LabeledContent("Screen Recording", value: "Never")
                 LabeledContent("Input Monitoring", value: "Never")
                 LabeledContent("Files and Folders", value: "Never")
-                LabeledContent("Network Access", value: "Never")
+                LabeledContent("Network Requests", value: "Never")
             }
         }
         .formStyle(.grouped)
-        .scrollContentBackground(.hidden)
         .padding(.horizontal, 14)
         .padding(.bottom, 14)
     }
@@ -151,7 +146,6 @@ private struct PrivacySettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .scrollContentBackground(.hidden)
         .padding(.horizontal, 14)
         .padding(.bottom, 14)
     }

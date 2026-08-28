@@ -6,50 +6,26 @@ import SwiftUI
 
 struct PrismCanvasBackground: View {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
 
     var body: some View {
         ZStack {
-            canvasBase
+            Color(nsColor: .windowBackgroundColor)
 
-            if !reduceTransparency {
-                AngularGradient(
+            if !reduceTransparency && colorSchemeContrast != .increased {
+                RadialGradient(
                     colors: [
-                        Color(red: 0.14, green: 0.55, blue: 1.00).opacity(0.30),
-                        Color(red: 0.44, green: 0.84, blue: 1.00).opacity(0.18),
-                        Color(red: 0.48, green: 0.42, blue: 1.00).opacity(0.22),
+                        Color.accentColor.opacity(0.08),
                         .clear,
-                        Color(red: 0.14, green: 0.55, blue: 1.00).opacity(0.30),
                     ],
                     center: .topLeading,
-                    startAngle: .degrees(-30),
-                    endAngle: .degrees(250)
+                    startRadius: 0,
+                    endRadius: 560
                 )
-                .blur(radius: 54)
-
-                LinearGradient(
-                    colors: [
-                        .clear,
-                        canvasBase.opacity(0.30),
-                        canvasBase.opacity(0.88),
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-
-                Rectangle()
-                    .fill(.ultraThinMaterial)
-                    .opacity(0.26)
             }
         }
         .ignoresSafeArea()
         .accessibilityHidden(true)
-    }
-
-    private var canvasBase: Color {
-        colorScheme == .dark
-            ? Color(red: 0.045, green: 0.065, blue: 0.095)
-            : Color(red: 0.925, green: 0.955, blue: 0.985)
     }
 }
 
@@ -96,16 +72,16 @@ struct PageHeader: View {
         VStack(alignment: .leading, spacing: 8) {
             Label(eyebrow, systemImage: symbol)
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.primary)
 
             Text(title)
-                .font(.system(.largeTitle, design: .rounded, weight: .bold))
+                .font(.title.weight(.semibold))
                 .accessibilityAddTraits(.isHeader)
                 .accessibilityIdentifier(identifier)
 
             Text(message)
                 .font(.body)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.primary)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

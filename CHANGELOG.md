@@ -9,6 +9,8 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 ### Added
 
 - Rail drag-to-place controls for direct, verified multi-position menu bar moves.
+- VoiceOver actions for Rail show, hide, first-position, and last-position moves without requiring drag input.
+- Automated macOS accessibility audits for every workspace destination, native Settings, and Prism Deck.
 - Privacy-safe visual audit captures for every shipping workspace surface and the status item.
 - Revision-bound CI, visual, endurance, distribution, public-source, and physical acceptance states in the assurance report.
 - A source-backed macOS 27 compatibility matrix with explicit safeguards and unresolved physical acceptance gates.
@@ -43,6 +45,8 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 - Let the native macOS list own the Menu Bar inventory surface and reduced Rail chrome to separators.
 - Rebuilt the workspace around one adaptive Prism Field canvas, a native floating sidebar, open content sections,
   and interactive Liquid Glass reserved for controls and draggable Rail items.
+- Replaced the custom canvas palette and Settings backdrop with native window backgrounds, semantic accent color,
+  native Settings forms, macOS title typography, and increased-contrast-aware presentation.
 - Added a CI contract that rejects decorative content-layer Liquid Glass regressions.
 - Migrated the workspace, prismCalc utility, and Settings lifecycle to native SwiftUI scenes while preserving the AppKit status-item popover boundary.
 - Replaced the status-item artwork with a template-rendered prism identity shared by the app UI.
@@ -50,6 +54,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 ### Fixed
 
 - Closed the temporary SwiftUI bootstrap workspace after opening prismCalc from a cold, menu-bar-only launch.
+- Removed unlabeled app-owned accessibility containers, redundant ownership announcements, and a plugin health role override.
 - Explained the auto-hide and full-screen recovery when macOS exposes no safe menu bar input surface.
 - Made visual audit tests fail when system UI obscures a shipping surface instead of accepting occluded screenshots.
 - Restored the approved user-facing `Rail` name while keeping internal Prism Rail type identifiers stable.

@@ -100,6 +100,7 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Adopt system Liquid Glass components and remove decorative legacy styling.
 - [x] Record current Apple guidance and public macOS 27 menu bar failure reports in a maintained compatibility matrix with explicit safeguards and physical gates.
 - [x] Implement keyboard navigation, help, focus, and accessibility actions.
+- [x] Run automated action, non-text contrast, element-detection, hit-region, hierarchy, and description audits across every shipping workspace destination, native Settings, and Prism Deck. Xcode 27 beta static-text contrast false positives remain covered by semantic-color source policy and visual review.
 - [x] Verify every shipping destination remains operational in light, dark, increased contrast, reduced transparency, and reduced motion launch variants.
 - [ ] Complete physical VoiceOver, text-size, and visual accessibility verification.
 - [x] Implement original application and template menu bar icons with no thaw imagery.

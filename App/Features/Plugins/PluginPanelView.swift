@@ -99,9 +99,10 @@ struct PluginsView: View {
             Label(pluginHealthTitle, systemImage: pluginHealthSymbol)
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(pluginHealthColor)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Plugin health: \(pluginHealthTitle)")
-                .accessibilityIdentifier("plugin.health")
+                .accessibilityRepresentation {
+                    Text("Plugin health: \(pluginHealthTitle)")
+                        .accessibilityIdentifier("plugin.health")
+                }
         }
     }
 

@@ -91,12 +91,12 @@ struct OverviewView: View {
                     .font(.headline)
 
                 Text(actionMessage)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Text(PrivacyCopy.observation + " " + PrivacyCopy.boundary)
                     .font(.caption)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(.primary)
 
                 if model.accessibilityState == .denied {
                     Divider()

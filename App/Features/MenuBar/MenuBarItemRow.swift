@@ -24,6 +24,7 @@ struct MenuBarItemRow: View {
             Image(systemName: ownershipSymbol)
                 .frame(width: 22)
                 .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.displayName)
