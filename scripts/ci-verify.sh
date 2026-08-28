@@ -30,6 +30,7 @@ Tests/ReleaseWorkflowTests/notarization_contract.sh
 Tests/ReleaseWorkflowTests/assurance_contract.sh
 Tests/ReleaseWorkflowTests/ui_qa_signing_contract.sh
 Tests/ReleaseWorkflowTests/physical_acceptance_contract.sh
+Tests/ReleaseWorkflowTests/release_signing_keychain_contract.sh
 
 if [ "$(uname -m)" != "arm64" ] || [[ "$(xcrun --sdk macosx --show-sdk-version)" != 27.* ]]; then
   printf 'CI requires the Apple silicon Xcode 27 runner.\n' >&2

@@ -5,6 +5,7 @@ validate_release_signing_keychain() {
   local requested_keychain="$1"
   local requested_identity="$2"
   local keychain_name
+  local identity_count
   local identity_output
 
   [[ "$requested_keychain" == /* ]] || fail 'the signing keychain path must be absolute'
@@ -29,6 +30,11 @@ validate_release_signing_keychain() {
 
   identity_output="$(security find-identity -v -p codesigning "$release_signing_keychain")" || \
     fail 'the dedicated signing keychain could not be inspected without interaction'
+
+  identity_count="$(printf '%s\n' "$identity_output" | \
+    rg -c '^[[:space:]]*[0-9]+\) [[:xdigit:]]{40} "' || true)"
+  [ "$identity_count" = 1 ] || \
+    fail 'the dedicated signing keychain must contain exactly one valid code-signing identity'
 
   if ! printf '%s\n' "$identity_output" | rg -Fq \
     "$release_signing_identity \"Developer ID Application: Patrick LaClair (N8A5T2PZY9)\""; then
