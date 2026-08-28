@@ -36,4 +36,9 @@ if rg -q '\.regularMaterial' App/Design/PrismVisuals.swift; then
   fail 'persistent content sections still create repeated material cards'
 fi
 
+if rg -Fq '.background(.regularMaterial, in: .rect(cornerRadius: 16))' \
+  App/Features/MenuBar/MenuBarView.swift App/Features/Overview/PrismRailView.swift; then
+  fail 'the Menu Bar workspace still wraps native content in material cards'
+fi
+
 printf 'Liquid Glass audit passed: native navigation, open content sections, and interactive custom glass remain separated.\n'

@@ -193,12 +193,6 @@ private extension MenuBarView {
                     }
                 }
                 .listStyle(.inset)
-                .scrollContentBackground(.hidden)
-                .background(.regularMaterial, in: .rect(cornerRadius: 16))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(.separator.opacity(0.38), lineWidth: 0.5)
-                }
                 .frame(minHeight: 220)
             } else {
                 ContentUnavailableView {

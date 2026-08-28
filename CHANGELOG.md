@@ -37,6 +37,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 ### Changed
 
 - Replaced repeated material-backed content cards with open native sections and restrained semantic accent rules.
+- Let the native macOS list own the Menu Bar inventory surface and reduced Rail chrome to separators.
 - Rebuilt the workspace around one adaptive Prism Field canvas, a native floating sidebar, open content sections,
   and interactive Liquid Glass reserved for controls and draggable Rail items.
 - Added a CI contract that rejects decorative content-layer Liquid Glass regressions.

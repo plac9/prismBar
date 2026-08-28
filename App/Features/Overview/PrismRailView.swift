@@ -28,11 +28,12 @@ struct PrismRailView: View {
             lane(for: .visible)
             lane(for: .hidden)
         }
-        .padding(12)
-        .background(.regularMaterial, in: .rect(cornerRadius: 16))
-        .overlay {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(.separator.opacity(0.38), lineWidth: 0.5)
+        .padding(.vertical, 12)
+        .overlay(alignment: .top) {
+            Divider()
+        }
+        .overlay(alignment: .bottom) {
+            Divider()
         }
         .accessibilityIdentifier("prismRail")
         .onChange(of: snapshot.generation) {
