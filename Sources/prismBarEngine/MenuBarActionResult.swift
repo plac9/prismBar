@@ -91,7 +91,7 @@ public struct MenuBarActionResult: Equatable, Sendable {
             )
         case .menuBarUnavailable:
             failure(
-                "The current menu bar surface is unavailable.",
+                "Exit full screen or turn off Automatically hide and show the menu bar, then refresh.",
                 symbol: "menubar.dock.rectangle.badge.questionmark"
             )
         case .observationFailed:

@@ -48,6 +48,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 
 ### Fixed
 
+- Explained the auto-hide and full-screen recovery when macOS exposes no safe menu bar input surface.
 - Made visual audit tests fail when system UI obscures a shipping surface instead of accepting occluded screenshots.
 - Restored the approved user-facing `Rail` name while keeping internal Prism Rail type identifiers stable.
 - Made normal launch menu-bar-first and isolated windowless Prism Deck UI tests from workspace restoration.

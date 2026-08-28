@@ -43,4 +43,14 @@ struct MenuBarActionResultTests {
         #expect(result.recovery == .refresh)
         #expect(result.message.contains("Fixture"))
     }
+
+    @Test("an unavailable menu bar explains the safe recovery")
+    func unavailableMenuBarRecovery() {
+        let result = MenuBarActionResult.move(.menuBarUnavailable, itemName: "Fixture")
+
+        #expect(result.kind == .failure)
+        #expect(result.message.contains("Exit full screen"))
+        #expect(result.message.contains("Automatically hide"))
+        #expect(result.recovery == .refresh)
+    }
 }
