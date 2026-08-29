@@ -40,15 +40,12 @@ if [ ! -d "$application_path/Contents" ]; then
 fi
 
 host_executable="$application_path/Contents/MacOS/prismBar"
-plugin_bundle="$application_path/Contents/XPCServices/prismCalcPluginService.xpc"
-plugin_executable="$plugin_bundle/Contents/MacOS/prismCalcPluginService"
 privacy_manifest="$application_path/Contents/Resources/PrivacyInfo.xcprivacy"
 bundled_license="$application_path/Contents/Resources/LICENSE"
 bundled_notice="$application_path/Contents/Resources/NOTICE"
 
 for required_path in \
   "$host_executable" \
-  "$plugin_executable" \
   "$privacy_manifest" \
   "$bundled_license" \
   "$bundled_notice"; do
@@ -63,7 +60,7 @@ cmp -s "$repository_root/NOTICE" "$bundled_notice" || \
   fail 'bundled legal notice differs from the repository notice'
 
 actual_executables="$(find "$application_path/Contents" -type f -perm -111 -print | LC_ALL=C sort)"
-expected_executables="$(printf '%s\n%s\n' "$host_executable" "$plugin_executable" | LC_ALL=C sort)"
+expected_executables="$host_executable"
 if [ "$actual_executables" != "$expected_executables" ]; then
   printf 'Expected executables:\n%s\nActual executables:\n%s\n' \
     "$expected_executables" "$actual_executables" >&2
@@ -75,7 +72,7 @@ if [ -d "$application_path/Contents/Frameworks" ] && \
   fail 'embedded frameworks or dynamic libraries are not allowed'
 fi
 
-for executable_path in "$host_executable" "$plugin_executable"; do
+for executable_path in "$host_executable"; do
   if [ "$(lipo -archs "$executable_path")" != 'arm64' ]; then
     fail "release executable is not arm64-only: $executable_path"
   fi
@@ -94,16 +91,12 @@ for executable_path in "$host_executable" "$plugin_executable"; do
 done
 
 host_bundle_identifier="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$application_path/Contents/Info.plist")"
-plugin_bundle_identifier="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$plugin_bundle/Contents/Info.plist")"
 minimum_system_version="$(/usr/libexec/PlistBuddy -c 'Print :LSMinimumSystemVersion' "$application_path/Contents/Info.plist")"
 source_revision="$(/usr/libexec/PlistBuddy -c 'Print :PrismSourceRevision' "$application_path/Contents/Info.plist")"
 source_repository_url="$(/usr/libexec/PlistBuddy -c 'Print :PrismSourceRepositoryURL' \
   "$application_path/Contents/Info.plist")"
 if [ "$host_bundle_identifier" != 'com.laclairtech.prismbar' ]; then
   fail "unexpected host bundle identifier: $host_bundle_identifier"
-fi
-if [ "$plugin_bundle_identifier" != 'com.laclairtech.prismbar.plugin.prismcalc' ]; then
-  fail "unexpected plugin bundle identifier: $plugin_bundle_identifier"
 fi
 if [ "$minimum_system_version" != '27.0' ]; then
   fail "unexpected minimum macOS version: $minimum_system_version"
@@ -124,11 +117,9 @@ fi
 if [ "$(plutil -convert json -o - "$repository_root/Config/prismBar.entitlements")" != '{}' ]; then
   fail 'host entitlement allowlist is not empty'
 fi
-expected_plugin_entitlements='{"com.apple.security.app-sandbox":true}'
-actual_plugin_entitlements="$(plutil -convert json -o - \
-  "$repository_root/Config/prismCalcPluginService.entitlements")"
-if [ "$actual_plugin_entitlements" != "$expected_plugin_entitlements" ]; then
-  fail 'plugin entitlement allowlist is not exactly App Sandbox'
+if [ -d "$application_path/Contents/XPCServices" ] && \
+  find "$application_path/Contents/XPCServices" -mindepth 1 -print -quit | rg -q .; then
+  fail 'the core-first application must not embed an XPC service'
 fi
 
-printf 'Release bundle audit passed: exact executables, libraries, entitlements, legal files, source provenance, and sensitive-string controls.\n'
+printf 'Release bundle audit passed: exact core executable, libraries, entitlements, legal files, source provenance, and sensitive-string controls.\n'
