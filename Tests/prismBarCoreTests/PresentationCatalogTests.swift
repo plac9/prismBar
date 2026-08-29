@@ -65,4 +65,21 @@ struct PresentationCatalogTests {
                 "2 menu bar sources did not respond. Visible items remain available and every move is still verified."
         )
     }
+
+    @Test("explains intentional source absence while hidden items are folded")
+    func foldedHiddenSectionNotice() {
+        let partial = MenuBarObservationPresentation(
+            itemCount: 3,
+            unavailableSourceCount: 46
+        )
+
+        #expect(
+            partial.sourceAvailabilityNotice(hiddenSectionCollapsed: true) ==
+                "Hidden items are folded. Reveal them to refresh and manage the full menu bar."
+        )
+        #expect(
+            partial.sourceAvailabilityNotice(hiddenSectionCollapsed: false) ==
+                partial.unavailableSourcesWarning
+        )
+    }
 }

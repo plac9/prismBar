@@ -73,4 +73,12 @@ public struct MenuBarObservationPresentation: Equatable, Sendable {
         return "\(unavailableSourceCount) menu bar \(source) did not respond. " +
             "Visible items remain available and every move is still verified."
     }
+
+    public func sourceAvailabilityNotice(hiddenSectionCollapsed: Bool) -> String? {
+        guard unavailableSourceCount > 0 else { return nil }
+        if hiddenSectionCollapsed {
+            return "Hidden items are folded. Reveal them to refresh and manage the full menu bar."
+        }
+        return unavailableSourcesWarning
+    }
 }

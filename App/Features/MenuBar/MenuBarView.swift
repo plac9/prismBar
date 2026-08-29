@@ -148,15 +148,19 @@ private extension MenuBarView {
     private var menuBarContent: some View {
         VStack(alignment: .leading, spacing: 10) {
             if let snapshot = model.menuBarSnapshot {
-                if let warning = MenuBarObservationPresentation(
+                if let notice = MenuBarObservationPresentation(
                     itemCount: snapshot.items.count,
                     unavailableSourceCount: snapshot.unavailableSourceCount
-                ).unavailableSourcesWarning {
+                ).sourceAvailabilityNotice(
+                    hiddenSectionCollapsed: model.isHiddenSectionCollapsed
+                ) {
                     Label(
-                        warning,
-                        systemImage: "exclamationmark.triangle"
+                        notice,
+                        systemImage: model.isHiddenSectionCollapsed
+                            ? "eye.slash"
+                            : "exclamationmark.triangle"
                     )
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(model.isHiddenSectionCollapsed ? Color.secondary : .orange)
                 }
 
                 PrismRailView(snapshot: snapshot)
