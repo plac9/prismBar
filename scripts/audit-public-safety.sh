@@ -33,9 +33,11 @@ fi
 personal_data_pattern='/Users/[A-Za-z0-9._-]+/|/home/[A-Za-z0-9._-]+/|/var/folders/|Documents/Codex|@[A-Za-z0-9.-]*(gmail|icloud|outlook|protonmail)\.[A-Za-z]{2,}|(^|[^0-9])(10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|192\.168\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[01])\.[0-9]{1,3}\.[0-9]{1,3}|100\.(6[4-9]|[7-9][0-9]|1[01][0-9]|12[0-7])\.[0-9]{1,3}\.[0-9]{1,3})([^0-9]|$)'
 scan_exclusions=(
   -g '!build/**'
+  -g '!.git'
   -g '!.git/**'
   -g '!scripts/audit-public-safety.sh'
   -g '!scripts/audit-release-bundle.sh'
+  -g '!scripts/audit-app-store-bundle.sh'
 )
 
 if rg -I -q --hidden "${scan_exclusions[@]}" "$personal_data_pattern" .; then
@@ -45,7 +47,8 @@ fi
 while IFS= read -r revision; do
   if git grep -I -q -E "$personal_data_pattern" "$revision" -- . \
     ':(exclude)scripts/audit-public-safety.sh' \
-    ':(exclude)scripts/audit-release-bundle.sh'; then
+    ':(exclude)scripts/audit-release-bundle.sh' \
+    ':(exclude)scripts/audit-app-store-bundle.sh'; then
     fail 'Git history contains a personal path, personal email domain, or private network address'
   fi
 done < <(git rev-list --all)
