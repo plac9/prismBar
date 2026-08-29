@@ -78,11 +78,12 @@ public actor VerifiedMoveCoordinator<
             return VerifiedMoveResult(outcome: outcome)
         }
 
-        guard moveScopeOrder(
-            item: plan.item,
-            destination: plan.destinationItem,
-            in: current
-        ) == plan.sourceScopeOrder else {
+        if let verificationSection = plan.verificationSection,
+           current.section(for: plan.item) == verificationSection {
+            return VerifiedMoveResult(outcome: .success, verifiedSnapshot: current)
+        }
+
+        guard preflightMatches(plan, current: current) else {
             return VerifiedMoveResult(outcome: .topologyChanged)
         }
         guard let sourceItem = current.items.first(where: { $0.id == plan.item }),
@@ -113,6 +114,32 @@ public actor VerifiedMoveCoordinator<
             plan,
             deadline: OperationDeadline(timeout: operationTimeout)
         )
+    }
+
+    private func preflightMatches(
+        _ plan: MovePlan,
+        current: MenuBarSnapshot
+    ) -> Bool {
+        guard plan.verificationSection != nil else {
+            return moveScopeOrder(
+                item: plan.item,
+                destination: plan.destinationItem,
+                in: current
+            ) == plan.sourceScopeOrder
+        }
+
+        guard let source = current.items.first(where: { $0.id == plan.item }),
+              let destination = current.items.first(where: {
+                  $0.id == plan.destinationItem
+              }),
+              source.surfaceID == destination.surfaceID,
+              destination.role == .hiddenSectionDivider,
+              let currentSection = current.section(for: plan.item),
+              currentSection != .controller
+        else {
+            return false
+        }
+        return true
     }
 
     private func verifyMove(

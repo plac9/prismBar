@@ -56,6 +56,58 @@ struct SectionMoveVerificationTests {
         #expect(result.verifiedSnapshot == settled)
     }
 
+    @Test("ignores unrelated source churn before a section move")
+    func ignoresUnrelatedSourceChurnBeforeSectionMove() async throws {
+        let planned = sectionSnapshot(
+            names: ["moving", "transient", "divider", "visible"],
+            generation: 1
+        )
+        let current = sectionSnapshot(
+            names: ["moving", "divider", "visible"],
+            generation: 2
+        )
+        let verified = sectionSnapshot(
+            names: ["divider", "visible", "moving"],
+            generation: 3
+        )
+        let plan = try SectionMovePlanner().plan(item: id("moving"), to: .visible, in: planned)
+        let performer = SectionRecordingMovePerformer()
+        let coordinator = VerifiedMoveCoordinator(
+            reader: SectionSnapshotSequenceReader(snapshots: [current, verified]),
+            performer: performer
+        )
+
+        let result = await coordinator.executeWithObservation(plan)
+
+        #expect(result.outcome == .success)
+        #expect(result.verifiedSnapshot == verified)
+        #expect(await performer.executionCount == 1)
+    }
+
+    @Test("accepts a section move completed before preflight without producing input")
+    func acceptsSectionMoveCompletedBeforePreflight() async throws {
+        let planned = sectionSnapshot(
+            names: ["moving", "divider", "visible"],
+            generation: 1
+        )
+        let current = sectionSnapshot(
+            names: ["divider", "visible", "moving"],
+            generation: 2
+        )
+        let plan = try SectionMovePlanner().plan(item: id("moving"), to: .visible, in: planned)
+        let performer = SectionRecordingMovePerformer()
+        let coordinator = VerifiedMoveCoordinator(
+            reader: SectionSnapshotSequenceReader(snapshots: [current]),
+            performer: performer
+        )
+
+        let result = await coordinator.executeWithObservation(plan)
+
+        #expect(result.outcome == .success)
+        #expect(result.verifiedSnapshot == current)
+        #expect(await performer.executionCount == 0)
+    }
+
     private func sectionSnapshot(names: [String], generation: UInt64) -> MenuBarSnapshot {
         MenuBarSnapshot(
             generation: generation,
@@ -96,11 +148,15 @@ private actor SectionSnapshotSequenceReader: MenuBarSnapshotReading {
     }
 }
 
-private struct SectionRecordingMovePerformer: MenuBarMovePerforming {
+private actor SectionRecordingMovePerformer: MenuBarMovePerforming {
+    private(set) var executionCount = 0
+
     func move(
         source _: MenuBarItemFrame,
         destination _: MenuBarItemFrame,
         insertionEdge _: MenuBarInsertionEdge,
         deadline _: OperationDeadline
-    ) {}
+    ) {
+        executionCount += 1
+    }
 }
