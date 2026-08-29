@@ -68,8 +68,6 @@ struct MainWindowView: View {
             OverviewView()
         case .menuBar:
             MenuBarView()
-        case .tools:
-            PluginsView()
         case .automation:
             ShortcutsView()
         case .privacy:

@@ -30,13 +30,6 @@ struct prismBarApp: App {
         }
         .defaultLaunchBehavior(.suppressed)
 
-        UtilityWindow("prismCalc", id: PrismSceneID.prismCalc) {
-            PrismCalcUtilityView(model: AppModel.shared)
-                .environment(AppModel.shared)
-        }
-        .defaultSize(width: 360, height: 520)
-        .windowResizability(.contentMinSize)
-
         Settings {
             SettingsRootView()
                 .environment(AppModel.shared)

@@ -14,10 +14,6 @@ final class AccessibilityAuditTests: XCTestCase {
         try auditWorkspaceDestination("Menu Bar")
     }
 
-    func testToolsPassesMacOSAccessibilityAudit() throws {
-        try auditWorkspaceDestination("Tools")
-    }
-
     func testAutomationPassesMacOSAccessibilityAudit() throws {
         try auditWorkspaceDestination("Automation")
     }
@@ -78,11 +74,8 @@ final class AccessibilityAuditTests: XCTestCase {
         XCTAssertTrue(statusItem.waitForExistence(timeout: 5), application.debugDescription)
         statusItem.click()
 
-        let modePicker = application.descendants(matching: .any)["prismDeck.mode"]
-        XCTAssertTrue(modePicker.waitForExistence(timeout: 3), application.debugDescription)
-        try performAudit(in: application)
-
-        modePicker.radioButtons["Tools"].click()
+        let deckTitle = application.staticTexts["prismDeck"]
+        XCTAssertTrue(deckTitle.waitForExistence(timeout: 3), application.debugDescription)
         try performAudit(in: application)
     }
 

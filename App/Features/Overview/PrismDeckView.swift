@@ -10,19 +10,15 @@ import SwiftUI
 struct PrismDeckView: View {
     @Bindable private var model: AppModel
     private let openWorkspace: () -> Void
-    private let openPrismCalc: () -> Void
-    @State private var mode = PrismDeckMode.bar
     @State private var isResetConfirmationPresented = false
     @State private var isItemListExpanded = false
 
     init(
         model: AppModel,
-        openWorkspace: @escaping () -> Void,
-        openPrismCalc: @escaping () -> Void
+        openWorkspace: @escaping () -> Void
     ) {
         self.model = model
         self.openWorkspace = openWorkspace
-        self.openPrismCalc = openPrismCalc
     }
 
     var body: some View {
@@ -30,15 +26,8 @@ struct PrismDeckView: View {
             header
             Divider()
 
-            Group {
-                switch mode {
-                case .bar:
-                    barMode
-                case .tools:
-                    toolsMode
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            barMode
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
             Divider()
             footer
@@ -69,9 +58,9 @@ private extension PrismDeckView {
                     .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 1) {
-                    Text("Prism Deck")
+                    Text("prismDeck")
                         .font(.headline)
-                    Text("Fast control without leaving your work")
+                    Text("Fast menu bar control without leaving your work")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -83,15 +72,6 @@ private extension PrismDeckView {
                     .help(accessibilityTitle)
                     .accessibilityLabel(accessibilityTitle)
             }
-
-            Picker("Mode", selection: $mode) {
-                ForEach(PrismDeckMode.allCases) { deckMode in
-                    Text(deckMode.title).tag(deckMode)
-                }
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .accessibilityIdentifier("prismDeck.mode")
         }
         .padding(14)
     }
@@ -170,63 +150,6 @@ private extension PrismDeckView {
             ProgressView("Reading menu bar items")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-    }
-
-    private var toolsMode: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("Tools")
-                .font(.title3.bold())
-            Text("Focused utilities that open independently from prismBar.")
-                .font(.callout)
-                .foregroundStyle(.secondary)
-
-            PrismContentSection {
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack(spacing: 12) {
-                        Image(systemName: "plus.forwardslash.minus")
-                            .font(.title2.weight(.semibold))
-                            .foregroundStyle(.tint)
-                            .frame(width: 38, height: 38)
-                            .background(.background.secondary, in: .rect(cornerRadius: 10))
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("prismCalc")
-                                .font(.headline)
-                            Text(toolStatusTitle)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-
-                        Spacer()
-                    }
-
-                    Text("A private calculator powered by an isolated, signed tool service.")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-
-                    HStack {
-                        Label("Local only", systemImage: "lock.shield")
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Button("Open prismCalc", systemImage: "arrow.up.forward.app") {
-                            openPrismCalc()
-                        }
-                        .buttonStyle(.glassProminent)
-                        .disabled(!model.isPluginEnabled)
-                    }
-                }
-            }
-
-            if !model.isPluginEnabled {
-                Button("Enable prismCalc", systemImage: "power") {
-                    model.setPluginEnabled(true)
-                }
-            }
-
-            Spacer()
-        }
-        .padding(14)
     }
 
     private var footer: some View {
@@ -324,16 +247,6 @@ private extension PrismDeckView {
 
     private var accessibilityColor: Color {
         model.accessibilityState == .granted ? .green : .orange
-    }
-
-    private var toolStatusTitle: String {
-        switch model.pluginState {
-        case .ready: "Ready"
-        case .loading, .idle: "Connecting"
-        case .unavailable: "Needs attention"
-        case .paused: "Paused for safety"
-        case .disabled: "Off"
-        }
     }
 
     private func resultColor(for kind: MenuBarActionResultKind) -> Color {

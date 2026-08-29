@@ -65,9 +65,9 @@ struct PrivacyView: View {
                         )
                         Divider()
                         PrivacyPrinciple(
-                            title: "Isolated tools",
-                            message: "Tools run in sandboxed services without Accessibility, files, or network access.",
-                            symbol: "shippingbox.and.arrow.backward"
+                            title: "Minimal runtime",
+                            message: "The core app has no plugin runtime, file access, or network access.",
+                            symbol: "lock.shield"
                         )
                     }
                 }

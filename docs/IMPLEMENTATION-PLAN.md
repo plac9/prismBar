@@ -4,6 +4,10 @@
 
 The project is complete only when every gate below has authoritative evidence from the current clean-room repository and the signed application installed on physical macOS 27.
 
+## Current scope lock
+
+The shipping application is intentionally limited to menu bar discovery, hide and reveal, direct arbitrary-position ordering, recovery, and the `prismDeck` status-item control surface. The plugin framework and prismCalc sources remain preserved and tested in the repository, but they are not linked, embedded, launched, or presented by the application. Plugin work resumes only after the installed core passes the physical macOS 27 gates in Phases 2 through 5.
+
 ## Phase 0: Repository and contracts
 
 - [x] Preserve the GPL reference tree without changing its working state.
@@ -62,11 +66,13 @@ The project is complete only when every gate below has authoritative evidence fr
 - [x] Implement a template-rendered prism status icon.
 - [x] Use the native macOS 27 expanded-interface session for the command center.
 - [x] Ensure normal click opens the command center, Escape dismisses it, and the same item reopens it.
-- [x] Add primary section actions, current state, plugin panels, Settings, and Quit.
+- [x] Add primary section actions, current state, Settings, and Quit.
 - [x] Add shortcut discovery and conflict detection without global keyboard monitoring.
 - [x] Prove menu operation with no main window open through a native XCUITest.
 
 ## Phase 6: Plugin platform
+
+Repository work is preserved, but this phase is frozen and excluded from the shipping application until core physical acceptance passes.
 
 - [x] Implement versioned `prismPluginKit` value and protocol contracts.
 - [x] Implement a bounded bundled-plugin registry and persistent user enable/disable lifecycle.
@@ -81,6 +87,8 @@ The project is complete only when every gate below has authoritative evidence fr
 
 ## Phase 7: prismCalc plugin
 
+Repository work is preserved, but this phase is frozen and excluded from the shipping application until core physical acceptance passes.
+
 - [x] Write independent calculator reducer tests from the product contract.
 - [x] Implement everyday arithmetic and deterministic decimal behavior.
 - [x] Implement bounded local recent-result history.
@@ -91,16 +99,16 @@ The project is complete only when every gate below has authoritative evidence fr
 
 ## Phase 8: Complete macOS 27 experience
 
-- [x] Build Overview, Menu Bar, Plugins, Shortcuts, Privacy, and About destinations.
+- [x] Build Home, Menu Bar, Automation, Privacy, and About destinations.
 - [x] Preserve the main-window frame and restore its native keyboard focus loop.
 - [x] Replace manual AppKit workspace, utility, and Settings windows with macOS 27 SwiftUI scene ownership.
-- [x] Prove native Command-comma and Prism Deck Settings entry points reuse one adaptive Settings window.
+- [x] Prove native Command-comma and `prismDeck` Settings entry points reuse one adaptive Settings window.
 - [x] Build onboarding, empty, unavailable, revoked, error, and recovery surfaces.
 - [x] Integrate the native system window background, semantic content surfaces, and standard interactive glass controls.
 - [x] Adopt system Liquid Glass components and remove decorative legacy styling.
 - [x] Record current Apple guidance and public macOS 27 menu bar failure reports in a maintained compatibility matrix with explicit safeguards and physical gates.
 - [x] Implement keyboard navigation, help, focus, and accessibility actions.
-- [x] Run automated action, non-text contrast, element-detection, hit-region, hierarchy, and description audits across every shipping workspace destination, native Settings, and Prism Deck. Xcode 27 beta static-text contrast false positives remain covered by semantic-color source policy and visual review.
+- [x] Run automated action, non-text contrast, element-detection, hit-region, hierarchy, and description audits across every shipping workspace destination, native Settings, and `prismDeck`. Xcode 27 beta static-text contrast false positives remain covered by semantic-color source policy and visual review.
 - [x] Verify every shipping destination remains operational in light, dark, increased contrast, reduced transparency, and reduced motion launch variants.
 - [ ] Complete physical VoiceOver, text-size, and visual accessibility verification.
 - [x] Implement original application and template menu bar icons with no thaw imagery.
@@ -132,6 +140,6 @@ The project is complete only when every gate below has authoritative evidence fr
 - [ ] Verify nested signing order and exact entitlement allowlists on that archive.
 - [ ] Package, notarize, staple, and validate the distribution artifact.
 - [ ] Install through the shipping flow to `/Applications/prismBar.app`.
-- [ ] Complete the physical macOS 27 permission, move, status item, plugin, relaunch, upgrade, displays, spaces, full-screen, sleep, wake, logout, and reboot matrix.
+- [ ] Complete the physical macOS 27 permission, move, status item, relaunch, upgrade, displays, spaces, full-screen, sleep, wake, logout, and reboot matrix.
 - [ ] Verify Gatekeeper behavior on a clean macOS 27 user account.
 - [ ] Publish only after owner review of the final diff, evidence, price, license presentation, and release artifact.

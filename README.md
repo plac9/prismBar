@@ -2,7 +2,7 @@
 
 prismBar is a privacy-first macOS 27 menu bar workspace. It makes menu bar items manageable, discoverable, and recoverable without capturing or transmitting what the user sees.
 
-Rail provides direct drag-to-place control from the workspace and Prism Deck. A drop resolves to one verified multi-position Command-drag rather than repeating one-position moves. Every action uses a fresh topology snapshot, one shared hard deadline, and a post-move observation before prismBar reports success.
+Rail provides direct drag-to-place control from the workspace and `prismDeck`. A drop resolves to one verified multi-position Command-drag rather than repeating one-position moves. Every action uses a fresh topology snapshot, one shared hard deadline, and a post-move observation before prismBar reports success.
 
 This repository is an independent clean-room implementation. It does not contain source code, tests, assets, strings, project configuration, or history from Ice, Thaw, or the former GPL-derived prismBar fork.
 
@@ -16,7 +16,11 @@ This repository is an independent clean-room implementation. It does not contain
 - Distribution: Developer ID signed, hardened, notarized direct distribution
 - Privacy: local-only operation, no analytics, telemetry, screen capture, OCR, or content upload
 - Accessibility: public macOS Accessibility APIs, requested only after the app is installed in a stable location
-- Plugins: bundled, separately signed, sandboxed XPC services with explicit capabilities
+- Shipping scope: menu bar control only; no plugin runtime, file access, or network access
+
+## Core-first scope
+
+The shipping app currently includes only the core model, Accessibility adapter, and verified menu-bar engine. `prismDeck` is its compact status-item control surface. Plugin and prismCalc sources are preserved for later development but are not linked, embedded, launched, or visible in the application.
 
 ## Repository boundary
 

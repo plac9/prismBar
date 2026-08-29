@@ -43,13 +43,6 @@ struct OverviewView: View {
                                 symbol: "menubar.rectangle",
                                 isReady: menuBarPresentation?.isComplete == true
                             )
-                            Divider()
-                            ReadinessRow(
-                                title: "Tools",
-                                value: pluginLabel,
-                                symbol: "wrench.and.screwdriver",
-                                isReady: model.pluginState == .ready
-                            )
                         }
                     }
                 }
@@ -78,9 +71,6 @@ struct OverviewView: View {
             }
             .frame(maxWidth: 720, alignment: .leading)
             .padding(36)
-        }
-        .task {
-            model.loadPluginIfNeeded()
         }
     }
 
@@ -237,15 +227,6 @@ struct OverviewView: View {
         )
     }
 
-    private var pluginLabel: String {
-        switch model.pluginState {
-        case .idle, .loading: "Checking"
-        case .ready: "prismCalc ready"
-        case .unavailable: "prismCalc unavailable"
-        case .paused: "prismCalc paused for safety"
-        case .disabled: "prismCalc disabled"
-        }
-    }
 }
 
 private struct RecoveryStep: View {

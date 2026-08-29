@@ -20,20 +20,12 @@ final class SceneActionRouter {
         guard let pendingWindowID else { return }
         self.pendingWindowID = nil
 
-        if pendingWindowID != PrismSceneID.workspace {
-            closeBootstrapWorkspace()
-        }
         openWindow(id: pendingWindowID)
     }
 
     @discardableResult
     func openWorkspace() -> Bool {
         presentWindow(id: PrismSceneID.workspace)
-    }
-
-    func openPrismCalc() {
-        AppModel.shared.loadPluginIfNeeded()
-        presentWindow(id: PrismSceneID.prismCalc)
     }
 
     @discardableResult
@@ -63,11 +55,6 @@ final class SceneActionRouter {
         return true
     }
 
-    private func closeBootstrapWorkspace() {
-        NSApplication.shared.windows
-            .filter { $0.isVisible && $0.title == "prismBar" }
-            .forEach { $0.close() }
-    }
 }
 
 struct SceneActionRegistrationView: View {

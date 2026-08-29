@@ -15,50 +15,21 @@ final class PrismDeckTests: XCTestCase {
         XCTAssertTrue(statusItem.waitForExistence(timeout: 5), application.debugDescription)
         statusItem.click()
 
-        let modePicker = application.descendants(matching: .any)["prismDeck.mode"]
-        XCTAssertTrue(modePicker.waitForExistence(timeout: 3))
+        let deckTitle = application.staticTexts["prismDeck"]
+        XCTAssertTrue(deckTitle.waitForExistence(timeout: 3))
         XCTAssertTrue(application.buttons["Open Workspace"].exists)
+        XCTAssertFalse(application.buttons["Open prismCalc"].exists)
+        XCTAssertFalse(application.radioButtons["Tools"].exists)
 
         application.typeKey(.escape, modifierFlags: [])
-        XCTAssertTrue(modePicker.waitForNonExistence(timeout: 3))
+        XCTAssertTrue(deckTitle.waitForNonExistence(timeout: 3))
 
         statusItem.click()
-        XCTAssertTrue(modePicker.waitForExistence(timeout: 3))
+        XCTAssertTrue(deckTitle.waitForExistence(timeout: 3))
 
         application.buttons["Open Workspace"].click()
         XCTAssertTrue(workspace.waitForExistence(timeout: 3))
         XCTAssertEqual(workspace.title, "prismBar")
-    }
-
-    func testToolsModeOpensPrismCalcUtilityWithoutWorkspace() {
-        let application = prismBarApplication(opensWorkspace: false)
-        application.launch()
-
-        let workspace = closeWorkspaceIfNeeded(in: application)
-        let statusItem = prismBarStatusItem(in: application)
-        XCTAssertTrue(statusItem.waitForExistence(timeout: 5), application.debugDescription)
-        statusItem.click()
-
-        let modePicker = application.descendants(matching: .any)["prismDeck.mode"]
-        XCTAssertTrue(modePicker.waitForExistence(timeout: 3))
-        modePicker.radioButtons["Tools"].click()
-
-        let openPrismCalc = application.buttons["Open prismCalc"]
-        XCTAssertTrue(openPrismCalc.waitForExistence(timeout: 3))
-        openPrismCalc.click()
-
-        let utility = application.windows["prismCalc"]
-        XCTAssertTrue(utility.waitForExistence(timeout: 5), application.debugDescription)
-        XCTAssertTrue(workspace.waitForNonExistence(timeout: 3), application.debugDescription)
-
-        clickWhenEnabled(application.buttons["Seven"])
-        clickWhenEnabled(application.buttons["Add"])
-        clickWhenEnabled(application.buttons["Five"])
-        clickWhenEnabled(application.buttons["Equals"])
-
-        let result = application.staticTexts["Calculator result"]
-        XCTAssertTrue(result.waitForExistence(timeout: 3))
-        XCTAssertEqual(result.value as? String, "12")
     }
 
     func testPrismDeckOpensSettingsWithoutWorkspace() {
@@ -107,15 +78,5 @@ final class PrismDeckTests: XCTestCase {
         application.descendants(matching: .statusItem)
             .matching(identifier: "prismBar")
             .firstMatch
-    }
-
-    private func clickWhenEnabled(_ element: XCUIElement) {
-        XCTAssertTrue(element.waitForExistence(timeout: 3))
-        let enabled = XCTNSPredicateExpectation(
-            predicate: NSPredicate(format: "enabled == true"),
-            object: element
-        )
-        XCTAssertEqual(XCTWaiter.wait(for: [enabled], timeout: 3), .completed)
-        element.click()
     }
 }

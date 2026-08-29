@@ -141,7 +141,7 @@ private struct PrivacySettingsView: View {
                 PrivacySetting(label: "Screen capture and OCR", value: "Never", symbol: "eye.slash")
                 PrivacySetting(label: "Analytics and telemetry", value: "None", symbol: "waveform.path")
                 PrivacySetting(label: "Network requests", value: "None", symbol: "network.slash")
-                PrivacySetting(label: "Tool permissions", value: "Sandboxed", symbol: "shippingbox")
+                PrivacySetting(label: "Bundled tools", value: "Not included", symbol: "shippingbox")
                 PrivacySetting(label: "Observed menu labels", value: "Memory only", symbol: "memorychip")
             }
         }

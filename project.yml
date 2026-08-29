@@ -48,6 +48,10 @@ targets:
     deploymentTarget: "27.0"
     sources:
       - path: App
+        excludes:
+          - Features/Plugins
+          - PluginCatalog.swift
+          - PluginClient.swift
       - path: Resources
       - path: LICENSE
         buildPhase: resources
@@ -60,10 +64,6 @@ targets:
         product: prismBarAccessibility
       - package: prismBarModules
         product: prismBarEngine
-      - package: prismBarModules
-        product: prismPluginKit
-      - target: prismCalcPluginService
-        embed: true
     entitlements:
       path: Config/prismBar.entitlements
     info:
@@ -90,37 +90,6 @@ targets:
       testTargets:
         - prismBarAppTests
         - prismBarUITests
-
-  prismCalcPluginService:
-    type: xpc-service
-    platform: macOS
-    deploymentTarget: "27.0"
-    sources:
-      - path: XPC/prismCalcPluginService
-    dependencies:
-      - package: prismBarModules
-        product: prismPluginKit
-      - package: prismBarModules
-        product: prismCalcPlugin
-    entitlements:
-      path: Config/prismCalcPluginService.entitlements
-      properties:
-        com.apple.security.app-sandbox: true
-    info:
-      path: Config/prismCalcPluginService-Info.plist
-      properties:
-        CFBundleDisplayName: prismCalc
-        CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "1"
-        XPCService:
-          ServiceType: Application
-          RunLoopType: NSRunLoop
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.laclairtech.prismbar.plugin.prismcalc
-        PRODUCT_NAME: prismCalcPluginService
-        GENERATE_INFOPLIST_FILE: NO
-        ENABLE_APP_SANDBOX: YES
 
   prismBarUITests:
     type: bundle.ui-testing

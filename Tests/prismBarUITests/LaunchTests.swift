@@ -2,7 +2,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-import Darwin
 import XCTest
 
 @MainActor
@@ -104,7 +103,6 @@ final class LaunchTests: XCTestCase {
         let destinations = [
             ("Home", "Your menu bar, in focus."),
             ("Menu Bar", "Accessibility required"),
-            ("Tools", "prismCalc"),
             ("Automation", "prismBar commands"),
             ("Privacy", "Your menu bar stays on your Mac."),
             ("About", "Mozilla Public License 2.0"),
@@ -135,7 +133,6 @@ final class LaunchTests: XCTestCase {
         let destinations = [
             ("Home", "home.header.sparkles"),
             ("Menu Bar", "menuBar.header.menubar.rectangle"),
-            ("Tools", "tools.header.wrench.and.screwdriver"),
             ("Automation", "automation.header.bolt.badge.clock"),
             ("Privacy", "privacy.header.hand.raised"),
             ("About", "about.header.info.circle"),
@@ -174,7 +171,7 @@ final class LaunchTests: XCTestCase {
             )
             XCTAssertEqual(mainWindow.title, "prismBar")
 
-            for destination in ["Home", "Menu Bar", "Tools", "Automation", "Privacy", "About"] {
+            for destination in ["Home", "Menu Bar", "Automation", "Privacy", "About"] {
                 application.activate()
                 XCTAssertEqual(
                     application.state,
@@ -228,82 +225,6 @@ final class LaunchTests: XCTestCase {
         XCTAssertEqual(mainWindow.title, "prismBar")
     }
 
-    func testToolsWorkspaceLaunchesPrismCalcWithoutEmbeddingCalculator() {
-        let application = prismBarApplication()
-        application.launch()
-
-        let toolsDestination = sidebarCell(named: "Tools", in: application)
-        XCTAssertTrue(toolsDestination.waitForExistence(timeout: 5))
-        toolsDestination.click()
-
-        let panelTitle = application.staticTexts["prismCalc"]
-        XCTAssertTrue(panelTitle.waitForExistence(timeout: 7), application.debugDescription)
-        let health = application.descendants(matching: .any)["plugin.health"]
-        XCTAssertTrue(health.waitForExistence(timeout: 3))
-        XCTAssertEqual(health.value as? String, "Plugin health: Verified and ready")
-
-        XCTAssertFalse(application.staticTexts["Calculator result"].exists)
-
-        let openTool = application.buttons["Open prismCalc"]
-        XCTAssertTrue(openTool.waitForExistence(timeout: 3))
-        openTool.click()
-
-        let utility = application.windows["prismCalc"]
-        XCTAssertTrue(utility.waitForExistence(timeout: 5), application.debugDescription)
-        XCTAssertTrue(application.staticTexts["Calculator result"].waitForExistence(timeout: 5))
-    }
-
-    func testHungPluginTimesOutWithoutHangingHostAndRecovers() throws {
-        let application = prismBarApplication()
-        application.launch()
-        try openReadyPlugin(in: application)
-
-        let servicePID = try XCTUnwrap(pluginServicePID())
-        XCTAssertEqual(kill(servicePID, SIGSTOP), 0)
-        defer {
-            _ = kill(servicePID, SIGCONT)
-        }
-
-        let utility = application.windows["prismCalc"]
-        let workspace = application.windows["prismBar"]
-        utility.buttons["Seven"].click()
-        XCTAssertTrue(utility.staticTexts["prismCalc unavailable"].waitForExistence(timeout: 5))
-        XCTAssertEqual(
-            workspace.descendants(matching: .any)["plugin.health"].value as? String,
-            "Plugin health: Connection needs attention"
-        )
-        XCTAssertNotEqual(application.state, .notRunning)
-
-        XCTAssertEqual(kill(servicePID, SIGCONT), 0)
-        utility.buttons["Retry"].click()
-        XCTAssertTrue(utility.buttons["Seven"].waitForExistence(timeout: 5))
-        XCTAssertNotEqual(application.state, .notRunning)
-    }
-
-    func testCrashedPluginDoesNotCrashHostAndRecovers() throws {
-        let application = prismBarApplication()
-        application.launch()
-        try openReadyPlugin(in: application)
-
-        let servicePID = try XCTUnwrap(pluginServicePID())
-        XCTAssertEqual(kill(servicePID, SIGSTOP), 0)
-        let utility = application.windows["prismCalc"]
-        let workspace = application.windows["prismBar"]
-        utility.buttons["Seven"].click()
-        XCTAssertEqual(kill(servicePID, SIGKILL), 0)
-
-        XCTAssertTrue(utility.staticTexts["prismCalc unavailable"].waitForExistence(timeout: 5))
-        XCTAssertEqual(
-            workspace.descendants(matching: .any)["plugin.health"].value as? String,
-            "Plugin health: Connection needs attention"
-        )
-        XCTAssertNotEqual(application.state, .notRunning)
-
-        utility.buttons["Retry"].click()
-        XCTAssertTrue(utility.buttons["Seven"].waitForExistence(timeout: 8))
-        XCTAssertNotEqual(application.state, .notRunning)
-    }
-
 }
 
 @MainActor
@@ -311,49 +232,6 @@ private func sidebarCell(named name: String, in application: XCUIApplication) ->
     application.descendants(matching: .any)["workspace.sidebar"].cells
         .containing(.staticText, identifier: name)
         .element
-}
-
-@MainActor
-private func openReadyPlugin(in application: XCUIApplication) throws {
-    let toolsDestination = sidebarCell(named: "Tools", in: application)
-    XCTAssertTrue(toolsDestination.waitForExistence(timeout: 5))
-    toolsDestination.click()
-    let openTool = application.buttons["Open prismCalc"]
-    XCTAssertTrue(openTool.waitForExistence(timeout: 7))
-    openTool.click()
-    XCTAssertTrue(application.buttons["Seven"].waitForExistence(timeout: 7))
-    _ = try XCTUnwrap(pluginServicePID())
-}
-
-private func pluginServicePID() -> pid_t? {
-    var processIdentifiers = [pid_t](repeating: 0, count: 16_384)
-    let byteCount = proc_listallpids(
-        &processIdentifiers,
-        Int32(processIdentifiers.count * MemoryLayout<pid_t>.stride)
-    )
-    guard byteCount > 0 else { return nil }
-
-    let processCount = Int(byteCount) / MemoryLayout<pid_t>.stride
-    let serviceSuffix = "/Build/Products/Debug/prismBar.app/Contents/XPCServices/" +
-        "prismCalcPluginService.xpc/Contents/MacOS/prismCalcPluginService"
-
-    for processIdentifier in processIdentifiers.prefix(processCount) where processIdentifier > 0 {
-        var pathBuffer = [CChar](repeating: 0, count: Int(MAXPATHLEN) * 4)
-        let pathLength = proc_pidpath(processIdentifier, &pathBuffer, UInt32(pathBuffer.count))
-        guard pathLength > 0 else { continue }
-
-        let pathBytes = pathBuffer.prefix(Int(pathLength))
-            .prefix { $0 != 0 }
-            .map { UInt8(bitPattern: $0) }
-        guard let executablePath = String(bytes: pathBytes, encoding: .utf8) else {
-            continue
-        }
-        if executablePath.contains("/Build/Products/Debug/prismBar.app/") &&
-            executablePath.hasSuffix(serviceSuffix) {
-            return processIdentifier
-        }
-    }
-    return nil
 }
 
 private enum PrivacyCopyFixture {

@@ -26,10 +26,9 @@ final class VisualAuditTests: XCTestCase {
         let destinations = [
             ("Home", "home.header.sparkles", "01-home"),
             ("Menu Bar", "menuBar.header.menubar.rectangle", "02-menu-bar"),
-            ("Tools", "tools.header.wrench.and.screwdriver", "03-tools"),
-            ("Automation", "automation.header.bolt.badge.clock", "05-automation"),
-            ("Privacy", "privacy.header.hand.raised", "06-privacy"),
-            ("About", "about.header.info.circle", "07-about"),
+            ("Automation", "automation.header.bolt.badge.clock", "03-automation"),
+            ("Privacy", "privacy.header.hand.raised", "04-privacy"),
+            ("About", "about.header.info.circle", "05-about"),
         ]
 
         for (destination, headerIdentifier, attachmentName) in destinations {
@@ -45,10 +44,6 @@ final class VisualAuditTests: XCTestCase {
                 XCTAssertFalse(application.staticTexts["Local development"].exists)
             }
             attach(workspace.screenshot(), named: attachmentName)
-
-            if destination == "Tools" {
-                captureReadyPrismCalc(in: application)
-            }
         }
 
         captureSettingsAndStatusItem(in: application, workspace: workspace)
@@ -64,7 +59,7 @@ final class VisualAuditTests: XCTestCase {
             .firstMatch
         XCTAssertTrue(settings.waitForExistence(timeout: 5))
         assertShippingSurfaceIsUnobscured()
-        attach(settings.screenshot(), named: "08-settings")
+        attach(settings.screenshot(), named: "06-settings")
 
         application.typeKey("w", modifierFlags: .command)
         XCTAssertTrue(settings.waitForNonExistence(timeout: 3))
@@ -76,28 +71,7 @@ final class VisualAuditTests: XCTestCase {
             .firstMatch
         XCTAssertTrue(statusItem.waitForExistence(timeout: 5))
         assertShippingSurfaceIsUnobscured()
-        attach(statusItem.screenshot(), named: "09-status-item")
-    }
-
-    private func captureReadyPrismCalc(in application: XCUIApplication) {
-        let health = application.descendants(matching: .any)["plugin.health"]
-        XCTAssertTrue(health.waitForExistence(timeout: 5))
-        XCTAssertEqual(health.value as? String, "Plugin health: Verified and ready")
-
-        let openButton = application.buttons["Open prismCalc"]
-        XCTAssertTrue(openButton.isEnabled)
-        openButton.click()
-
-        let utility = application.windows["prismCalc"]
-        XCTAssertTrue(utility.waitForExistence(timeout: 5))
-        XCTAssertTrue(application.descendants(matching: .any)["plugin.panel"].waitForExistence(timeout: 5))
-        utility.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.03)).click()
-        assertShippingSurfaceIsUnobscured()
-        attach(utility.screenshot(), named: "04-prism-calc")
-        let closeButton = utility.buttons["_XCUI:CloseWindow"]
-        XCTAssertTrue(closeButton.exists)
-        closeButton.click()
-        XCTAssertTrue(utility.waitForNonExistence(timeout: 3))
+        attach(statusItem.screenshot(), named: "07-status-item")
     }
 
     private func installSystemUIOcclusionMonitor() -> NSObjectProtocol {

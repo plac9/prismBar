@@ -17,12 +17,3 @@ enum MenuBarActionState: Equatable {
     case moving(itemID: MenuBarItemID?)
     case result(MenuBarActionResult)
 }
-
-enum PluginLoadingState: Equatable {
-    case idle
-    case loading
-    case ready
-    case unavailable
-    case paused
-    case disabled
-}
