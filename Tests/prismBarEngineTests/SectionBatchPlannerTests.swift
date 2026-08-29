@@ -56,6 +56,34 @@ struct SectionBatchPlannerTests {
         )
     }
 
+    @Test("distinguishes an already-completed batch step from an unavailable item")
+    func classifiesBatchStepDisposition() {
+        let snapshot = fixtureSnapshot()
+        let planner = SectionBatchPlanner()
+
+        #expect(
+            planner.disposition(
+                for: MenuBarItemID(rawValue: "visible-one"),
+                to: .visible,
+                in: snapshot
+            ) == .alreadyCompleted
+        )
+        #expect(
+            planner.disposition(
+                for: MenuBarItemID(rawValue: "hidden-one"),
+                to: .visible,
+                in: snapshot
+            ) == .moveRequired
+        )
+        #expect(
+            planner.disposition(
+                for: MenuBarItemID(rawValue: "missing"),
+                to: .visible,
+                in: snapshot
+            ) == .unavailable
+        )
+    }
+
     private func fixtureSnapshot() -> MenuBarSnapshot {
         MenuBarSnapshot(
             generation: 1,

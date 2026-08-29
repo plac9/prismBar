@@ -310,6 +310,19 @@ extension AppModel {
             let snapshot = try await menuBarController.snapshot(
                 deadline: OperationDeadline(timeout: .seconds(8))
             )
+            switch SectionBatchPlanner().disposition(
+                for: itemID,
+                to: section,
+                in: snapshot
+            ) {
+            case .alreadyCompleted:
+                movedCount += 1
+                continue
+            case .unavailable:
+                return (movedCount, .itemUnavailable)
+            case .moveRequired:
+                break
+            }
             let plan = try SectionMovePlanner().plan(item: itemID, to: section, in: snapshot)
             let outcome = await menuBarController.execute(plan)
             guard outcome == .success else {
