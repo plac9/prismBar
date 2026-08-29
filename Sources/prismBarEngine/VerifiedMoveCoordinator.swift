@@ -42,6 +42,9 @@ public actor VerifiedMoveCoordinator<
     Reader: MenuBarSnapshotReading,
     Performer: MenuBarMovePerforming
 > {
+    private static var sectionVerificationAttemptLimit: Int { 8 }
+    private static var sectionVerificationRetryDelay: Duration { .milliseconds(120) }
+
     private enum SnapshotReadResult: Sendable {
         case success(MenuBarSnapshot)
         case failure(MoveExecutionOutcome)
@@ -106,16 +109,47 @@ public actor VerifiedMoveCoordinator<
             }
         }
 
-        let verificationDeadline = OperationDeadline(timeout: operationTimeout)
-        switch await readSnapshot(deadline: verificationDeadline) {
-        case let .success(observed):
-            return VerifiedMoveResult(
-                outcome: verificationOutcome(for: plan, observed: observed),
-                verifiedSnapshot: observed
-            )
-        case let .failure(outcome):
-            return VerifiedMoveResult(outcome: outcome)
+        return await verifyMove(
+            plan,
+            deadline: OperationDeadline(timeout: operationTimeout)
+        )
+    }
+
+    private func verifyMove(
+        _ plan: MovePlan,
+        deadline: OperationDeadline
+    ) async -> VerifiedMoveResult {
+        var latestPartialResult: VerifiedMoveResult?
+        let attemptLimit = plan.verificationSection == nil
+            ? 1
+            : Self.sectionVerificationAttemptLimit
+
+        for attempt in 0 ..< attemptLimit {
+            switch await readSnapshot(deadline: deadline) {
+            case let .success(observed):
+                let result = VerifiedMoveResult(
+                    outcome: verificationOutcome(for: plan, observed: observed),
+                    verifiedSnapshot: observed
+                )
+                guard case .partial = result.outcome,
+                      attempt + 1 < attemptLimit
+                else {
+                    return result
+                }
+                latestPartialResult = result
+            case let .failure(outcome):
+                return latestPartialResult ?? VerifiedMoveResult(outcome: outcome)
+            }
+
+            do {
+                try await Task.sleep(for: Self.sectionVerificationRetryDelay)
+                try deadline.check()
+            } catch {
+                return latestPartialResult ?? VerifiedMoveResult(outcome: .timedOut)
+            }
         }
+
+        return latestPartialResult ?? VerifiedMoveResult(outcome: .observationFailed)
     }
 
     private func readSnapshot(deadline: OperationDeadline) async -> SnapshotReadResult {

@@ -30,6 +30,32 @@ struct SectionMoveVerificationTests {
         #expect(result.verifiedSnapshot == observed)
     }
 
+    @Test("waits for macOS to settle a section move before reporting failure")
+    func waitsForSettledSectionMove() async throws {
+        let initial = sectionSnapshot(
+            names: ["hidden", "divider", "visible", "moving"],
+            generation: 1
+        )
+        let intermediate = sectionSnapshot(
+            names: ["hidden", "divider", "moving", "visible"],
+            generation: 2
+        )
+        let settled = sectionSnapshot(
+            names: ["moving", "hidden", "divider", "visible"],
+            generation: 3
+        )
+        let plan = try SectionMovePlanner().plan(item: id("moving"), to: .hidden, in: initial)
+        let coordinator = VerifiedMoveCoordinator(
+            reader: SectionSnapshotSequenceReader(snapshots: [initial, intermediate, settled]),
+            performer: SectionRecordingMovePerformer()
+        )
+
+        let result = await coordinator.executeWithObservation(plan)
+
+        #expect(result.outcome == .success)
+        #expect(result.verifiedSnapshot == settled)
+    }
+
     private func sectionSnapshot(names: [String], generation: UInt64) -> MenuBarSnapshot {
         MenuBarSnapshot(
             generation: generation,
