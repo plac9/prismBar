@@ -12,6 +12,7 @@ prismBar must provide useful menu bar control without becoming a route for infor
 - local preferences and calculator history
 - application signing and release credentials
 - plugin protocol integrity
+- process-local action and recovery state
 - build, CI, and release provenance
 
 ## Trust boundaries
@@ -22,6 +23,7 @@ prismBar must provide useful menu bar control without becoming a route for infor
 | XPC | host protocol validator | plugin service input and availability | code-signing requirement, schema limits, timeouts |
 | Plugin renderer | host-owned native views | plugin-provided descriptors | closed element vocabulary, size limits, semantic validation |
 | Preferences | typed domain layer | corrupted or stale stored data | versioned decoding, validation, safe defaults |
+| Recovery ledger | trusted host memory | stale topology and information disclosure | verified snapshots, compatibility checks, ten-entry bound, trust-loss clearing, no persistence or XPC |
 | Release | signed source revision | build machine and artifacts | clean build, SBOM, signature, notarization, stapling, hash publication |
 | Public repository | reviewed source | contributions and automation | no secrets, dependency review, provenance, branch review |
 
@@ -74,6 +76,19 @@ prismBar must provide useful menu bar control without becoming a route for infor
 - Diagnostic export is absent from version 1.
 - Tests scan built strings and logs for forbidden synthetic canaries and local paths.
 - No third-party crash reporter is linked.
+
+### Recovery state disclosure or replay
+
+**Threat:** Before and after topology snapshots reveal application inventory, survive longer than intended, cross into a plugin, or replay against an incompatible menu bar.
+
+**Mitigations:**
+
+- The recovery ledger exists only in host-process memory and holds at most ten verified entries.
+- Receipts and snapshots do not conform to a persistence contract and are never written to `UserDefaults`, files, logs, diagnostics, or XPC messages.
+- Accessibility revocation, signing-identity change, and process termination invalidate recovery state.
+- Recovery requires equal item and display-surface sets between the verified after snapshot and current topology.
+- A recovery attempt is a new protected action and must be verified before the interface reports success.
+- Persistent Scenes remain disabled until a separate privacy design addresses stable cross-launch identity.
 
 ### Input injection or unintended control
 

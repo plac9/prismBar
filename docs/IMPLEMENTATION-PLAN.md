@@ -6,7 +6,7 @@ The project is complete only when every gate below has authoritative evidence fr
 
 ## Current scope lock
 
-The shipping application is intentionally limited to menu bar discovery, hide and reveal, direct arbitrary-position ordering, recovery, and the `prismDeck` status-item control surface. The plugin framework and prismCalc sources remain preserved and tested in the repository, but they are not linked, embedded, launched, or presented by the application. Plugin work resumes only after the installed core passes the physical macOS 27 gates in Phases 2 through 5.
+The shipping application is intentionally limited to menu bar discovery, hide and reveal, direct arbitrary-position ordering, process-local recovery, and the `prismDeck` status-item control surface. The Prism Card framework and prismCalc sources remain preserved and tested in the repository, but they are not linked, embedded, launched, or presented by the application. Prism Card work resumes only after the installed core passes the physical macOS 27 gates in Phases 2 through 5.
 
 ## Phase 0: Repository and contracts
 
@@ -60,6 +60,22 @@ The shipping application is intentionally limited to menu bar discovery, hide an
 - [x] Reject input when the target display has no reserved menu bar area or geometry crosses displays.
 - [x] Add equivalent keyboard and accessibility actions.
 - [x] Prove mouse-up, Command-up, and pointer restoration on cancellation and failure after one bounded Command-drag.
+- [x] Define typed action identifiers, kinds, phases, and receipts.
+- [x] Add a ten-entry process-local recovery ledger with topology compatibility checks.
+- [x] Route direct moves through receipt-backed application state.
+- [ ] Route section, batch, reset, and recovery operations through the same receipt coordinator.
+- [ ] Implement verified recovery execution against the latest compatible entry.
+- [ ] Clear recovery history on every live trust or signing-identity transition, not only protected-call revocation.
+
+## Phase 4A: Verified rebuild sequence
+
+- [x] Confirm signed, hardened, notarized direct distribution as the required channel for the full menu-bar manager.
+- [x] Reject the physically disproven Mac App Store organizer experiment as a shipping alternative.
+- [x] Land the typed receipt and bounded in-memory recovery foundation.
+- [ ] Rebuild Rail around stable drag state, destination previews, typed receipts, recovery, keyboard parity, and multi-display truth.
+- [ ] Rebuild `prismDeck` with topology truth, Rail, current receipt, recovery, Settings, and Quit as the primary compact workflow.
+- [ ] Design persistent Scenes only after a separate privacy review of cross-launch item identity.
+- [ ] Resume Prism Cards only after the installed core passes physical macOS 27 acceptance.
 
 ## Phase 5: Status item and daily workflow
 

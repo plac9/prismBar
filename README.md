@@ -1,8 +1,8 @@
 # prismBar
 
-prismBar is a privacy-first macOS 27 menu bar workspace. It makes menu bar items manageable, discoverable, and recoverable without capturing or transmitting what the user sees.
+prismBar is a privacy-first macOS 27 menu bar manager. It discovers, moves, hides, reveals, and recovers menu bar items without capturing or transmitting what the user sees.
 
-Rail provides direct drag-to-place control from the workspace and `prismDeck`. A drop resolves to one verified multi-position Command-drag rather than repeating one-position moves. Every action uses a fresh topology snapshot, one shared hard deadline, and a post-move observation before prismBar reports success.
+Rail provides direct drag-to-place control from the workspace and `prismDeck`. A drop resolves to one verified multi-position Command-drag rather than repeating one-position moves. Every action uses a fresh topology snapshot, one shared hard deadline, and a post-move observation before prismBar reports success. Typed process-local receipts distinguish verifying, applied, partial, blocked, and recovered outcomes.
 
 This repository is an independent clean-room implementation. It does not contain source code, tests, assets, strings, project configuration, or history from Ice, Thaw, or the former GPL-derived prismBar fork.
 
@@ -16,11 +16,13 @@ This repository is an independent clean-room implementation. It does not contain
 - Distribution: Developer ID signed, hardened, notarized direct distribution
 - Privacy: local-only operation, no analytics, telemetry, screen capture, OCR, or content upload
 - Accessibility: public macOS Accessibility APIs, requested only after the app is installed in a stable location
-- Shipping scope: menu bar control only; no plugin runtime, file access, or network access
+- Shipping scope: menu bar control only; no Prism Card runtime, file access, or network access
 
 ## Core-first scope
 
-The shipping app currently includes only the core model, Accessibility adapter, and verified menu-bar engine. `prismDeck` is its compact status-item control surface. Plugin and prismCalc sources are preserved for later development but are not linked, embedded, launched, or visible in the application.
+The shipping app currently includes only the core model, Accessibility adapter, verified menu-bar engine, typed action receipts, and a bounded in-memory recovery ledger. `prismDeck` is its compact status-item control surface. Recovery snapshots are never persisted, logged, or sent across XPC. Persistent Scenes remain future work behind a separate privacy review.
+
+Prism Cards are the future user-facing capability system. Their framework and prismCalc sources are preserved for later development but are not linked, embedded, launched, or visible in the application. Prism Cards resume only after the installed core menu-bar product passes its physical macOS 27 gates.
 
 ## Repository boundary
 
@@ -36,7 +38,7 @@ prismBar and prismPluginKit are licensed under the Mozilla Public License 2.0. T
 
 Every application bundle includes the exact MPL-2.0 text, the project NOTICE, and its complete Git source revision. About provides local legal-document access and an explicit link to the matching public source tree.
 
-The independently developed prismCalc application retains its own license. The open-source prismCalc plugin in this repository is an integration surface and compact calculator, not a copy of the prismCalc application.
+The independently developed prismCalc application retains its own license. The open-source prismCalc Card source in this repository is an integration surface and compact calculator, not a copy of the prismCalc application.
 
 See [LICENSE](LICENSE), [NOTICE](NOTICE), [dependency and license inventory](docs/DEPENDENCIES.md), [SPDX SBOM](sbom.spdx.json), and [CONTRIBUTING.md](CONTRIBUTING.md).
 

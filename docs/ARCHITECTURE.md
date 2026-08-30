@@ -2,7 +2,7 @@
 
 ## System shape
 
-prismBar is a native macOS application with one trusted host process and separately sandboxed bundled plugin processes.
+prismBar is a native macOS menu-bar manager with one trusted host process and separately sandboxed bundled Prism Card processes. The full product uses signed, notarized direct distribution because its cross-process Accessibility behavior is incompatible with App Sandbox.
 
 ```text
 User
@@ -86,7 +86,7 @@ Permission state is never persisted as truth. Every foreground transition and pr
 
 ## Topology and action model
 
-The engine separates observation, planning, execution, and verification:
+The engine separates observation, planning, execution, verification, and recovery:
 
 1. Observe a fresh topology snapshot.
 2. Validate the requested target against the snapshot.
@@ -98,9 +98,17 @@ The engine separates observation, planning, execution, and verification:
 
 The user interface never optimistically mutates the authoritative topology. It may show progress tied to the action identifier.
 
-## Plugin protocol
+### Action receipts and recovery
 
-`PrismPluginKit` uses a versioned Codable wire contract with these top-level messages:
+Every protected action creates a monotonic process-local identifier and a typed receipt. Receipts move through verifying and one terminal phase: applied, partial, blocked, or recovered. They contain only bounded user-facing results and never enter production logs.
+
+The trusted host owns a bounded recovery ledger with at most ten entries. An entry contains an in-memory before snapshot and its verified after snapshot. Recovery is available only when the current item and display-surface sets are compatible. The ledger is never encoded, persisted, exported, or sent across XPC, and it clears on Accessibility trust loss, signing-identity change, or process termination.
+
+Persistent Scenes are not an extension of this ledger. They require a separate privacy design because stable cross-launch menu identities may reveal application inventory.
+
+## Prism Card protocol
+
+Prism Cards use the existing `prismPluginKit` versioned Codable wire contract with these top-level messages:
 
 - `PluginHandshake`
 - `PluginManifest`
@@ -116,7 +124,7 @@ Panel descriptors support a bounded set of host-rendered elements: text, result 
 
 The host and service enforce reciprocal exact code-signing requirements on every `NSXPCConnection`. The host validates the sealed embedded XPC bundle, exact bundle identifier, Team ID, protocol version, and declared capability set. Protocol version and capabilities are checked during handshake before any panel data is requested. Wire messages, descriptors, request concurrency, response size, timeout, and reconnect behavior are bounded.
 
-The host owns a bounded build-time registry of bundled plugin registrations. Each registration fixes the service identifier, display name, version, capability set, allowed application identifiers, default enabled state, and preference key before the app is signed. Duplicate or malformed registrations fail closed. A user can disable a plugin at any time, which invalidates its XPC connection and removes its panel without affecting menu bar control. Version 1 does not scan directories or accept downloaded plugin bundles.
+The host owns a bounded build-time registry of bundled Card registrations. Each registration fixes the service identifier, display name, version, capability set, allowed application identifiers, default enabled state, and preference key before the app is signed. Duplicate or malformed registrations fail closed. A user can disable a Card at any time, which invalidates its XPC connection and removes its panel without affecting menu bar control. Version 1 does not scan directories or accept downloaded bundles. Card integration remains frozen until the installed core menu-bar product passes physical macOS 27 acceptance.
 
 ## Failure behavior
 
