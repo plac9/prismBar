@@ -113,22 +113,11 @@ extension AppModel {
             await revealHiddenSectionForAction()
 
             do {
-                let snapshot = try await menuBarController.snapshot(
-                    deadline: OperationDeadline(timeout: .seconds(8))
+                let plan = try Self.directMovePlan(
+                    itemID: itemID,
+                    destinationIndex: destinationIndex,
+                    displayedSnapshot: displayedSnapshot
                 )
-                guard snapshot.items.map(\.id) == displayedSnapshot.items.map(\.id) else {
-                    completeMenuBarAction(
-                        id: pendingReceipt.id,
-                        result: .warning(
-                            "The menu bar changed before the move. Review the refreshed positions and try again."
-                        ),
-                        after: nil
-                    )
-                    await restoreHiddenSectionIfNeeded(wasCollapsed)
-                    refreshMenuBar(preservingActionResult: true)
-                    return
-                }
-                let plan = try MovePlanner().plan(item: itemID, to: destinationIndex, in: snapshot)
                 let execution = await menuBarController.executeWithObservation(plan)
                 let outcome = acceptVerifiedExecution(execution)
                 didAcceptVerifiedSnapshot = execution.verifiedSnapshot != nil
@@ -156,6 +145,18 @@ extension AppModel {
                 refreshMenuBar(preservingActionResult: true)
             }
         }
+    }
+
+    static func directMovePlan(
+        itemID: MenuBarItemID,
+        destinationIndex: Int,
+        displayedSnapshot: MenuBarSnapshot
+    ) throws -> MovePlan {
+        try MovePlanner().plan(
+            item: itemID,
+            to: destinationIndex,
+            in: displayedSnapshot
+        )
     }
 
     private func acceptVerifiedExecution(_ execution: VerifiedMoveResult) -> MoveExecutionOutcome {

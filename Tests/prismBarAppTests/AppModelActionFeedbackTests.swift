@@ -9,6 +9,25 @@ import XCTest
 
 @MainActor
 final class AppModelActionFeedbackTests: XCTestCase {
+    func testDirectMovePlanKeepsTheDestinationShownToTheUser() throws {
+        let displayed = visibleSnapshot(
+            names: ["fixture.one", "fixture.two", "fixture.three"],
+            generation: 1
+        )
+
+        let plan = try AppModel.directMovePlan(
+            itemID: MenuBarItemID(rawValue: "fixture.three"),
+            destinationIndex: 0,
+            displayedSnapshot: displayed
+        )
+
+        XCTAssertEqual(plan.destinationItem, MenuBarItemID(rawValue: "fixture.one"))
+        XCTAssertEqual(
+            plan.sourceScopeOrder,
+            ["fixture.one", "fixture.two", "fixture.three"].map(MenuBarItemID.init(rawValue:))
+        )
+    }
+
     func testManualMenuBarRefreshClearsVisibleReceiptButPreservesHistory() {
         let model = makeModel()
         let before = snapshot(generation: 1)
@@ -190,6 +209,16 @@ final class AppModelActionFeedbackTests: XCTestCase {
         )
         let visible = item("fixture.visible", position: reversed ? 0 : 2, surface: surface)
         return MenuBarSnapshot(generation: generation, items: [hidden, divider, visible])
+    }
+
+    private func visibleSnapshot(names: [String], generation: UInt64) -> MenuBarSnapshot {
+        let surface = MenuBarSurfaceID(rawValue: "fixture.display")
+        return MenuBarSnapshot(
+            generation: generation,
+            items: names.enumerated().map { index, name in
+                item(name, position: index, surface: surface)
+            }
+        )
     }
 
     private func item(
