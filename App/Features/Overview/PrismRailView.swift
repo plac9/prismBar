@@ -221,8 +221,8 @@ private extension PrismRailView {
             Divider()
             keyboardMoveButton("Move Left", systemImage: "arrow.left", move: .previous, item: item)
             keyboardMoveButton("Move Right", systemImage: "arrow.right", move: .next, item: item)
-            keyboardMoveButton("Move to Start", systemImage: "arrow.left.to.line", move: .first, item: item)
-            keyboardMoveButton("Move to End", systemImage: "arrow.right.to.line", move: .last, item: item)
+            keyboardMoveButton("Move to First Position", systemImage: "arrow.left.to.line", move: .first, item: item)
+            keyboardMoveButton("Move to Last Position", systemImage: "arrow.right.to.line", move: .last, item: item)
         }
     }
 
@@ -234,8 +234,8 @@ private extension PrismRailView {
             }
             keyboardMoveButton("Move Left", move: .previous, item: item)
             keyboardMoveButton("Move Right", move: .next, item: item)
-            keyboardMoveButton("Move to Start", move: .first, item: item)
-            keyboardMoveButton("Move to End", move: .last, item: item)
+            keyboardMoveButton("Move to First Position", move: .first, item: item)
+            keyboardMoveButton("Move to Last Position", move: .last, item: item)
         }
     }
 

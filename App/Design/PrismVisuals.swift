@@ -80,9 +80,9 @@ struct PrismGateView: View {
         return AnyShapeStyle(
             LinearGradient(
                 colors: [
-                    Color(red: 0.14, green: 0.52, blue: 0.98),
-                    Color(red: 0.38, green: 0.30, blue: 0.92),
-                    Color(red: 0.91, green: 0.28, blue: 0.68),
+                    .blue,
+                    .purple,
+                    .pink,
                 ],
                 startPoint: .leading,
                 endPoint: .trailing
