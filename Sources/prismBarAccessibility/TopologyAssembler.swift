@@ -88,6 +88,8 @@ public struct TopologyAssembler: Sendable {
     private static let maximumObservations = 2_048
     private static let systemBundleIdentifiers = [
         "com.apple.controlcenter",
+        "com.apple.menubaragent",
+        "com.apple.siri",
         "com.apple.systemuiserver",
     ]
     private let identifierKey: SymmetricKey

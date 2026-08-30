@@ -65,6 +65,26 @@ struct TopologyAssemblerTests {
         #expect(snapshot.items.map(\.isMovable) == [true, true, false])
     }
 
+    @Test("classifies macOS 27 menu bar agents as protected system items")
+    func classifiesMacOS27SystemOwners() {
+        let observations = [
+            observation(
+                token: "menu-agent",
+                horizontalPosition: 100,
+                bundleIdentifier: "com.apple.MenuBarAgent"
+            ),
+            observation(
+                token: "assistant",
+                horizontalPosition: 200,
+                bundleIdentifier: "com.apple.Siri"
+            ),
+        ]
+
+        let snapshot = TopologyAssembler().assemble(generation: 1, observations: observations)
+
+        #expect(snapshot.items.map(\.ownership) == [.system, .system])
+    }
+
     @Test("does not expose observed labels in stable identifiers")
     func hashesStableIdentifiers() {
         let sensitiveLabel = "Private Account Status"
