@@ -13,6 +13,11 @@ struct ConcurrentObservationReaderTests {
         #expect(NativeMenuBarObservationReader.maximumConcurrentSources == 2)
     }
 
+    @Test("uses one native catalog pass for bounded macOS 27 latency")
+    func boundsNativeRetryPolicy() {
+        #expect(NativeMenuBarObservationReader.attemptLimit == 1)
+    }
+
     @Test("limits concurrent source reads to the configured capacity")
     func limitsConcurrentSourceReads() async throws {
         let sourceReader = ConcurrencyProbeSourceReader(delay: .milliseconds(20))
