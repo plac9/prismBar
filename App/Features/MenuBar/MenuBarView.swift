@@ -97,6 +97,8 @@ private extension MenuBarView {
             )
             .font(.callout.weight(.medium))
             .foregroundStyle(snapshot.isComplete ? Color.secondary : .orange)
+            .help(presentation.unavailableSourcesWarning ?? presentation.summary)
+            .accessibilityHint(presentation.unavailableSourcesWarning ?? presentation.summary)
 
             Spacer()
 

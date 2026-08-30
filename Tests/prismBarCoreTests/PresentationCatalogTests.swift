@@ -39,7 +39,7 @@ struct PresentationCatalogTests {
             unavailableSourceCount: 0
         )
 
-        #expect(partial.summary == "18 items, 25 sources unavailable")
+        #expect(partial.summary == "18 items found, partial scan")
         #expect(partial.isComplete == false)
         #expect(complete.summary == "1 item")
         #expect(complete.isComplete)
@@ -58,11 +58,13 @@ struct PresentationCatalogTests {
 
         #expect(
             single.unavailableSourcesWarning ==
-                "1 menu bar source did not respond. Visible items remain available and every move is still verified."
+                "1 running application did not return menu bar data. " +
+                "The items shown remain available and every move is still verified."
         )
         #expect(
             multiple.unavailableSourcesWarning ==
-                "2 menu bar sources did not respond. Visible items remain available and every move is still verified."
+                "2 running applications did not return menu bar data. " +
+                "The items shown remain available and every move is still verified."
         )
     }
 

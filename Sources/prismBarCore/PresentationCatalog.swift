@@ -63,15 +63,14 @@ public struct MenuBarObservationPresentation: Equatable, Sendable {
         guard unavailableSourceCount > 0 else {
             return items
         }
-        let sources = unavailableSourceCount == 1 ? "source" : "sources"
-        return "\(items), \(unavailableSourceCount) \(sources) unavailable"
+        return "\(items) found, partial scan"
     }
 
     public var unavailableSourcesWarning: String? {
         guard unavailableSourceCount > 0 else { return nil }
-        let source = unavailableSourceCount == 1 ? "source" : "sources"
-        return "\(unavailableSourceCount) menu bar \(source) did not respond. " +
-            "Visible items remain available and every move is still verified."
+        let application = unavailableSourceCount == 1 ? "application" : "applications"
+        return "\(unavailableSourceCount) running \(application) did not return menu bar data. " +
+            "The items shown remain available and every move is still verified."
     }
 
     public func sourceAvailabilityNotice(hiddenSectionCollapsed: Bool) -> String? {
