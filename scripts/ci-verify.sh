@@ -13,7 +13,7 @@ fi
 revision="$(git rev-parse HEAD)"
 started_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
-for dependency in actionlint gitleaks jq rg swift swiftlint xcodebuild xcodegen; do
+for dependency in actionlint gitleaks jq perl rg swift swiftlint xcodebuild xcodegen; do
   if ! command -v "$dependency" >/dev/null 2>&1; then
     printf 'CI dependency is unavailable: %s\n' "$dependency" >&2
     exit 1
@@ -41,12 +41,58 @@ fi
 gitleaks git . --no-banner --redact
 actionlint .github/workflows/ci.yml
 
+normalize_local_package_reference() {
+  local input_path="$1"
+  local output_path="$2"
+  local reference_pattern='PBXFileReference; lastKnownFileType = folder; name = ".*"; path = \.; sourceTree = SOURCE_ROOT;'
+  local reference_count
+  local reference_id
+
+  reference_count="$(rg -c "$reference_pattern" "$input_path" || true)"
+  if [ "$reference_count" != '1' ]; then
+    printf 'Expected one root local-package reference in %s, found %s.\n' \
+      "$input_path" "${reference_count:-0}" >&2
+    return 1
+  fi
+
+  reference_id="$(rg "$reference_pattern" "$input_path" | awk '{print $1}')"
+  LOCAL_PACKAGE_REFERENCE_ID="$reference_id" perl -pe '
+    if (index($_, $ENV{"LOCAL_PACKAGE_REFERENCE_ID"}) >= 0) {
+      s/\Q$ENV{"LOCAL_PACKAGE_REFERENCE_ID"}\E/LOCAL_PACKAGE_REFERENCE/g;
+      s{/\*.*?\*/}{/* LOCAL_PACKAGE */}g;
+    }
+  ' "$input_path" > "$output_path"
+}
+
+generated_project='prismBar.xcodeproj/project.pbxproj'
+expected_project="$(mktemp "${TMPDIR:-/tmp}/prismbar-project-expected.XXXXXX")"
+expected_normalized="$(mktemp "${TMPDIR:-/tmp}/prismbar-project-expected-normalized.XXXXXX")"
+generated_normalized="$(mktemp "${TMPDIR:-/tmp}/prismbar-project-generated-normalized.XXXXXX")"
+
+restore_checked_in_project() {
+  if [ -s "$expected_project" ]; then
+    cp "$expected_project" "$generated_project"
+  fi
+  rm -f "$expected_project" "$expected_normalized" "$generated_normalized"
+}
+
+trap restore_checked_in_project EXIT INT TERM
+git show "HEAD:$generated_project" > "$expected_project"
 xcodegen generate
-if ! git diff --quiet -- prismBar.xcodeproj; then
-  printf 'The generated Xcode project does not match project.yml.\n' >&2
-  git diff --stat -- prismBar.xcodeproj
+generated_project_changes="$(git diff --name-only -- prismBar.xcodeproj)"
+if [ -n "$generated_project_changes" ] && [ "$generated_project_changes" != "$generated_project" ]; then
+  printf 'XcodeGen changed unexpected project files:\n%s\n' "$generated_project_changes" >&2
   exit 1
 fi
+normalize_local_package_reference "$expected_project" "$expected_normalized"
+normalize_local_package_reference "$generated_project" "$generated_normalized"
+if ! cmp -s "$expected_normalized" "$generated_normalized"; then
+  printf 'The generated Xcode project does not match project.yml.\n' >&2
+  diff -u "$expected_normalized" "$generated_normalized" || true
+  exit 1
+fi
+restore_checked_in_project
+trap - EXIT INT TERM
 
 verification_root="${CI_VERIFICATION_ROOT:-$(mktemp -d "${TMPDIR:-/tmp}/prismbar-ci.XXXXXX")}"
 if [ -z "${CI_VERIFICATION_ROOT:-}" ]; then
