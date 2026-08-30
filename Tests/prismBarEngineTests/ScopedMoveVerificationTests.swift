@@ -108,6 +108,68 @@ struct ScopedMoveVerificationTests {
 
         #expect(outcome == .partial(observedIndex: 1))
     }
+
+    @Test("accepts exact target placement while an unrelated post-input identity changes")
+    func acceptsAnchoredPlacementAfterUnrelatedIdentityChurn() async throws {
+        let initial = sectionedSnapshot(
+            hiddenNames: [],
+            visibleNames: ["one", "two", "three", "four"],
+            generation: 1
+        )
+        let observed = sectionedSnapshot(
+            hiddenNames: [],
+            visibleNames: ["four", "one", "replacement", "three"],
+            generation: 2
+        )
+        let destinationIndex = try #require(
+            initial.items.firstIndex(where: { $0.id == id("one") })
+        )
+        let plan = try MovePlanner().plan(
+            item: id("four"),
+            to: destinationIndex,
+            in: initial
+        )
+        let coordinator = VerifiedMoveCoordinator(
+            reader: ScopedSnapshotSequenceReader(snapshots: [initial, observed]),
+            performer: ScopedRecordingMovePerformer()
+        )
+
+        let result = await coordinator.executeWithObservation(plan)
+
+        #expect(result.outcome == .success)
+        #expect(result.verifiedSnapshot == observed)
+    }
+
+    @Test("rejects target placement when surviving anchors are scrambled")
+    func rejectsScrambledSurvivingAnchors() async throws {
+        let initial = sectionedSnapshot(
+            hiddenNames: [],
+            visibleNames: ["one", "two", "three", "four"],
+            generation: 1
+        )
+        let scrambled = sectionedSnapshot(
+            hiddenNames: [],
+            visibleNames: ["four", "one", "three", "two"],
+            generation: 2
+        )
+        let destinationIndex = try #require(
+            initial.items.firstIndex(where: { $0.id == id("one") })
+        )
+        let plan = try MovePlanner().plan(
+            item: id("four"),
+            to: destinationIndex,
+            in: initial
+        )
+        let coordinator = VerifiedMoveCoordinator(
+            reader: ScopedSnapshotSequenceReader(snapshots: [initial, scrambled]),
+            performer: ScopedRecordingMovePerformer()
+        )
+
+        let result = await coordinator.executeWithObservation(plan)
+
+        #expect(result.outcome == .partial(observedIndex: 0))
+        #expect(result.verifiedSnapshot == scrambled)
+    }
 }
 
 private actor ScopedSnapshotSequenceReader: MenuBarSnapshotReading {

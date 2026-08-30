@@ -42,8 +42,8 @@ public actor VerifiedMoveCoordinator<
     Reader: MenuBarSnapshotReading,
     Performer: MenuBarMovePerforming
 > {
-    private static var sectionVerificationAttemptLimit: Int { 8 }
-    private static var sectionVerificationRetryDelay: Duration { .milliseconds(120) }
+    private static var verificationAttemptLimit: Int { 8 }
+    private static var verificationRetryDelay: Duration { .milliseconds(120) }
 
     private enum SnapshotReadResult: Sendable {
         case success(MenuBarSnapshot)
@@ -147,7 +147,7 @@ public actor VerifiedMoveCoordinator<
         deadline: OperationDeadline
     ) async -> VerifiedMoveResult {
         var latestPartialResult: VerifiedMoveResult?
-        let attemptLimit = Self.sectionVerificationAttemptLimit
+        let attemptLimit = Self.verificationAttemptLimit
 
         for attempt in 0 ..< attemptLimit {
             switch await readSnapshot(deadline: deadline) {
@@ -167,7 +167,7 @@ public actor VerifiedMoveCoordinator<
             }
 
             do {
-                try await Task.sleep(for: Self.sectionVerificationRetryDelay)
+                try await Task.sleep(for: Self.verificationRetryDelay)
                 try deadline.check()
             } catch {
                 return latestPartialResult ?? VerifiedMoveResult(outcome: .timedOut)
@@ -275,6 +275,10 @@ public actor VerifiedMoveCoordinator<
         ) == plan.expectedScopeOrder {
             return .success
         }
+        if plan.verificationSection == nil,
+           directPlacementMatches(plan, observed: observed) {
+            return .success
+        }
         if let section = observed.section(for: plan.item),
            section != .controller,
            let observedIndex = observed.movementDestinations(for: plan.item)
@@ -285,5 +289,36 @@ public actor VerifiedMoveCoordinator<
             return .partial(observedIndex: observedIndex)
         }
         return .itemUnavailable
+    }
+
+    private func directPlacementMatches(
+        _ plan: MovePlan,
+        observed: MenuBarSnapshot
+    ) -> Bool {
+        guard let observedScope = moveScopeOrder(
+            item: plan.item,
+            destination: plan.destinationItem,
+            in: observed
+        ),
+        let plannedSourceIndex = plan.sourceScopeOrder.firstIndex(of: plan.item),
+        let plannedDestinationIndex = plan.sourceScopeOrder.firstIndex(of: plan.destinationItem),
+        let observedSourceIndex = observedScope.firstIndex(of: plan.item),
+        let observedDestinationIndex = observedScope.firstIndex(of: plan.destinationItem)
+        else {
+            return false
+        }
+
+        let isAtRequestedAnchor = if plannedSourceIndex < plannedDestinationIndex {
+            observedSourceIndex == observedDestinationIndex + 1
+        } else {
+            observedSourceIndex + 1 == observedDestinationIndex
+        }
+        guard isAtRequestedAnchor else { return false }
+
+        let plannedAnchors = plan.sourceScopeOrder.filter { $0 != plan.item }
+        let observedAnchors = observedScope.filter { $0 != plan.item }
+        let survivingAnchors = Set(plannedAnchors).intersection(observedAnchors)
+        return plannedAnchors.filter(survivingAnchors.contains) ==
+            observedAnchors.filter(survivingAnchors.contains)
     }
 }
