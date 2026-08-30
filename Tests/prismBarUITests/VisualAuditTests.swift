@@ -80,7 +80,7 @@ final class VisualAuditTests: XCTestCase {
 
         let deckTitle = application.staticTexts["prismDeck"]
         XCTAssertTrue(deckTitle.waitForExistence(timeout: 3))
-        let deck = application.windows.firstMatch
+        let deck = application.popovers.firstMatch
         XCTAssertTrue(deck.waitForExistence(timeout: 3))
         assertShippingSurfaceIsUnobscured()
         attach(deck.screenshot(), named: "08-prismDeck")
