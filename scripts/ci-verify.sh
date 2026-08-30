@@ -58,9 +58,14 @@ normalize_local_package_reference() {
   reference_id="$(rg "$reference_pattern" "$input_path" | awk '{print $1}')"
   LOCAL_PACKAGE_REFERENCE_ID="$reference_id" perl -pe '
     if (index($_, $ENV{"LOCAL_PACKAGE_REFERENCE_ID"}) >= 0) {
-      s/\Q$ENV{"LOCAL_PACKAGE_REFERENCE_ID"}\E/LOCAL_PACKAGE_REFERENCE/g;
-      s{/\*.*?\*/}{/* LOCAL_PACKAGE */}g;
+      if (/PBXFileReference/) {
+        $_ = "";
+      } else {
+        s/\Q$ENV{"LOCAL_PACKAGE_REFERENCE_ID"}\E/LOCAL_PACKAGE_REFERENCE/g;
+        s{/\*.*?\*/}{/* LOCAL_PACKAGE */}g;
+      }
     }
+    END { print "LOCAL_PACKAGE_REFERENCE_DECLARATION\n"; }
   ' "$input_path" > "$output_path"
 }
 
