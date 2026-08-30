@@ -10,33 +10,25 @@ import SwiftUI
 struct MenuBarView: View {
     @Environment(AppModel.self) private var model
     @State private var isResetConfirmationPresented = false
+    @State private var isBulkOrganizationExpanded = false
     @State private var selectedItemIDs: Set<MenuBarItemID> = []
 
     var body: some View {
-        GeometryReader { geometry in
-            VStack(alignment: .leading, spacing: 16) {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
                 PageHeader(
                     symbol: "menubar.rectangle",
                     eyebrow: "Organization",
                     title: "Menu Bar",
-                    message: "Move directly to any position in a section. Every action is checked " +
-                        "against a fresh macOS topology before it is reported as complete.",
+                    message: "Place an item once. prismBar checks the menu bar macOS actually presents " +
+                        "before it reports the change as complete.",
                     identifier: "menuBar.header.menubar.rectangle"
                 )
 
-                if model.accessibilityState == .granted {
-                    menuBarControls
-                }
-
-                actionStatus
                 menuBarContent
             }
             .padding(28)
-            .frame(
-                width: geometry.size.width,
-                height: geometry.size.height,
-                alignment: .topLeading
-            )
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .confirmationDialog(
             "Show every movable menu bar item?",
@@ -47,7 +39,7 @@ struct MenuBarView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This preserves item order and leaves the hidden section unfolded.")
+            Text("This preserves item order and leaves the tucked-away section open.")
         }
         .onChange(of: model.menuBarSnapshot?.generation) {
             guard let snapshot = model.menuBarSnapshot else {
@@ -60,174 +52,187 @@ struct MenuBarView: View {
 }
 
 private extension MenuBarView {
-    private var menuBarControls: some View {
-        PrismContentSection {
-            VStack(alignment: .leading, spacing: 12) {
-                Label("Menu bar controls", systemImage: "slider.horizontal.3")
-                    .font(.headline)
-
-                Divider()
-
-                HStack(spacing: 10) {
-                    Button(
-                        model.isHiddenSectionCollapsed ? "Reveal Hidden Items" : "Fold Hidden Items",
-                        systemImage: model.isHiddenSectionCollapsed ? "eye" : "eye.slash"
-                    ) {
-                        model.setHiddenSectionCollapsed(!model.isHiddenSectionCollapsed)
-                    }
-                    .buttonStyle(.glassProminent)
-                    .disabled(
-                        model.accessibilityState != .granted ||
-                            model.menuBarState == .loading ||
-                            model.menuBarSnapshot?.hiddenSectionDivider == nil
-                    )
-
-                    Button("Refresh", systemImage: "arrow.clockwise") {
-                        model.refreshMenuBar()
-                    }
-                    .buttonStyle(.glass)
-                    .disabled(
-                        model.accessibilityState != .granted ||
-                            model.menuBarState == .loading
-                    )
-
-                    Spacer()
-
-                    Menu {
-                        Button("Undo Last Change", systemImage: "arrow.uturn.backward") {
-                            model.recoverLastMenuBarAction()
-                        }
-                        .disabled(!model.canRecoverLastAction || model.isMenuBarActionInProgress)
-                        .accessibilityIdentifier("menuBar.undoLastChange")
-
-                        Divider()
-
-                        Button("Show Every Movable Item", systemImage: "arrow.uturn.backward") {
-                            isResetConfirmationPresented = true
-                        }
-                        .disabled(model.isMenuBarActionInProgress)
-                    } label: {
-                        Label("Recovery", systemImage: "lifepreserver")
-                    }
-                    .menuStyle(.button)
-                    .buttonStyle(.glass)
-                    .disabled(model.accessibilityState != .granted || model.menuBarState != .ready)
-                }
-
-                Divider()
-
-                HStack(spacing: 10) {
-                    Label(
-                        "\(selectedItemIDs.count) selected",
-                        systemImage: selectedItemIDs.isEmpty ? "checklist.unchecked" : "checklist.checked"
-                    )
-                    .font(.callout.weight(.medium))
-                    .foregroundStyle(selectedItemIDs.isEmpty ? .secondary : .primary)
-
-                    Spacer()
-
-                    Button("Hide Selected", systemImage: "eye.slash") {
-                        let selection = selectedItemIDs
-                        selectedItemIDs.removeAll()
-                        model.moveMenuBarItems(selection, to: .hidden)
-                    }
-                    .buttonStyle(.glassProminent)
-                    .disabled(!canMoveSelection(to: .hidden))
-
-                    Button("Show Selected", systemImage: "eye") {
-                        let selection = selectedItemIDs
-                        selectedItemIDs.removeAll()
-                        model.moveMenuBarItems(selection, to: .visible)
-                    }
-                    .buttonStyle(.glass)
-                    .disabled(!canMoveSelection(to: .visible))
-
-                    Button("Clear") {
-                        selectedItemIDs.removeAll()
-                    }
-                    .buttonStyle(.glass)
-                    .disabled(selectedItemIDs.isEmpty || model.isMenuBarActionInProgress)
-                }
-            }
-        }
-    }
-
     @ViewBuilder
-    private var menuBarContent: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            if let snapshot = model.menuBarSnapshot {
-                if let notice = MenuBarObservationPresentation(
-                    itemCount: snapshot.items.count,
-                    unavailableSourceCount: snapshot.unavailableSourceCount
-                ).sourceAvailabilityNotice(
-                    hiddenSectionCollapsed: model.isHiddenSectionCollapsed
-                ) {
-                    Label(
-                        notice,
-                        systemImage: model.isHiddenSectionCollapsed
-                            ? "eye.slash"
-                            : "exclamationmark.triangle"
-                    )
-                    .foregroundStyle(model.isHiddenSectionCollapsed ? Color.secondary : .orange)
-                }
-
+    var menuBarContent: some View {
+        if let snapshot = model.menuBarSnapshot {
+            VStack(alignment: .leading, spacing: 14) {
+                topologyTruth(snapshot)
+                actionStatus
                 PrismRailView(snapshot: snapshot)
+                immediateActions(snapshot)
+                bulkOrganization(snapshot)
+            }
+        } else {
+            ContentUnavailableView {
+                Label(unavailableTitle, systemImage: "menubar.rectangle")
+            } description: {
+                Text(unavailableDescription)
+            } actions: {
+                if model.accessibilityState != .granted {
+                    primaryPermissionRecoveryButton
 
-                List {
-                    Section("Visible") {
-                        ForEach(items(in: .visible, snapshot: snapshot)) { item in
-                            MenuBarItemRow(
-                                item: item,
-                                destinations: snapshot.movementDestinations(for: item.id),
-                                surfaceLabel: surfaceLabel(for: item, snapshot: snapshot),
-                                section: .visible,
-                                isSelected: selectionBinding(for: item.id)
-                            )
-                        }
+                    Button("Check Again", systemImage: "arrow.clockwise") {
+                        model.refreshAccessibility()
                     }
-
-                    Section("Hidden") {
-                        let hiddenItems = items(in: .hidden, snapshot: snapshot)
-                        if hiddenItems.isEmpty {
-                            Label("No hidden items", systemImage: "checkmark.circle")
-                                .foregroundStyle(.secondary)
-                        } else {
-                            ForEach(hiddenItems) { item in
-                                MenuBarItemRow(
-                                    item: item,
-                                    destinations: snapshot.movementDestinations(for: item.id),
-                                    surfaceLabel: surfaceLabel(for: item, snapshot: snapshot),
-                                    section: .hidden,
-                                    isSelected: selectionBinding(for: item.id)
-                                )
-                            }
-                        }
-                    }
+                    .accessibilityIdentifier("menuBar.checkAccess")
                 }
-                .listStyle(.inset)
-                .frame(minHeight: 220)
+            }
+            .frame(maxWidth: .infinity, minHeight: 360)
+        }
+    }
+
+    func topologyTruth(_ snapshot: MenuBarSnapshot) -> some View {
+        let itemCount = snapshot.items.filter { $0.role == .item }.count
+        let presentation = MenuBarObservationPresentation(
+            itemCount: itemCount,
+            unavailableSourceCount: snapshot.unavailableSourceCount
+        )
+
+        return HStack(spacing: 10) {
+            Label(
+                presentation.summary,
+                systemImage: snapshot.isComplete
+                    ? "checkmark.circle.fill"
+                    : "exclamationmark.triangle.fill"
+            )
+            .font(.callout.weight(.medium))
+            .foregroundStyle(snapshot.isComplete ? Color.secondary : .orange)
+
+            Spacer()
+
+            Label(
+                model.isHiddenSectionCollapsed ? "Tucked away" : "All sections open",
+                systemImage: model.isHiddenSectionCollapsed ? "eye.slash" : "eye"
+            )
+            .font(.callout)
+            .foregroundStyle(.secondary)
+        }
+    }
+
+    func immediateActions(_ snapshot: MenuBarSnapshot) -> some View {
+        HStack(spacing: 10) {
+            Button(
+                model.isHiddenSectionCollapsed ? "Reveal Tucked Away" : "Tuck Away Hidden",
+                systemImage: model.isHiddenSectionCollapsed ? "eye" : "eye.slash"
+            ) {
+                model.setHiddenSectionCollapsed(!model.isHiddenSectionCollapsed)
+            }
+            .buttonStyle(.glassProminent)
+            .disabled(
+                model.accessibilityState != .granted ||
+                    model.menuBarState == .loading ||
+                    snapshot.hiddenSectionDivider == nil
+            )
+
+            Button("Undo", systemImage: "arrow.uturn.backward") {
+                model.recoverLastMenuBarAction()
+            }
+            .buttonStyle(.glass)
+            .disabled(!model.canRecoverLastAction || model.isMenuBarActionInProgress)
+            .accessibilityIdentifier("menuBar.undoLastChange")
+
+            Spacer()
+
+            Button("Refresh", systemImage: "arrow.clockwise") {
+                model.refreshMenuBar()
+            }
+            .buttonStyle(.glass)
+            .disabled(model.menuBarState == .loading)
+
+            Menu("More", systemImage: "ellipsis") {
+                Button("Show Every Movable Item", systemImage: "eye") {
+                    isResetConfirmationPresented = true
+                }
+                .disabled(model.isMenuBarActionInProgress)
+            }
+            .menuStyle(.button)
+            .buttonStyle(.glass)
+        }
+    }
+
+    func bulkOrganization(_ snapshot: MenuBarSnapshot) -> some View {
+        DisclosureGroup("Bulk organization", isExpanded: $isBulkOrganizationExpanded) {
+            VStack(alignment: .leading, spacing: 12) {
+                bulkActions
+                itemSection("On Bar", section: .visible, snapshot: snapshot)
+                itemSection("Tucked Away", section: .hidden, snapshot: snapshot)
+            }
+            .padding(.top, 10)
+        }
+        .font(.callout.weight(.medium))
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(.background.secondary, in: .rect(cornerRadius: 14))
+    }
+
+    var bulkActions: some View {
+        HStack(spacing: 10) {
+            Label(
+                "\(selectedItemIDs.count) selected",
+                systemImage: selectedItemIDs.isEmpty ? "checklist.unchecked" : "checklist.checked"
+            )
+            .foregroundStyle(selectedItemIDs.isEmpty ? .secondary : .primary)
+
+            Spacer()
+
+            Button("Hide Selected", systemImage: "eye.slash") {
+                let selection = selectedItemIDs
+                selectedItemIDs.removeAll()
+                model.moveMenuBarItems(selection, to: .hidden)
+            }
+            .disabled(!canMoveSelection(to: .hidden))
+
+            Button("Show Selected", systemImage: "eye") {
+                let selection = selectedItemIDs
+                selectedItemIDs.removeAll()
+                model.moveMenuBarItems(selection, to: .visible)
+            }
+            .disabled(!canMoveSelection(to: .visible))
+
+            Button("Clear") {
+                selectedItemIDs.removeAll()
+            }
+            .disabled(selectedItemIDs.isEmpty || model.isMenuBarActionInProgress)
+        }
+        .buttonStyle(.glass)
+    }
+
+    @ViewBuilder
+    func itemSection(
+        _ title: String,
+        section: MenuBarSection,
+        snapshot: MenuBarSnapshot
+    ) -> some View {
+        let sectionItems = items(in: section, snapshot: snapshot)
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            if sectionItems.isEmpty {
+                Label("No items", systemImage: "checkmark.circle")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.vertical, 8)
             } else {
-                ContentUnavailableView {
-                    Label(unavailableTitle, systemImage: "menubar.rectangle")
-                } description: {
-                    Text(unavailableDescription)
-                } actions: {
-                    if model.accessibilityState != .granted {
-                        primaryPermissionRecoveryButton
-
-                        Button("Check Again", systemImage: "arrow.clockwise") {
-                            model.refreshAccessibility()
-                        }
-                        .accessibilityIdentifier("menuBar.checkAccess")
-                    }
+                ForEach(sectionItems) { item in
+                    MenuBarItemRow(
+                        item: item,
+                        destinations: snapshot.movementDestinations(for: item.id),
+                        surfaceLabel: surfaceLabel(for: item, snapshot: snapshot),
+                        section: section,
+                        isSelected: selectionBinding(for: item.id)
+                    )
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(.background, in: .rect(cornerRadius: 10))
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
+
     @ViewBuilder
-    private var actionStatus: some View {
+    var actionStatus: some View {
         switch model.menuBarActionState {
         case .idle:
             EmptyView()
@@ -260,14 +265,14 @@ private extension MenuBarView {
         }
     }
 
-    private var actionProgressMessage: String {
+    var actionProgressMessage: String {
         model.currentActionReceipt?.kind == .recovery
-            ? "Restoring and verifying against macOS…"
-            : "Moving and verifying against macOS…"
+            ? "Restoring and checking macOS"
+            : "Moving and checking macOS"
     }
 
     @ViewBuilder
-    private func recoveryButton(for recovery: MenuBarRecoveryAction) -> some View {
+    func recoveryButton(for recovery: MenuBarRecoveryAction) -> some View {
         switch recovery {
         case .refresh:
             Button("Refresh", systemImage: "arrow.clockwise") {
@@ -284,7 +289,7 @@ private extension MenuBarView {
         }
     }
 
-    private func resultColor(for kind: MenuBarActionResultKind) -> Color {
+    func resultColor(for kind: MenuBarActionResultKind) -> Color {
         switch kind {
         case .success: .green
         case .warning: .orange
@@ -292,19 +297,13 @@ private extension MenuBarView {
         }
     }
 
-    private func items(
-        in section: MenuBarSection,
-        snapshot: MenuBarSnapshot
-    ) -> [MenuBarItem] {
+    func items(in section: MenuBarSection, snapshot: MenuBarSnapshot) -> [MenuBarItem] {
         snapshot.items.filter { item in
             item.role == .item && snapshot.section(for: item.id) == section
         }
     }
 
-    private func surfaceLabel(
-        for item: MenuBarItem,
-        snapshot: MenuBarSnapshot
-    ) -> String {
+    func surfaceLabel(for item: MenuBarItem, snapshot: MenuBarSnapshot) -> String {
         guard snapshot.surfaceIDs.count > 1,
               let index = snapshot.surfaceIDs.firstIndex(of: item.surfaceID)
         else {
@@ -313,7 +312,7 @@ private extension MenuBarView {
         return "Display \(index + 1)"
     }
 
-    private func selectionBinding(for itemID: MenuBarItemID) -> Binding<Bool> {
+    func selectionBinding(for itemID: MenuBarItemID) -> Binding<Bool> {
         Binding {
             selectedItemIDs.contains(itemID)
         } set: { isSelected in
@@ -325,7 +324,7 @@ private extension MenuBarView {
         }
     }
 
-    private func canMoveSelection(to section: MenuBarSection) -> Bool {
+    func canMoveSelection(to section: MenuBarSection) -> Bool {
         guard !model.isMenuBarActionInProgress,
               let snapshot = model.menuBarSnapshot
         else { return false }
@@ -338,11 +337,11 @@ private extension MenuBarView {
         }
     }
 
-    private var unavailableTitle: String {
+    var unavailableTitle: String {
         model.accessibilityState == .granted ? "Checking the menu bar" : "Accessibility required"
     }
 
-    private var unavailableDescription: String {
+    var unavailableDescription: String {
         switch model.accessibilityState {
         case .granted:
             "prismBar is building a fresh local topology."
@@ -358,7 +357,7 @@ private extension MenuBarView {
     }
 
     @ViewBuilder
-    private var primaryPermissionRecoveryButton: some View {
+    var primaryPermissionRecoveryButton: some View {
         switch model.accessibilityState {
         case .requiresStableInstall, .identityMismatch:
             Button("Show in Finder", systemImage: "finder") {

@@ -175,14 +175,12 @@ private extension PrismRailView {
         let position = (laneItems.firstIndex(where: { $0.id == item.id }) ?? 0) + 1
 
         return HStack(spacing: 6) {
-            Image(systemName: itemSymbol(item))
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(itemTint(item))
-                .accessibilityHidden(true)
+            itemIcon(item)
 
             Text(item.displayName)
                 .font(.caption.weight(.medium))
                 .lineLimit(1)
+                .frame(maxWidth: 150)
 
             if movingItemID == item.id {
                 ProgressView()
@@ -201,7 +199,8 @@ private extension PrismRailView {
             railMenu(item, section: section)
         }
         .help(canMove(item) ? "Drag to reposition \(item.displayName)" : "This item cannot be moved")
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityIdentifier("prismRail.\(section.rawValue).item.\(position)")
         .accessibilityLabel(item.displayName)
         .accessibilityValue(
             canMove(item)
@@ -330,6 +329,34 @@ private extension PrismRailView {
     func itemSymbol(_ item: MenuBarItem) -> String {
         if movingItemID == item.id { return "arrow.left.arrow.right" }
         return canMove(item) ? "line.3.horizontal" : "lock.fill"
+    }
+
+    @ViewBuilder
+    func itemIcon(_ item: MenuBarItem) -> some View {
+        if let icon = applicationIcon(item) {
+            Image(nsImage: icon)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 16, height: 16)
+                .accessibilityHidden(true)
+        } else {
+            Image(systemName: itemSymbol(item))
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(itemTint(item))
+                .accessibilityHidden(true)
+        }
+    }
+
+    func applicationIcon(_ item: MenuBarItem) -> NSImage? {
+        guard item.ownership == .application,
+              let bundleIdentifier = item.ownerBundleIdentifier,
+              let applicationURL = NSWorkspace.shared.urlForApplication(
+                  withBundleIdentifier: bundleIdentifier
+              )
+        else {
+            return nil
+        }
+        return NSWorkspace.shared.icon(forFile: applicationURL.path)
     }
 
     func itemTint(_ item: MenuBarItem) -> Color {
