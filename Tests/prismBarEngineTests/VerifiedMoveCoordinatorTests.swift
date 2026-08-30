@@ -77,6 +77,25 @@ struct VerifiedMoveCoordinatorTests {
         #expect(outcome == .partial(observedIndex: 1))
     }
 
+    @Test("waits for a direct multi-position move to finish settling")
+    func waitsForDirectMoveToSettle() async throws {
+        let initial = snapshot(names: ["one", "two", "three", "four"], generation: 1)
+        let intermediate = snapshot(names: ["one", "four", "two", "three"], generation: 2)
+        let expected = snapshot(names: ["four", "one", "two", "three"], generation: 3)
+        let plan = try MovePlanner().plan(item: id("four"), to: 0, in: initial)
+        let reader = SnapshotSequenceReader(snapshots: [initial, intermediate, expected])
+        let coordinator = VerifiedMoveCoordinator(
+            reader: reader,
+            performer: RecordingMovePerformer()
+        )
+
+        let result = await coordinator.executeWithObservation(plan)
+
+        #expect(result.outcome == .success)
+        #expect(result.verifiedSnapshot == expected)
+        #expect(await reader.remainingCount == 0)
+    }
+
     @Test("moves between visible targets while preserving partial topology status")
     func movesWithinPartialTopology() async throws {
         let complete = snapshot(names: ["one", "two"], generation: 1)

@@ -147,9 +147,7 @@ public actor VerifiedMoveCoordinator<
         deadline: OperationDeadline
     ) async -> VerifiedMoveResult {
         var latestPartialResult: VerifiedMoveResult?
-        let attemptLimit = plan.verificationSection == nil
-            ? 1
-            : Self.sectionVerificationAttemptLimit
+        let attemptLimit = Self.sectionVerificationAttemptLimit
 
         for attempt in 0 ..< attemptLimit {
             switch await readSnapshot(deadline: deadline) {
