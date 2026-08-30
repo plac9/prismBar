@@ -6,6 +6,93 @@ import prismBarCore
 import prismBarEngine
 
 extension AppModel {
+    func recoverLastMenuBarAction() {
+        guard accessibilityState == .granted,
+              !isMenuBarActionInProgress,
+              let attempt = beginMenuBarRecovery()
+        else { return }
+
+        Task { [weak self] in
+            guard let self else { return }
+            let wasCollapsed = isHiddenSectionCollapsed
+            await revealHiddenSectionForAction()
+            let planner = MenuBarRecoveryPlanner()
+            let moveLimit = attempt.entry.before.items.count(where: { $0.role == .item })
+            var latestVerifiedSnapshot: MenuBarSnapshot?
+
+            do {
+                for moveIndex in 0 ... moveLimit {
+                    let current: MenuBarSnapshot
+                    if let latestVerifiedSnapshot {
+                        current = latestVerifiedSnapshot
+                    } else {
+                        current = try await menuBarController.snapshot(
+                            deadline: OperationDeadline(timeout: .seconds(8))
+                        )
+                    }
+
+                    if try planner.isRestored(current, target: attempt.entry.before) {
+                        acceptVerifiedMenuBarSnapshot(current)
+                        completeMenuBarRecovery(
+                            id: attempt.receipt.id,
+                            result: .success("Previous menu bar layout restored."),
+                            after: current
+                        )
+                        await restoreHiddenSectionIfNeeded(wasCollapsed)
+                        return
+                    }
+
+                    guard moveIndex < moveLimit,
+                          let plan = try planner.nextPlan(
+                              current: current,
+                              restoring: attempt.entry.before
+                          )
+                    else {
+                        completeMenuBarRecovery(
+                            id: attempt.receipt.id,
+                            result: .failure("Recovery stopped at its safe move limit."),
+                            after: current
+                        )
+                        await restoreHiddenSectionIfNeeded(wasCollapsed)
+                        return
+                    }
+
+                    let execution = await menuBarController.executeWithObservation(plan)
+                    if let verifiedSnapshot = execution.verifiedSnapshot {
+                        acceptVerifiedMenuBarSnapshot(verifiedSnapshot)
+                        latestVerifiedSnapshot = verifiedSnapshot
+                    } else {
+                        latestVerifiedSnapshot = nil
+                    }
+                    guard execution.outcome == .success else {
+                        if execution.outcome == .permissionRevoked {
+                            handleAccessibilityRevocation()
+                            return
+                        }
+                        completeMenuBarRecovery(
+                            id: attempt.receipt.id,
+                            result: recoveryResult(for: execution.outcome),
+                            after: execution.verifiedSnapshot
+                        )
+                        await restoreHiddenSectionIfNeeded(wasCollapsed)
+                        return
+                    }
+                }
+            } catch MenuBarAuthorizationError.permissionRevoked {
+                handleAccessibilityRevocation()
+            } catch {
+                completeMenuBarRecovery(
+                    id: attempt.receipt.id,
+                    result: .warning(
+                        "Recovery stopped safely because the menu bar changed. Refresh and try again."
+                    ),
+                    after: latestVerifiedSnapshot
+                )
+                await restoreHiddenSectionIfNeeded(wasCollapsed)
+            }
+        }
+    }
+
     func moveMenuBarItem(_ itemID: MenuBarItemID, to destinationIndex: Int) {
         guard accessibilityState == .granted,
               let displayedSnapshot = menuBarSnapshot,
@@ -76,6 +163,16 @@ extension AppModel {
             acceptVerifiedMenuBarSnapshot(snapshot)
         }
         return execution.outcome
+    }
+
+    private func recoveryResult(for outcome: MoveExecutionOutcome) -> MenuBarActionResult {
+        let detail = MenuBarActionResult.move(outcome, itemName: "the previous layout")
+        return MenuBarActionResult(
+            kind: detail.kind,
+            message: "Recovery stopped safely. \(detail.message)",
+            symbol: detail.symbol,
+            recovery: detail.recovery
+        )
     }
 
     func moveMenuBarItem(_ itemID: MenuBarItemID, to section: MenuBarSection) {

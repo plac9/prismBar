@@ -94,6 +94,14 @@ private extension MenuBarView {
                     Spacer()
 
                     Menu {
+                        Button("Undo Last Change", systemImage: "arrow.uturn.backward") {
+                            model.recoverLastMenuBarAction()
+                        }
+                        .disabled(!model.canRecoverLastAction || model.isMenuBarActionInProgress)
+                        .accessibilityIdentifier("menuBar.undoLastChange")
+
+                        Divider()
+
                         Button("Show Every Movable Item", systemImage: "arrow.uturn.backward") {
                             isResetConfirmationPresented = true
                         }
@@ -227,7 +235,7 @@ private extension MenuBarView {
             HStack(spacing: 10) {
                 ProgressView()
                     .controlSize(.small)
-                Text("Moving and verifying against macOS…")
+                Text(actionProgressMessage)
                     .font(.callout.weight(.medium))
                 Spacer()
             }
@@ -250,6 +258,12 @@ private extension MenuBarView {
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("menuBar.actionResult")
         }
+    }
+
+    private var actionProgressMessage: String {
+        model.currentActionReceipt?.kind == .recovery
+            ? "Restoring and verifying against macOS…"
+            : "Moving and verifying against macOS…"
     }
 
     @ViewBuilder

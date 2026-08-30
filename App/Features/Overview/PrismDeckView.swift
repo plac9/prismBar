@@ -128,6 +128,12 @@ private extension PrismDeckView {
                 .font(.caption)
 
                 HStack(spacing: 8) {
+                    Button("Undo", systemImage: "arrow.uturn.backward") {
+                        model.recoverLastMenuBarAction()
+                    }
+                    .disabled(!model.canRecoverLastAction || model.isMenuBarActionInProgress)
+                    .accessibilityIdentifier("statusMenu.undoLastChange")
+
                     Button(
                         model.isHiddenSectionCollapsed ? "Reveal Hidden" : "Fold Hidden",
                         systemImage: model.isHiddenSectionCollapsed ? "eye" : "eye.slash"
@@ -226,7 +232,12 @@ private extension PrismDeckView {
         case .idle:
             EmptyView()
         case .moving:
-            Label("Moving and verifying", systemImage: "progress.indicator")
+            Label(
+                model.currentActionReceipt?.kind == .recovery
+                    ? "Restoring and verifying"
+                    : "Moving and verifying",
+                systemImage: "progress.indicator"
+            )
                 .font(.caption)
                 .accessibilityIdentifier("statusMenu.actionProgress")
         case let .result(result):

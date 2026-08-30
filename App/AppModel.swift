@@ -198,6 +198,33 @@ final class AppModel {
         menuBarActionState = .result(result)
     }
 
+    func beginMenuBarRecovery() -> MenuBarRecoveryAttempt? {
+        guard let menuBarSnapshot,
+              let attempt = recoveryLedger.beginRecovery(with: menuBarSnapshot)
+        else {
+            return nil
+        }
+        currentActionReceipt = attempt.receipt
+        menuBarActionState = .moving(itemID: nil)
+        return attempt
+    }
+
+    func completeMenuBarRecovery(
+        id: MenuBarActionID,
+        result: MenuBarActionResult,
+        after: MenuBarSnapshot?
+    ) {
+        guard let receipt = recoveryLedger.completeRecovery(
+            id: id,
+            result: result,
+            after: after
+        ) else {
+            return
+        }
+        currentActionReceipt = receipt
+        menuBarActionState = .result(receipt.result ?? result)
+    }
+
     private func clearVisibleMenuBarAction() {
         currentActionReceipt = nil
         menuBarActionState = .idle

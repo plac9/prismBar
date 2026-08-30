@@ -86,11 +86,80 @@ final class AppModelActionFeedbackTests: XCTestCase {
         XCTAssertEqual(model.menuBarActionState, .result(result))
     }
 
+    func testRecoveryBeginsOnlyFromTheVerifiedAfterSnapshot() {
+        let model = makeModel()
+        let before = snapshot(generation: 1)
+        let after = snapshot(generation: 2, reversed: true)
+        retainRecoveryEntry(in: model, before: before, after: after)
+
+        model.acceptVerifiedMenuBarSnapshot(before)
+        XCTAssertNil(model.beginMenuBarRecovery())
+
+        model.acceptVerifiedMenuBarSnapshot(after)
+        let attempt = model.beginMenuBarRecovery()
+
+        XCTAssertEqual(attempt?.receipt.kind, .recovery)
+        XCTAssertEqual(model.currentActionReceipt?.phase, .verifying)
+        XCTAssertEqual(model.menuBarActionState, .moving(itemID: nil))
+    }
+
+    func testExactRecoveryProjectsRecoveredReceiptAndConsumesHistory() throws {
+        let model = makeModel()
+        let before = snapshot(generation: 1)
+        let after = snapshot(generation: 2, reversed: true)
+        retainRecoveryEntry(in: model, before: before, after: after)
+        model.acceptVerifiedMenuBarSnapshot(after)
+        let attempt = try XCTUnwrap(model.beginMenuBarRecovery())
+        let result = MenuBarActionResult.success("Previous menu bar layout restored.")
+
+        model.completeMenuBarRecovery(
+            id: attempt.receipt.id,
+            result: result,
+            after: before
+        )
+
+        XCTAssertEqual(model.currentActionReceipt?.phase, .recovered)
+        XCTAssertEqual(model.menuBarActionState, .result(result))
+        XCTAssertEqual(model.recentActionReceipts, [])
+    }
+
+    func testUnverifiedRecoveryProjectsBlockedReceiptAndKeepsSafeRetry() throws {
+        let model = makeModel()
+        let before = snapshot(generation: 1)
+        let after = snapshot(generation: 2, reversed: true)
+        retainRecoveryEntry(in: model, before: before, after: after)
+        model.acceptVerifiedMenuBarSnapshot(after)
+        let attempt = try XCTUnwrap(model.beginMenuBarRecovery())
+
+        model.completeMenuBarRecovery(
+            id: attempt.receipt.id,
+            result: .success("Previous menu bar layout restored."),
+            after: after
+        )
+
+        XCTAssertEqual(model.currentActionReceipt?.phase, .blocked)
+        XCTAssertEqual(model.currentActionReceipt?.canRecover, true)
+        XCTAssertEqual(model.recentActionReceipts.count, 1)
+    }
+
     private func makeModel() -> AppModel {
         let suiteName = "com.laclairtech.prismbar.tests.action-feedback.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
         defaults.removePersistentDomain(forName: suiteName)
         return AppModel(defaults: defaults, automaticallyRefresh: false)
+    }
+
+    private func retainRecoveryEntry(
+        in model: AppModel,
+        before: MenuBarSnapshot,
+        after: MenuBarSnapshot
+    ) {
+        let pending = model.beginMenuBarAction(kind: .directMove, before: before, itemID: nil)
+        model.completeMenuBarAction(
+            id: pending.id,
+            result: .success("Completed action"),
+            after: after
+        )
     }
 
     private func snapshot(generation: UInt64, reversed: Bool = false) -> MenuBarSnapshot {
