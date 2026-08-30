@@ -1,0 +1,176 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+@testable import prismBarEngine
+import prismBarCore
+import Testing
+
+@Suite("Menu bar recovery ledger")
+struct MenuBarRecoveryLedgerTests {
+    @Test("issues monotonic process-local identifiers")
+    func issuesMonotonicIdentifiers() {
+        var ledger = MenuBarRecoveryLedger()
+
+        let first = ledger.begin(kind: .directMove, before: snapshot(generation: 1))
+        let second = ledger.begin(kind: .sectionMove, before: snapshot(generation: 2))
+
+        #expect(first.id == MenuBarActionID(rawValue: 1))
+        #expect(second.id == MenuBarActionID(rawValue: 2))
+        #expect(first.phase == .verifying)
+        #expect(second.phase == .verifying)
+    }
+
+    @Test("does not expose an incomplete operation as recoverable")
+    func incompleteOperationIsNotRecoverable() {
+        var ledger = MenuBarRecoveryLedger()
+        _ = ledger.begin(kind: .directMove, before: snapshot(generation: 1))
+
+        #expect(ledger.entries.isEmpty)
+        #expect(ledger.latestCompatible(with: snapshot(generation: 2)) == nil)
+    }
+
+    @Test("retains only verified successful or partial operations")
+    func retainsVerifiedOperations() {
+        var ledger = MenuBarRecoveryLedger()
+        let before = snapshot(generation: 1)
+        let after = snapshot(generation: 2, reversed: true)
+
+        let success = ledger.begin(kind: .directMove, before: before)
+        let successReceipt = ledger.complete(
+            id: success.id,
+            result: .success("Verified"),
+            after: after
+        )
+        let partial = ledger.begin(kind: .directMove, before: after)
+        let partialReceipt = ledger.complete(
+            id: partial.id,
+            result: .warning("Partially applied"),
+            after: before
+        )
+        let blocked = ledger.begin(kind: .directMove, before: before)
+        let blockedReceipt = ledger.complete(
+            id: blocked.id,
+            result: .failure("Blocked"),
+            after: nil
+        )
+
+        #expect(successReceipt?.canRecover == true)
+        #expect(partialReceipt?.canRecover == true)
+        #expect(blockedReceipt?.canRecover == false)
+        #expect(ledger.entries.map(\.receipt.id) == [success.id, partial.id])
+    }
+
+    @Test("retains only the newest ten completed entries")
+    func enforcesEntryLimit() {
+        var ledger = MenuBarRecoveryLedger()
+
+        for generation in 1 ... 12 {
+            let before = snapshot(generation: UInt64(generation))
+            let pending = ledger.begin(kind: .directMove, before: before)
+            _ = ledger.complete(
+                id: pending.id,
+                result: .success("Verified"),
+                after: snapshot(generation: UInt64(generation + 100), reversed: true)
+            )
+        }
+
+        #expect(ledger.entries.count == MenuBarRecoveryLedger.maximumEntries)
+        #expect(ledger.entries.first?.receipt.id == MenuBarActionID(rawValue: 3))
+        #expect(ledger.entries.last?.receipt.id == MenuBarActionID(rawValue: 12))
+    }
+
+    @Test("requires equal item and surface sets for recovery")
+    func validatesCompatibility() {
+        var ledger = MenuBarRecoveryLedger()
+        let pending = ledger.begin(kind: .directMove, before: snapshot(generation: 1))
+        _ = ledger.complete(
+            id: pending.id,
+            result: .success("Verified"),
+            after: snapshot(generation: 2, reversed: true)
+        )
+
+        #expect(ledger.latestCompatible(with: snapshot(generation: 3)) != nil)
+        #expect(ledger.latestCompatible(with: snapshot(generation: 3, missingItem: true)) == nil)
+        #expect(ledger.latestCompatible(with: snapshot(generation: 3, alternateSurface: true)) == nil)
+    }
+
+    @Test("clears completed and pending recovery state")
+    func clearsAllState() {
+        var ledger = MenuBarRecoveryLedger()
+        let completed = ledger.begin(kind: .directMove, before: snapshot(generation: 1))
+        _ = ledger.complete(
+            id: completed.id,
+            result: .success("Verified"),
+            after: snapshot(generation: 2, reversed: true)
+        )
+        let pending = ledger.begin(kind: .sectionMove, before: snapshot(generation: 3))
+
+        ledger.clear()
+
+        #expect(ledger.entries.isEmpty)
+        #expect(ledger.complete(
+            id: pending.id,
+            result: .success("Verified"),
+            after: snapshot(generation: 4)
+        ) == nil)
+    }
+
+    private func snapshot(
+        generation: UInt64,
+        reversed: Bool = false,
+        missingItem: Bool = false,
+        alternateSurface: Bool = false
+    ) -> MenuBarSnapshot {
+        let surface = MenuBarSurfaceID(
+            rawValue: alternateSurface ? "fixture.display.alternate" : "fixture.display.primary"
+        )
+        var items = [
+            item("fixture.hidden", position: 0, surface: surface),
+            item(
+                "fixture.divider",
+                position: 1,
+                surface: surface,
+                role: .hiddenSectionDivider
+            ),
+            item("fixture.visible", position: 2, surface: surface),
+        ]
+        if missingItem {
+            items.removeLast()
+        } else if reversed {
+            items = [items[2], items[1], items[0]].enumerated().map { offset, item in
+                MenuBarItem(
+                    id: item.id,
+                    position: offset,
+                    isMovable: item.isMovable,
+                    displayName: item.displayName,
+                    ownership: item.ownership,
+                    availability: item.availability,
+                    role: item.role,
+                    frame: item.frame,
+                    surfaceID: item.surfaceID
+                )
+            }
+        }
+        return MenuBarSnapshot(generation: generation, items: items)
+    }
+
+    private func item(
+        _ identifier: String,
+        position: Int,
+        surface: MenuBarSurfaceID,
+        role: MenuBarItemRole = .item
+    ) -> MenuBarItem {
+        MenuBarItem(
+            id: MenuBarItemID(rawValue: identifier),
+            position: position,
+            isMovable: role == .item,
+            displayName: "Synthetic item",
+            ownership: .application,
+            availability: .controllable,
+            role: role,
+            frame: MenuBarItemFrame(minX: Double(position * 24), minY: 0, width: 20, height: 20),
+            surfaceID: surface
+        )
+    }
+}
