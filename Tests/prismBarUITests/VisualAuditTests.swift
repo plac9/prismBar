@@ -59,7 +59,13 @@ final class VisualAuditTests: XCTestCase {
             .firstMatch
         XCTAssertTrue(settings.waitForExistence(timeout: 5))
         assertShippingSurfaceIsUnobscured()
-        attach(settings.screenshot(), named: "06-settings")
+        attach(settings.screenshot(), named: "06-settings-general")
+
+        let privacy = settings.buttons["Privacy"]
+        XCTAssertTrue(privacy.waitForExistence(timeout: 3))
+        privacy.click()
+        assertShippingSurfaceIsUnobscured()
+        attach(settings.screenshot(), named: "07-settings-privacy")
 
         application.typeKey("w", modifierFlags: .command)
         XCTAssertTrue(settings.waitForNonExistence(timeout: 3))
@@ -70,8 +76,18 @@ final class VisualAuditTests: XCTestCase {
             .matching(identifier: "prismBar")
             .firstMatch
         XCTAssertTrue(statusItem.waitForExistence(timeout: 5))
+        statusItem.click()
+
+        let deckTitle = application.staticTexts["prismDeck"]
+        XCTAssertTrue(deckTitle.waitForExistence(timeout: 3))
+        let deck = application.windows.firstMatch
+        XCTAssertTrue(deck.waitForExistence(timeout: 3))
         assertShippingSurfaceIsUnobscured()
-        attach(statusItem.screenshot(), named: "07-status-item")
+        attach(deck.screenshot(), named: "08-prismDeck")
+
+        application.typeKey(.escape, modifierFlags: [])
+        XCTAssertTrue(deckTitle.waitForNonExistence(timeout: 3))
+        attach(statusItem.screenshot(), named: "09-status-item")
     }
 
     private func installSystemUIOcclusionMonitor() -> NSObjectProtocol {
@@ -116,7 +132,7 @@ final class VisualAuditTests: XCTestCase {
         XCTAssertTrue(statusItem.waitForExistence(timeout: 5), application.debugDescription)
         statusItem.click()
 
-        let openWorkspace = application.buttons["Open Workspace"]
+        let openWorkspace = application.buttons["Open prismBar"]
         XCTAssertTrue(openWorkspace.waitForExistence(timeout: 3), application.debugDescription)
         openWorkspace.click()
         return workspace
