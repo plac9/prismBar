@@ -72,6 +72,27 @@ struct MovePlannerTests {
         }
     }
 
+    @Test("rejects a destination beyond the protected system cluster boundary")
+    func rejectsProtectedSystemDestination() {
+        let application = MenuBarItem(
+            id: .init(rawValue: "calendar"),
+            position: 0,
+            isMovable: true,
+            ownership: .application
+        )
+        let system = MenuBarItem(
+            id: .init(rawValue: "clock"),
+            position: 1,
+            isMovable: true,
+            ownership: .system
+        )
+        let snapshot = MenuBarSnapshot(generation: 1, items: [application, system])
+
+        #expect(throws: MovePlanningError.unreachableDestination(system.id)) {
+            try MovePlanner().plan(item: application.id, to: 1, in: snapshot)
+        }
+    }
+
     @Test("preserves every item exactly once for all direct moves")
     func exhaustiveDirectMoveInvariants() throws {
         for itemCount in 1 ... 12 {

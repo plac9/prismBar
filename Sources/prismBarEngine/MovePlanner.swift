@@ -70,6 +70,7 @@ public enum MovePlanningError: Error, Equatable, Sendable {
     case itemIsNotMovable(MenuBarItemID)
     case invalidDestination(Int)
     case differentSurface
+    case unreachableDestination(MenuBarItemID)
 }
 
 public struct MovePlanner: Sendable {
@@ -95,7 +96,12 @@ public struct MovePlanner: Sendable {
             throw MovePlanningError.differentSurface
         }
 
-        let destinationItem = snapshot.items[destinationIndex].id
+        let destination = snapshot.items[destinationIndex]
+        let destinationItem = destination.id
+        if destination.role == .item,
+           destination.ownership != snapshot.items[sourceIndex].ownership {
+            throw MovePlanningError.unreachableDestination(destinationItem)
+        }
         let sourceOrder = snapshot.items.map(\.id)
         var expectedOrder = sourceOrder
         let movingItem = expectedOrder.remove(at: sourceIndex)

@@ -152,6 +152,7 @@ public struct PrismRailDropResolver: Sendable {
               let target = snapshot.items.first(where: { $0.id == targetItemID }),
               target.role == .item,
               target.availability == .controllable,
+              target.ownership == source.ownership,
               target.surfaceID == source.surfaceID,
               snapshot.section(for: target.id) == request.destinationSection
         else {

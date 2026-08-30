@@ -55,6 +55,15 @@ struct PrismRailDropResolverTests {
         #expect(resolver.resolve(.last, itemID: id("chat"), in: snapshot) == nil)
     }
 
+    @Test("keeps application keyboard movement before the protected system cluster")
+    func keepsKeyboardMovementInsideOwnershipLane() {
+        let snapshot = protectedClusterSnapshot()
+        let resolver = PrismRailKeyboardMoveResolver()
+
+        #expect(resolver.resolve(.last, itemID: id("mail"), in: snapshot) == 2)
+        #expect(resolver.resolve(.next, itemID: id("calendar"), in: snapshot) == nil)
+    }
+
     @Test("selects the first surface that actually presents menu items")
     func selectsPopulatedSurface() {
         let emptySurface = MenuBarSurfaceID(rawValue: "controller-only")
@@ -200,6 +209,19 @@ struct PrismRailDropResolverTests {
         #expect(PrismRailDropResolver().resolve(request, in: snapshot) == nil)
     }
 
+    @Test("rejects dropping an application item into the protected system cluster")
+    func rejectsCrossOwnershipDrop() {
+        let snapshot = protectedClusterSnapshot()
+        let request = PrismRailDropRequest(
+            itemID: id("mail"),
+            snapshotGeneration: 9,
+            targetItemID: id("clock"),
+            destinationSection: .visible
+        )
+
+        #expect(PrismRailDropResolver().resolve(request, in: snapshot) == nil)
+    }
+
     @Test("rejects an immovable source item")
     func rejectsImmovableSource() {
         let snapshot = railSnapshot(calendarMovable: false)
@@ -244,17 +266,32 @@ private extension PrismRailDropResolverTests {
         )
     }
 
+    func protectedClusterSnapshot() -> MenuBarSnapshot {
+        MenuBarSnapshot(
+            generation: 9,
+            items: [
+                item("divider", position: 0, movable: false, role: .hiddenSectionDivider),
+                item("mail", position: 1),
+                item("calendar", position: 2),
+                item("control-center", position: 3, ownership: .system),
+                item("clock", position: 4, ownership: .system),
+            ]
+        )
+    }
+
     func item(
         _ value: String,
         position: Int,
         movable: Bool = true,
         role: MenuBarItemRole = .item,
+        ownership: MenuBarItemOwnership = .application,
         surface: MenuBarSurfaceID = .unknown
     ) -> MenuBarItem {
         MenuBarItem(
             id: id(value),
             position: position,
             isMovable: movable,
+            ownership: ownership,
             role: role,
             surfaceID: surface
         )

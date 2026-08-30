@@ -194,6 +194,7 @@ public struct MenuBarSnapshot: Equatable, Codable, Sendable {
 
         return items.filter { candidate in
             candidate.role == .item &&
+                candidate.ownership == item.ownership &&
                 candidate.surfaceID == item.surfaceID &&
                 section(for: candidate.id) == itemSection
         }
