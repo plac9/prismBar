@@ -28,6 +28,19 @@ final class AppModelActionFeedbackTests: XCTestCase {
         )
     }
 
+    func testSectionMovePlanKeepsTheDisplayedSectionBoundary() throws {
+        let displayed = snapshot(generation: 1)
+
+        let plan = try AppModel.sectionMovePlan(
+            itemID: MenuBarItemID(rawValue: "fixture.visible"),
+            section: .hidden,
+            displayedSnapshot: displayed
+        )
+
+        XCTAssertEqual(plan.destinationItem, MenuBarItemID(rawValue: "fixture.divider"))
+        XCTAssertEqual(plan.verificationSection, .hidden)
+    }
+
     func testManualMenuBarRefreshClearsVisibleReceiptButPreservesHistory() {
         let model = makeModel()
         let before = snapshot(generation: 1)

@@ -259,7 +259,9 @@ public actor VerifiedMoveCoordinator<
             return .inputFailed
         }
     }
+}
 
+private extension VerifiedMoveCoordinator {
     private func verificationOutcome(
         for plan: MovePlan,
         observed: MenuBarSnapshot

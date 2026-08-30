@@ -113,10 +113,10 @@ public struct MenuBarRecoveryPlanner: Sendable {
                 throw MenuBarRecoveryPlanningError.incompatibleSurface(targetItem.id)
             }
             if targetItem.role == .item,
-               (currentItem.availability != .controllable ||
+               currentItem.availability != .controllable ||
                    targetItem.availability != .controllable ||
                    !currentItem.isMovable ||
-                   !targetItem.isMovable) {
+                   !targetItem.isMovable {
                 throw MenuBarRecoveryPlanningError.incompatibleAvailability(targetItem.id)
             }
         }

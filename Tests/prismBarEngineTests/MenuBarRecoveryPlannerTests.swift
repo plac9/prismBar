@@ -57,7 +57,7 @@ struct MenuBarRecoveryPlannerTests {
             order: ["a.one", "a.two", "a.divider", "b.one", "b.two", "b.divider"],
             surfaces: [
                 "a.one": "display.a", "a.two": "display.a", "a.divider": "display.a",
-                "b.one": "display.b", "b.two": "display.b", "b.divider": "display.b"
+                "b.one": "display.b", "b.two": "display.b", "b.divider": "display.b",
             ]
         )
         let current = snapshot(
@@ -65,7 +65,7 @@ struct MenuBarRecoveryPlannerTests {
             order: ["a.one", "a.two", "a.divider", "b.two", "b.one", "b.divider"],
             surfaces: [
                 "a.one": "display.a", "a.two": "display.a", "a.divider": "display.a",
-                "b.one": "display.b", "b.two": "display.b", "b.divider": "display.b"
+                "b.one": "display.b", "b.two": "display.b", "b.divider": "display.b",
             ]
         )
 
@@ -97,7 +97,7 @@ struct MenuBarRecoveryPlannerTests {
         .changedRole,
         .changedSurface,
         .unavailableItem,
-        .incompleteSnapshot
+        .incompleteSnapshot,
     ])
     func incompatibleTopology(_ mutation: RecoveryMutation) {
         let target = snapshot(order: ["one", "divider", "two", "control"])
