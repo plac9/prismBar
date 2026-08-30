@@ -80,7 +80,7 @@ struct MenuBarRecoveryLedgerTests {
         #expect(ledger.entries.last?.receipt.id == MenuBarActionID(rawValue: 12))
     }
 
-    @Test("requires equal item and surface sets for recovery")
+    @Test("requires the exact verified after topology for recovery")
     func validatesCompatibility() {
         var ledger = MenuBarRecoveryLedger()
         let pending = ledger.begin(kind: .directMove, before: snapshot(generation: 1))
@@ -90,9 +90,91 @@ struct MenuBarRecoveryLedgerTests {
             after: snapshot(generation: 2, reversed: true)
         )
 
-        #expect(ledger.latestCompatible(with: snapshot(generation: 3)) != nil)
+        #expect(ledger.latestCompatible(with: snapshot(generation: 3)) == nil)
+        #expect(ledger.latestCompatible(with: snapshot(generation: 3, reversed: true)) != nil)
         #expect(ledger.latestCompatible(with: snapshot(generation: 3, missingItem: true)) == nil)
         #expect(ledger.latestCompatible(with: snapshot(generation: 3, alternateSurface: true)) == nil)
+    }
+
+    @Test("begins recovery only from the exact verified after topology")
+    func beginsCompatibleRecovery() throws {
+        var ledger = completedLedger()
+
+        #expect(ledger.beginRecovery(with: snapshot(generation: 3)) == nil)
+
+        let candidate = ledger.beginRecovery(with: snapshot(generation: 3, reversed: true))
+        let attempt = try #require(candidate)
+        #expect(attempt.receipt.kind == .recovery)
+        #expect(attempt.receipt.phase == .verifying)
+        #expect(attempt.entry.before == snapshot(generation: 1))
+    }
+
+    @Test("consumes the recovery candidate only after exact restoration")
+    func completesVerifiedRecovery() throws {
+        var ledger = completedLedger()
+        let candidate = ledger.beginRecovery(with: snapshot(generation: 3, reversed: true))
+        let attempt = try #require(candidate)
+
+        let receipt = ledger.completeRecovery(
+            id: attempt.receipt.id,
+            result: .success("Previous layout restored."),
+            after: snapshot(generation: 4)
+        )
+
+        #expect(receipt?.phase == .recovered)
+        #expect(receipt?.kind == .recovery)
+        #expect(ledger.entries.isEmpty)
+    }
+
+    @Test("does not consume or misreport an unverified recovery")
+    func rejectsUnverifiedRecovery() throws {
+        var ledger = completedLedger()
+        let candidate = ledger.beginRecovery(with: snapshot(generation: 3, reversed: true))
+        let attempt = try #require(candidate)
+
+        let receipt = ledger.completeRecovery(
+            id: attempt.receipt.id,
+            result: .success("Previous layout restored."),
+            after: snapshot(generation: 4, reversed: true)
+        )
+
+        #expect(receipt?.phase == .blocked)
+        #expect(receipt?.canRecover == true)
+        #expect(ledger.entries.count == 1)
+    }
+
+    @Test("a partial recovery is retryable only while the verified after topology remains")
+    func retrySafety() throws {
+        var unchangedLedger = completedLedger()
+        let unchangedCandidate = unchangedLedger.beginRecovery(
+            with: snapshot(generation: 3, reversed: true)
+        )
+        let unchangedAttempt = try #require(unchangedCandidate)
+        let unchangedReceipt = unchangedLedger.completeRecovery(
+            id: unchangedAttempt.receipt.id,
+            result: .failure("Recovery stopped safely."),
+            after: snapshot(generation: 4, reversed: true)
+        )
+
+        #expect(unchangedReceipt?.canRecover == true)
+        #expect(unchangedLedger.latestCompatible(
+            with: snapshot(generation: 5, reversed: true)
+        ) != nil)
+
+        var changedLedger = completedLedger()
+        let changedCandidate = changedLedger.beginRecovery(
+            with: snapshot(generation: 3, reversed: true)
+        )
+        let changedAttempt = try #require(changedCandidate)
+        let changedReceipt = changedLedger.completeRecovery(
+            id: changedAttempt.receipt.id,
+            result: .failure("Recovery stopped safely."),
+            after: snapshot(generation: 4)
+        )
+
+        #expect(changedReceipt?.canRecover == false)
+        #expect(changedLedger.latestCompatible(with: snapshot(generation: 4)) == nil)
+        #expect(changedLedger.entries.count == 1)
     }
 
     @Test("clears completed and pending recovery state")
@@ -114,6 +196,17 @@ struct MenuBarRecoveryLedgerTests {
             result: .success("Verified"),
             after: snapshot(generation: 4)
         ) == nil)
+    }
+
+    private func completedLedger() -> MenuBarRecoveryLedger {
+        var ledger = MenuBarRecoveryLedger()
+        let pending = ledger.begin(kind: .directMove, before: snapshot(generation: 1))
+        _ = ledger.complete(
+            id: pending.id,
+            result: .success("Verified"),
+            after: snapshot(generation: 2, reversed: true)
+        )
+        return ledger
     }
 
     private func snapshot(
