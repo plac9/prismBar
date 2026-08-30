@@ -95,7 +95,8 @@ public struct MenuBarRecoveryLedger: Sendable {
         }
 
         let canRecover = result.kind != .failure && after.map {
-            Self.snapshotsAreCompatible(pending.before, $0)
+            Self.snapshotsAreCompatible(pending.before, $0) &&
+                !Self.snapshotsMatchForRecovery(pending.before, $0)
         } == true
         let receipt = MenuBarActionReceipt.completed(
             id: id,

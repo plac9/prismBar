@@ -61,6 +61,22 @@ struct MenuBarRecoveryLedgerTests {
         #expect(ledger.entries.map(\.receipt.id) == [success.id, partial.id])
     }
 
+    @Test("does not retain a verified no-op as recoverable")
+    func rejectsNoOp() {
+        var ledger = MenuBarRecoveryLedger()
+        let before = snapshot(generation: 1)
+        let pending = ledger.begin(kind: .reset, before: before)
+
+        let receipt = ledger.complete(
+            id: pending.id,
+            result: .success("Nothing changed"),
+            after: snapshot(generation: 2)
+        )
+
+        #expect(receipt?.canRecover == false)
+        #expect(ledger.entries.isEmpty)
+    }
+
     @Test("retains only the newest ten completed entries")
     func enforcesEntryLimit() {
         var ledger = MenuBarRecoveryLedger()
