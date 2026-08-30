@@ -7,6 +7,54 @@ import Testing
 
 @Suite("Prism Rail drops")
 struct PrismRailDropResolverTests {
+    @Test("builds one display layout with ordered visible and hidden lanes")
+    func buildsSelectedSurfaceLayout() {
+        let first = MenuBarSurfaceID(rawValue: "first")
+        let second = MenuBarSurfaceID(rawValue: "second")
+        let snapshot = MenuBarSnapshot(
+            generation: 8,
+            items: [
+                item("private.one", position: 0, surface: first),
+                item("divider.one", position: 1, movable: false, role: .hiddenSectionDivider, surface: first),
+                item("public.one", position: 2, surface: first),
+                item("private.two", position: 3, surface: second),
+                item("divider.two", position: 4, movable: false, role: .hiddenSectionDivider, surface: second),
+                item("public.two", position: 5, surface: second),
+            ]
+        )
+
+        let layout = PrismRailLayout(snapshot: snapshot, surfaceID: second)
+
+        #expect(layout.surfaceID == second)
+        #expect(layout.hiddenItems.map(\.id) == [id("private.two")])
+        #expect(layout.visibleItems.map(\.id) == [id("public.two")])
+        #expect(layout.itemCount == 2)
+        #expect(layout.surfaceCount == 2)
+        #expect(layout.generation == 8)
+    }
+
+    @Test("resolves adjacent keyboard movement without crossing lanes")
+    func resolvesAdjacentKeyboardMovement() {
+        let snapshot = railSnapshot()
+        let resolver = PrismRailKeyboardMoveResolver()
+
+        #expect(resolver.resolve(.previous, itemID: id("chat"), in: snapshot) == 0)
+        #expect(resolver.resolve(.next, itemID: id("mail"), in: snapshot) == 1)
+        #expect(resolver.resolve(.previous, itemID: id("mail"), in: snapshot) == nil)
+        #expect(resolver.resolve(.next, itemID: id("chat"), in: snapshot) == nil)
+    }
+
+    @Test("resolves first and last keyboard movement within the current lane")
+    func resolvesKeyboardEndpoints() {
+        let snapshot = railSnapshot()
+        let resolver = PrismRailKeyboardMoveResolver()
+
+        #expect(resolver.resolve(.first, itemID: id("chat"), in: snapshot) == 0)
+        #expect(resolver.resolve(.last, itemID: id("mail"), in: snapshot) == 1)
+        #expect(resolver.resolve(.first, itemID: id("mail"), in: snapshot) == nil)
+        #expect(resolver.resolve(.last, itemID: id("chat"), in: snapshot) == nil)
+    }
+
     @Test("selects the first surface that actually presents menu items")
     func selectsPopulatedSurface() {
         let emptySurface = MenuBarSurfaceID(rawValue: "controller-only")
