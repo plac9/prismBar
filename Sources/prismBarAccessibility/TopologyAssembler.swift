@@ -125,7 +125,9 @@ public struct TopologyAssembler: Sendable {
             return MenuBarItem(
                 id: MenuBarItemID(rawValue: stableIdentifier(seed: identitySeed, occurrence: occurrence)),
                 position: position,
-                isMovable: availability == .controllable && role == .item,
+                isMovable: availability == .controllable &&
+                    role == .item &&
+                    ownership == .application,
                 displayName: displayName(for: observation),
                 ownerBundleIdentifier: observation.owner.bundleIdentifier,
                 ownership: ownership,

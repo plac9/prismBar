@@ -7,6 +7,24 @@ import Testing
 
 @Suite("Menu bar snapshots")
 struct MenuBarSnapshotTests {
+    @Test("allows verified movement only for controllable application items")
+    func verifiedMovementPolicy() {
+        let application = MenuBarItem(
+            id: .init(rawValue: "application"),
+            position: 0,
+            isMovable: true
+        )
+        let system = MenuBarItem(
+            id: .init(rawValue: "clock"),
+            position: 1,
+            isMovable: true,
+            ownership: .system
+        )
+
+        #expect(application.allowsVerifiedMovement)
+        #expect(!system.allowsVerifiedMovement)
+    }
+
     @Test("numbers displays by menu order instead of private identifier value")
     func ordersSurfacesByFirstMenuItem() {
         let leadingSurface = MenuBarSurfaceID(rawValue: "z-private-id")

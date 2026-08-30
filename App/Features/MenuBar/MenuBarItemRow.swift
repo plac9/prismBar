@@ -40,8 +40,14 @@ struct MenuBarItemRow: View {
                 .font(.caption.weight(.medium))
                 .foregroundStyle(section == .hidden ? .secondary : .primary)
 
-            sectionButton
-            positionMenu
+            if item.ownership == .system {
+                Label("Fixed", systemImage: "lock.fill")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+            } else {
+                sectionButton
+                positionMenu
+            }
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .contain)
@@ -123,7 +129,7 @@ struct MenuBarItemRow: View {
     }
 
     private var canMove: Bool {
-        item.isMovable && item.availability == .controllable && !model.isMenuBarActionInProgress
+        item.allowsVerifiedMovement && !model.isMenuBarActionInProgress
     }
 
     private var currentSectionPosition: Int {

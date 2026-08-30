@@ -85,7 +85,7 @@ public struct MovePlanner: Sendable {
             throw MovePlanningError.itemNotFound(itemID)
         }
 
-        guard snapshot.items[sourceIndex].isMovable else {
+        guard snapshot.items[sourceIndex].allowsVerifiedMovement else {
             throw MovePlanningError.itemIsNotMovable(itemID)
         }
 

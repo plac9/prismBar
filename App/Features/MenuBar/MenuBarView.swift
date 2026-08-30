@@ -333,8 +333,7 @@ private extension MenuBarView {
 
         return snapshot.items.contains { item in
             selectedItemIDs.contains(item.id) &&
-                item.isMovable &&
-                item.availability == .controllable &&
+                item.allowsVerifiedMovement &&
                 snapshot.section(for: item.id) != section
         }
     }

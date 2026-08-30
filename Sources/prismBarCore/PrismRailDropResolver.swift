@@ -70,8 +70,7 @@ public struct PrismRailKeyboardMoveResolver: Sendable {
     ) -> Int? {
         guard let item = snapshot.items.first(where: { $0.id == itemID }),
               item.role == .item,
-              item.isMovable,
-              item.availability == .controllable
+              item.allowsVerifiedMovement
         else {
             return nil
         }
@@ -135,8 +134,7 @@ public struct PrismRailDropResolver: Sendable {
               request.destinationSection != .controller,
               let source = snapshot.items.first(where: { $0.id == request.itemID }),
               source.role == .item,
-              source.isMovable,
-              source.availability == .controllable
+              source.allowsVerifiedMovement
         else {
             return nil
         }
@@ -151,7 +149,7 @@ public struct PrismRailDropResolver: Sendable {
         guard targetItemID != source.id,
               let target = snapshot.items.first(where: { $0.id == targetItemID }),
               target.role == .item,
-              target.availability == .controllable,
+              target.allowsVerifiedMovement,
               target.ownership == source.ownership,
               target.surfaceID == source.surfaceID,
               snapshot.section(for: target.id) == request.destinationSection

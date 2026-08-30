@@ -92,6 +92,26 @@ struct MenuBarRecoveryPlannerTests {
         #expect(plan.destinationItem == id("divider"))
     }
 
+    @Test("restores application items while macOS items remain fixed anchors")
+    func restoresAroundSystemAnchors() throws {
+        let ownership: [String: MenuBarItemOwnership] = ["clock": .system]
+        let target = snapshot(
+            order: ["one", "two", "clock", "divider", "control"],
+            ownership: ownership
+        )
+        let current = snapshot(
+            generation: 2,
+            order: ["two", "one", "clock", "divider", "control"],
+            ownership: ownership
+        )
+
+        let candidate = try planner.nextPlan(current: current, restoring: target)
+        let plan = try #require(candidate)
+
+        #expect(plan.item == id("one"))
+        #expect(plan.destinationIndex == 0)
+    }
+
     @Test("fails closed for incompatible or incomplete topology", arguments: [
         RecoveryMutation.missingItem,
         .changedRole,
@@ -173,7 +193,8 @@ struct MenuBarRecoveryPlannerTests {
     private func snapshot(
         generation: UInt64 = 1,
         order: [String],
-        surfaces: [String: String] = [:]
+        surfaces: [String: String] = [:],
+        ownership: [String: MenuBarItemOwnership] = [:]
     ) -> MenuBarSnapshot {
         MenuBarSnapshot(
             generation: generation,
@@ -188,8 +209,9 @@ struct MenuBarRecoveryPlannerTests {
                 return MenuBarItem(
                     id: id(name),
                     position: index,
-                    isMovable: role == .item,
+                    isMovable: role == .item && ownership[name] != .system,
                     displayName: "Synthetic item",
+                    ownership: ownership[name, default: .application],
                     availability: .controllable,
                     role: role,
                     frame: MenuBarItemFrame(

@@ -62,7 +62,7 @@ struct TopologyAssemblerTests {
         let snapshot = TopologyAssembler().assemble(generation: 1, observations: observations)
 
         #expect(snapshot.items.map(\.ownership) == [.application, .system, .selfOwned])
-        #expect(snapshot.items.map(\.isMovable) == [true, true, false])
+        #expect(snapshot.items.map(\.isMovable) == [true, false, false])
     }
 
     @Test("classifies macOS 27 menu bar agents as protected system items")
@@ -83,6 +83,7 @@ struct TopologyAssemblerTests {
         let snapshot = TopologyAssembler().assemble(generation: 1, observations: observations)
 
         #expect(snapshot.items.map(\.ownership) == [.system, .system])
+        #expect(snapshot.items.allSatisfy { !$0.isMovable })
     }
 
     @Test("does not expose observed labels in stable identifiers")

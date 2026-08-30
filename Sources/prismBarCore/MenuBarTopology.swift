@@ -123,6 +123,13 @@ public struct MenuBarItem: Identifiable, Equatable, Codable, Sendable {
         self.frame = frame
         self.surfaceID = surfaceID
     }
+
+    public var allowsVerifiedMovement: Bool {
+        isMovable &&
+            availability == .controllable &&
+            role == .item &&
+            ownership == .application
+    }
 }
 
 public struct MenuBarSnapshot: Equatable, Codable, Sendable {
@@ -185,7 +192,7 @@ public struct MenuBarSnapshot: Equatable, Codable, Sendable {
 
     public func movementDestinations(for itemID: MenuBarItemID) -> [MenuBarItem] {
         guard let item = items.first(where: { $0.id == itemID }),
-              item.role == .item,
+              item.allowsVerifiedMovement,
               let itemSection = section(for: itemID),
               itemSection != .controller
         else {
@@ -193,7 +200,7 @@ public struct MenuBarSnapshot: Equatable, Codable, Sendable {
         }
 
         return items.filter { candidate in
-            candidate.role == .item &&
+            candidate.allowsVerifiedMovement &&
                 candidate.ownership == item.ownership &&
                 candidate.surfaceID == item.surfaceID &&
                 section(for: candidate.id) == itemSection

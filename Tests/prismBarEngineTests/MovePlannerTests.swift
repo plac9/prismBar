@@ -39,6 +39,27 @@ struct MovePlannerTests {
         }
     }
 
+    @Test("rejects a macOS-owned source even when AX reports it movable")
+    func rejectsSystemOwnedSource() {
+        let clock = MenuBarItem(
+            id: .init(rawValue: "clock"),
+            position: 0,
+            isMovable: true,
+            ownership: .system
+        )
+        let controlCenter = MenuBarItem(
+            id: .init(rawValue: "control-center"),
+            position: 1,
+            isMovable: true,
+            ownership: .system
+        )
+        let snapshot = MenuBarSnapshot(generation: 2, items: [clock, controlCenter])
+
+        #expect(throws: MovePlanningError.itemIsNotMovable(clock.id)) {
+            try MovePlanner().plan(item: clock.id, to: 1, in: snapshot)
+        }
+    }
+
     @Test("rejects an out of range destination")
     func rejectsInvalidDestination() {
         let item = MenuBarItem(id: .init(rawValue: "calendar"), position: 0, isMovable: true)

@@ -10,7 +10,7 @@ public struct SectionResetPlanner: Sendable {
     public func hiddenItemsToReveal(in snapshot: MenuBarSnapshot) -> [MenuBarItemID] {
         snapshot.items
             .filter { item in
-                item.isMovable && snapshot.section(for: item.id) == .hidden
+                item.allowsVerifiedMovement && snapshot.section(for: item.id) == .hidden
             }
             .reversed()
             .map(\.id)

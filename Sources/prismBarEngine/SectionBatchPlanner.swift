@@ -46,8 +46,7 @@ public struct SectionBatchPlanner: Sendable {
         guard targetSection != .controller,
               let item = snapshot.items.first(where: { $0.id == itemID }),
               item.role == .item,
-              item.isMovable,
-              item.availability == .controllable,
+              item.allowsVerifiedMovement,
               let currentSection = snapshot.section(for: itemID),
               currentSection != .controller
         else {

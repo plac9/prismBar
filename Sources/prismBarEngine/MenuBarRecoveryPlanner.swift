@@ -105,6 +105,7 @@ public struct MenuBarRecoveryPlanner: Sendable {
                 throw MenuBarRecoveryPlanningError.incompatibleItemSet
             }
             guard currentItem.role == targetItem.role,
+                  currentItem.ownership == targetItem.ownership,
                   currentItem.isMovable == targetItem.isMovable
             else {
                 throw MenuBarRecoveryPlanningError.incompatibleRole(targetItem.id)
@@ -113,20 +114,19 @@ public struct MenuBarRecoveryPlanner: Sendable {
                 throw MenuBarRecoveryPlanningError.incompatibleSurface(targetItem.id)
             }
             if targetItem.role == .item,
-               currentItem.availability != .controllable ||
-                   targetItem.availability != .controllable ||
-                   !currentItem.isMovable ||
-                   !targetItem.isMovable {
+               targetItem.ownership == .application,
+               !currentItem.allowsVerifiedMovement ||
+                   !targetItem.allowsVerifiedMovement {
                 throw MenuBarRecoveryPlanningError.incompatibleAvailability(targetItem.id)
             }
         }
 
         for surfaceID in surfaceIDs(in: target) {
             let currentAnchors = current.items.filter {
-                $0.surfaceID == surfaceID && $0.role != .item
+                $0.surfaceID == surfaceID && !$0.allowsVerifiedMovement
             }.map(\.id)
             let targetAnchors = target.items.filter {
-                $0.surfaceID == surfaceID && $0.role != .item
+                $0.surfaceID == surfaceID && !$0.allowsVerifiedMovement
             }.map(\.id)
             guard currentAnchors == targetAnchors else {
                 throw MenuBarRecoveryPlanningError.incompatibleAnchorOrder(surfaceID)

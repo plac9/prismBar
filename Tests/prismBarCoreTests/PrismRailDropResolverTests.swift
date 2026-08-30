@@ -64,6 +64,19 @@ struct PrismRailDropResolverTests {
         #expect(resolver.resolve(.next, itemID: id("calendar"), in: snapshot) == nil)
     }
 
+    @Test("does not offer keyboard movement for macOS-owned items")
+    func rejectsSystemKeyboardMovement() {
+        let snapshot = protectedClusterSnapshot()
+
+        #expect(
+            PrismRailKeyboardMoveResolver().resolve(
+                .previous,
+                itemID: id("clock"),
+                in: snapshot
+            ) == nil
+        )
+    }
+
     @Test("selects the first surface that actually presents menu items")
     func selectsPopulatedSurface() {
         let emptySurface = MenuBarSurfaceID(rawValue: "controller-only")

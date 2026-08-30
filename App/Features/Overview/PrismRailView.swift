@@ -198,14 +198,14 @@ private extension PrismRailView {
         .contextMenu {
             railMenu(item, section: section)
         }
-        .help(canMove(item) ? "Drag to reposition \(item.displayName)" : "This item cannot be moved")
+        .help(itemHelp(item))
         .accessibilityElement(children: .ignore)
         .accessibilityIdentifier("prismRail.\(section.rawValue).item.\(position)")
         .accessibilityLabel(item.displayName)
         .accessibilityValue(
             canMove(item)
                 ? "\(sectionTitle(section)), position \(position) of \(laneItems.count), draggable"
-                : "\(sectionTitle(section)), unavailable"
+                : "\(sectionTitle(section)), \(fixedItemDescription(item))"
         )
         .accessibilityActions {
             railAccessibilityActions(item, section: section)
@@ -304,9 +304,19 @@ private extension PrismRailView {
     }
 
     func canMove(_ item: MenuBarItem) -> Bool {
-        item.isMovable &&
-            item.availability == .controllable &&
+        item.allowsVerifiedMovement &&
             !model.isMenuBarActionInProgress
+    }
+
+    func itemHelp(_ item: MenuBarItem) -> String {
+        if item.ownership == .system {
+            return "macOS keeps this item in place"
+        }
+        return canMove(item) ? "Drag to reposition \(item.displayName)" : "This item cannot be moved"
+    }
+
+    func fixedItemDescription(_ item: MenuBarItem) -> String {
+        item.ownership == .system ? "fixed by macOS" : "unavailable"
     }
 
     var movingItemID: MenuBarItemID? {
