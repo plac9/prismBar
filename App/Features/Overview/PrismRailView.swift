@@ -3,6 +3,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import prismBarCore
+import AppKit
 import SwiftUI
 
 struct PrismRailView: View {
@@ -23,18 +24,14 @@ struct PrismRailView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
             header
             lane(for: .visible)
+            PrismGateView(isActive: targetedSection != nil || targetedItemID != nil)
             lane(for: .hidden)
         }
-        .padding(.vertical, 12)
-        .overlay(alignment: .top) {
-            Divider()
-        }
-        .overlay(alignment: .bottom) {
-            Divider()
-        }
+        .padding(14)
+        .background(.background.secondary, in: .rect(cornerRadius: 18))
         .accessibilityIdentifier("prismRail")
         .onChange(of: snapshot.generation) {
             dragTokens = Self.makeDragTokens(for: snapshot)
@@ -46,23 +43,37 @@ struct PrismRailView: View {
             )
         }
         .onChange(of: snapshot.surfaceIDs) {
-            guard !snapshot.surfaceIDs.contains(selectedSurfaceID) else { return }
-            selectedSurfaceID = snapshot.surfaceIDs.first ?? .unknown
+            selectedSurfaceID = PrismRailSurfaceResolver().resolve(
+                in: snapshot,
+                current: selectedSurfaceID
+            )
         }
     }
 }
 
 private extension PrismRailView {
-    var header: some View {
-        HStack(spacing: 8) {
-            Label(PrismRailPresentation.title, systemImage: "arrow.left.arrow.right")
-                .font(.callout.weight(.semibold))
+    var layout: PrismRailLayout {
+        PrismRailLayout(snapshot: snapshot, surfaceID: selectedSurfaceID)
+    }
 
-            Text("Drag to place")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+    var header: some View {
+        HStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(PrismRailPresentation.title)
+                    .font(.headline)
+                    .accessibilityAddTraits(.isHeader)
+
+                Text("Drag once. prismBar verifies the result.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
 
             Spacer()
+
+            Text("\(layout.itemCount)")
+                .font(.caption.monospacedDigit().weight(.semibold))
+                .foregroundStyle(.secondary)
+                .accessibilityLabel("\(layout.itemCount) items on this display")
 
             if snapshot.surfaceIDs.count > 1 {
                 surfacePicker
@@ -71,40 +82,43 @@ private extension PrismRailView {
     }
 
     var surfacePicker: some View {
-        Menu {
+        Picker("Display", selection: $selectedSurfaceID) {
             ForEach(Array(snapshot.surfaceIDs.enumerated()), id: \.element) { offset, surfaceID in
-                Button {
-                    selectedSurfaceID = surfaceID
-                } label: {
-                    if surfaceID == selectedSurfaceID {
-                        Label("Display \(offset + 1)", systemImage: "checkmark")
-                    } else {
-                        Text("Display \(offset + 1)")
-                    }
-                }
+                Text("Display \(offset + 1)")
+                    .tag(surfaceID)
             }
-        } label: {
-            Label(selectedSurfaceTitle, systemImage: "display")
         }
-        .menuStyle(.button)
+        .labelsHidden()
+        .pickerStyle(.menu)
         .controlSize(.small)
+        .accessibilityLabel("Rail display")
     }
 
     func lane(for section: MenuBarSection) -> some View {
         let laneItems = items(in: section)
 
-        return VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Label(sectionTitle(section), systemImage: sectionSymbol(section))
-                    .font(.caption.weight(.medium))
-                Spacer()
+        return VStack(alignment: .leading, spacing: 7) {
+            HStack(spacing: 6) {
+                Image(systemName: sectionSymbol(section))
+                    .foregroundStyle(section == .visible ? Color.accentColor : .secondary)
+                    .accessibilityHidden(true)
+
+                Text(sectionTitle(section))
+                    .font(.caption.weight(.semibold))
+
                 Text("\(laneItems.count)")
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(.secondary)
+                    .font(.caption2.monospacedDigit())
+                    .foregroundStyle(.tertiary)
+
+                Spacer()
+
+                Text(sectionHint(section))
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
             }
 
             ScrollView(.horizontal) {
-                LazyHStack(spacing: 6) {
+                LazyHStack(spacing: 7) {
                     if laneItems.isEmpty {
                         emptyLane(section)
                     } else {
@@ -114,18 +128,21 @@ private extension PrismRailView {
                     }
                 }
                 .scrollTargetLayout()
-                .padding(2)
+                .padding(4)
             }
             .scrollIndicators(.never)
             .scrollTargetBehavior(.viewAligned)
-            .frame(height: 42)
+            .frame(height: 48)
             .dropDestination(for: String.self) { tokens, _ in
                 performDrop(tokens: tokens, targetItemID: nil, section: section)
             } isTargeted: { isTargeted in
                 targetedSection = isTargeted ? section : nil
             }
-            .background(laneBackground(section))
-            .clipShape(.rect(cornerRadius: 10))
+            .background(laneBackground(section), in: .rect(cornerRadius: 12))
+            .overlay {
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(laneStroke(section), style: .init(lineWidth: 1, dash: [4, 4]))
+            }
             .accessibilityIdentifier("prismRail.\(section.rawValue)")
         }
     }
@@ -144,12 +161,12 @@ private extension PrismRailView {
                 .glassEffect(.regular.interactive(), in: .capsule)
                 .draggable(token) {
                     railItemContent(item, section: section)
-                        .padding(4)
+                        .padding(5)
                         .background(.regularMaterial, in: .capsule)
                 }
         } else {
             content
-                .background(.thinMaterial, in: .capsule)
+                .background(.quaternary, in: .capsule)
         }
     }
 
@@ -157,87 +174,99 @@ private extension PrismRailView {
         let laneItems = items(in: section)
         let position = (laneItems.firstIndex(where: { $0.id == item.id }) ?? 0) + 1
 
-        return HStack(spacing: 5) {
-            Image(systemName: canMove(item) ? "line.3.horizontal" : "lock.fill")
+        return HStack(spacing: 6) {
+            Image(systemName: itemSymbol(item))
                 .font(.caption2.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(itemTint(item))
                 .accessibilityHidden(true)
 
             Text(item.displayName)
                 .font(.caption.weight(.medium))
                 .lineLimit(1)
+
+            if movingItemID == item.id {
+                ProgressView()
+                    .controlSize(.mini)
+                    .accessibilityHidden(true)
+            }
         }
-        .padding(.horizontal, 9)
-        .frame(height: 32)
-        .background {
-            Capsule()
-                .fill(itemBackground(item))
-        }
+        .padding(.horizontal, 10)
+        .frame(height: 34)
         .overlay {
             Capsule()
-                .stroke(itemStroke(item), lineWidth: targetedItemID == item.id ? 2 : 0.5)
+                .strokeBorder(itemStroke(item), lineWidth: targetedItemID == item.id ? 2 : 0.5)
         }
         .contentShape(.capsule)
-        .help(canMove(item) ? "Drag \(item.displayName) to a new position" : "This item cannot be moved")
+        .contextMenu {
+            railMenu(item, section: section)
+        }
+        .help(canMove(item) ? "Drag to reposition \(item.displayName)" : "This item cannot be moved")
         .accessibilityElement(children: .combine)
         .accessibilityLabel(item.displayName)
         .accessibilityValue(
             canMove(item)
-                ? "\(sectionTitle(section)) section, position \(position) of \(laneItems.count), draggable"
-                : "\(sectionTitle(section)) section, unavailable"
+                ? "\(sectionTitle(section)), position \(position) of \(laneItems.count), draggable"
+                : "\(sectionTitle(section)), unavailable"
         )
         .accessibilityActions {
-            railAccessibilityActions(item, section: section, laneItems: laneItems)
+            railAccessibilityActions(item, section: section)
         }
     }
 
     @ViewBuilder
-    func railAccessibilityActions(
-        _ item: MenuBarItem,
-        section: MenuBarSection,
-        laneItems: [MenuBarItem]
-    ) -> some View {
+    func railMenu(_ item: MenuBarItem, section: MenuBarSection) -> some View {
         if canMove(item) {
             Button(section == .hidden ? "Show" : "Hide") {
                 model.moveMenuBarItem(item.id, to: section == .hidden ? .visible : .hidden)
             }
+            Divider()
+            keyboardMoveButton("Move Left", systemImage: "arrow.left", move: .previous, item: item)
+            keyboardMoveButton("Move Right", systemImage: "arrow.right", move: .next, item: item)
+            keyboardMoveButton("Move to Start", systemImage: "arrow.left.to.line", move: .first, item: item)
+            keyboardMoveButton("Move to End", systemImage: "arrow.right.to.line", move: .last, item: item)
+        }
+    }
 
-            if let firstItem = laneItems.first, firstItem.id != item.id {
-                Button("Move to First Position") {
-                    model.moveMenuBarItem(item.id, to: firstItem.position)
-                }
+    @ViewBuilder
+    func railAccessibilityActions(_ item: MenuBarItem, section: MenuBarSection) -> some View {
+        if canMove(item) {
+            Button(section == .hidden ? "Show" : "Hide") {
+                model.moveMenuBarItem(item.id, to: section == .hidden ? .visible : .hidden)
             }
+            keyboardMoveButton("Move Left", move: .previous, item: item)
+            keyboardMoveButton("Move Right", move: .next, item: item)
+            keyboardMoveButton("Move to Start", move: .first, item: item)
+            keyboardMoveButton("Move to End", move: .last, item: item)
+        }
+    }
 
-            if let lastItem = laneItems.last, lastItem.id != item.id {
-                Button("Move to Last Position") {
-                    model.moveMenuBarItem(item.id, to: lastItem.position)
-                }
+    @ViewBuilder
+    func keyboardMoveButton(
+        _ title: String,
+        systemImage: String? = nil,
+        move: PrismRailKeyboardMove,
+        item: MenuBarItem
+    ) -> some View {
+        let destination = PrismRailKeyboardMoveResolver().resolve(move, itemID: item.id, in: snapshot)
+        if let systemImage {
+            Button(title, systemImage: systemImage) {
+                if let destination { model.moveMenuBarItem(item.id, to: destination) }
             }
+            .disabled(destination == nil)
+        } else {
+            Button(title) {
+                if let destination { model.moveMenuBarItem(item.id, to: destination) }
+            }
+            .disabled(destination == nil)
         }
     }
 
     func emptyLane(_ section: MenuBarSection) -> some View {
-        Label("Drop here", systemImage: "arrow.down.to.line")
+        Label("Drop an item here", systemImage: "arrow.down.to.line.compact")
             .font(.caption)
             .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity, minHeight: 32)
-            .padding(.horizontal, 10)
-            .accessibilityLabel("Empty \(sectionTitle(section)) section. Drop an item here.")
-    }
-
-    func laneBackground(_ section: MenuBarSection) -> some ShapeStyle {
-        targetedSection == section ? AnyShapeStyle(.tint.opacity(0.16)) : AnyShapeStyle(.clear)
-    }
-
-    func itemBackground(_ item: MenuBarItem) -> some ShapeStyle {
-        if targetedItemID == item.id {
-            return AnyShapeStyle(.tint.opacity(0.2))
-        }
-        return AnyShapeStyle(.background.tertiary)
-    }
-
-    func itemStroke(_ item: MenuBarItem) -> Color {
-        targetedItemID == item.id ? .accentColor : .secondary.opacity(0.28)
+            .frame(minWidth: 150, minHeight: 34)
+            .accessibilityLabel("Empty \(sectionTitle(section)). Drop an item here.")
     }
 
     func performDrop(
@@ -272,11 +301,7 @@ private extension PrismRailView {
     }
 
     func items(in section: MenuBarSection) -> [MenuBarItem] {
-        snapshot.items.filter { item in
-            item.role == .item &&
-                item.surfaceID == selectedSurfaceID &&
-                snapshot.section(for: item.id) == section
-        }
+        section == .hidden ? layout.hiddenItems : layout.visibleItems
     }
 
     func canMove(_ item: MenuBarItem) -> Bool {
@@ -285,17 +310,44 @@ private extension PrismRailView {
             !model.isMenuBarActionInProgress
     }
 
+    var movingItemID: MenuBarItemID? {
+        guard case let .moving(itemID) = model.menuBarActionState else { return nil }
+        return itemID
+    }
+
     func sectionTitle(_ section: MenuBarSection) -> String {
-        section == .hidden ? "Hidden" : "Visible"
+        section == .hidden ? "Tucked Away" : "On Bar"
+    }
+
+    func sectionHint(_ section: MenuBarSection) -> String {
+        section == .hidden ? "Reveal when needed" : "Always visible"
     }
 
     func sectionSymbol(_ section: MenuBarSection) -> String {
-        section == .hidden ? "eye.slash" : "eye"
+        section == .hidden ? "eye.slash" : "menubar.rectangle"
     }
 
-    var selectedSurfaceTitle: String {
-        let offset = snapshot.surfaceIDs.firstIndex(of: selectedSurfaceID) ?? 0
-        return "Display \(offset + 1)"
+    func itemSymbol(_ item: MenuBarItem) -> String {
+        if movingItemID == item.id { return "arrow.left.arrow.right" }
+        return canMove(item) ? "line.3.horizontal" : "lock.fill"
+    }
+
+    func itemTint(_ item: MenuBarItem) -> Color {
+        movingItemID == item.id ? .accentColor : .secondary
+    }
+
+    func laneBackground(_ section: MenuBarSection) -> Color {
+        targetedSection == section ? .accentColor.opacity(0.12) : .clear
+    }
+
+    func laneStroke(_ section: MenuBarSection) -> Color {
+        targetedSection == section ? .accentColor : Color(nsColor: .separatorColor).opacity(0.55)
+    }
+
+    func itemStroke(_ item: MenuBarItem) -> Color {
+        if targetedItemID == item.id { return .accentColor }
+        if movingItemID == item.id { return .accentColor.opacity(0.7) }
+        return Color(nsColor: .separatorColor).opacity(0.65)
     }
 
     static func makeDragTokens(for snapshot: MenuBarSnapshot) -> [MenuBarItemID: String] {

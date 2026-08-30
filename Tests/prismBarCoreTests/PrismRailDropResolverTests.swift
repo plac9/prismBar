@@ -5,7 +5,7 @@
 @testable import prismBarCore
 import Testing
 
-@Suite("Prism Rail drops")
+@Suite("Rail drops")
 struct PrismRailDropResolverTests {
     @Test("builds one display layout with ordered visible and hidden lanes")
     func buildsSelectedSurfaceLayout() {

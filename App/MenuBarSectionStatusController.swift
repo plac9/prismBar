@@ -20,7 +20,7 @@ final class MenuBarSectionStatusController: NSObject {
         let popover = NSPopover()
         popover.behavior = .transient
         popover.animates = true
-        popover.contentSize = NSSize(width: 360, height: 520)
+        popover.contentSize = NSSize(width: 440, height: 500)
         popover.delegate = self
         popover.contentViewController = NSHostingController(
             rootView: PrismDeckView(

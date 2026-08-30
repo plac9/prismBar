@@ -17,7 +17,7 @@ final class PrismDeckTests: XCTestCase {
 
         let deckTitle = application.staticTexts["prismDeck"]
         XCTAssertTrue(deckTitle.waitForExistence(timeout: 3))
-        XCTAssertTrue(application.buttons["Open Workspace"].exists)
+        XCTAssertTrue(application.buttons["Open prismBar"].exists)
         XCTAssertFalse(application.buttons["Open prismCalc"].exists)
         XCTAssertFalse(application.radioButtons["Tools"].exists)
 
@@ -27,7 +27,7 @@ final class PrismDeckTests: XCTestCase {
         statusItem.click()
         XCTAssertTrue(deckTitle.waitForExistence(timeout: 3))
 
-        application.buttons["Open Workspace"].click()
+        application.buttons["Open prismBar"].click()
         XCTAssertTrue(workspace.waitForExistence(timeout: 3))
         XCTAssertEqual(workspace.title, "prismBar")
     }
