@@ -14,7 +14,11 @@ extension AppModel {
 
         let itemName = displayedSnapshot.items.first(where: { $0.id == itemID })?.displayName
             ?? "the selected item"
-        menuBarActionState = .moving(itemID: itemID)
+        let pendingReceipt = beginMenuBarAction(
+            kind: .directMove,
+            before: displayedSnapshot,
+            itemID: itemID
+        )
         Task { [weak self] in
             guard let self else { return }
             let wasCollapsed = isHiddenSectionCollapsed
@@ -26,10 +30,12 @@ extension AppModel {
                     deadline: OperationDeadline(timeout: .seconds(8))
                 )
                 guard snapshot.items.map(\.id) == displayedSnapshot.items.map(\.id) else {
-                    menuBarActionState = .result(
-                        .warning(
+                    completeMenuBarAction(
+                        id: pendingReceipt.id,
+                        result: .warning(
                             "The menu bar changed before the move. Review the refreshed positions and try again."
-                        )
+                        ),
+                        after: nil
                     )
                     await restoreHiddenSectionIfNeeded(wasCollapsed)
                     refreshMenuBar(preservingActionResult: true)
@@ -39,7 +45,11 @@ extension AppModel {
                 let execution = await menuBarController.executeWithObservation(plan)
                 let outcome = acceptVerifiedExecution(execution)
                 didAcceptVerifiedSnapshot = execution.verifiedSnapshot != nil
-                menuBarActionState = .result(.move(outcome, itemName: itemName))
+                completeMenuBarAction(
+                    id: pendingReceipt.id,
+                    result: .move(outcome, itemName: itemName),
+                    after: execution.verifiedSnapshot
+                )
                 if outcome == .permissionRevoked {
                     handleAccessibilityRevocation()
                 } else {
@@ -47,10 +57,11 @@ extension AppModel {
                 }
             } catch MenuBarAuthorizationError.permissionRevoked {
                 handleAccessibilityRevocation()
-                menuBarActionState = .result(.move(.permissionRevoked, itemName: itemName))
             } catch {
-                menuBarActionState = .result(
-                    .failure("That item cannot be moved to the requested position.")
+                completeMenuBarAction(
+                    id: pendingReceipt.id,
+                    result: .failure("That item cannot be moved to the requested position."),
+                    after: nil
                 )
                 await restoreHiddenSectionIfNeeded(wasCollapsed)
             }

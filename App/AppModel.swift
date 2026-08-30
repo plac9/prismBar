@@ -16,6 +16,7 @@ final class AppModel {
     private(set) var accessibilityState: AccessibilityPermissionState
     private(set) var menuBarState: MenuBarLoadingState = .waitingForPermission
     private(set) var menuBarSnapshot: MenuBarSnapshot?
+    private(set) var currentActionReceipt: MenuBarActionReceipt?
     var menuBarActionState: MenuBarActionState = .idle
     var isHiddenSectionCollapsed = false
 
@@ -24,7 +25,17 @@ final class AppModel {
     private var permissionSession: AccessibilityPermissionSession
     private var permissionRevision = 0
     private var topologyRevision = 0
+    private var recoveryLedger = MenuBarRecoveryLedger()
     let menuBarController = LiveMenuBarController()
+
+    var recentActionReceipts: [MenuBarActionReceipt] {
+        recoveryLedger.entries.map(\.receipt)
+    }
+
+    var canRecoverLastAction: Bool {
+        guard let menuBarSnapshot else { return false }
+        return recoveryLedger.latestCompatible(with: menuBarSnapshot) != nil
+    }
 
     var isMenuBarActionInProgress: Bool {
         if case .moving = menuBarActionState {
@@ -33,7 +44,10 @@ final class AppModel {
         return false
     }
 
-    private init(defaults: UserDefaults = .standard) {
+    init(
+        defaults: UserDefaults = .standard,
+        automaticallyRefresh: Bool = true
+    ) {
         self.defaults = defaults
         permissionSession = AccessibilityPermissionSession(
             evaluator: AccessibilityPermissionEvaluator(
@@ -43,7 +57,9 @@ final class AppModel {
             hasRequestedAccess: defaults.bool(forKey: Self.requestHistoryKey)
         )
         accessibilityState = .requiresStableInstall
-        refreshAccessibility()
+        if automaticallyRefresh {
+            refreshAccessibility()
+        }
     }
 
     func refreshAccessibility() {
@@ -107,7 +123,7 @@ final class AppModel {
 
     func refreshMenuBar(preservingActionResult: Bool = false) {
         if !preservingActionResult {
-            menuBarActionState = .idle
+            clearVisibleMenuBarAction()
         }
 
         guard accessibilityState == .granted else {
@@ -153,7 +169,38 @@ final class AppModel {
 
     func handleAccessibilityRevocation() {
         accessibilityState = .denied
+        recoveryLedger.clear()
+        clearVisibleMenuBarAction()
         invalidateMenuBar()
+    }
+
+    @discardableResult
+    func beginMenuBarAction(
+        kind: MenuBarActionKind,
+        before: MenuBarSnapshot,
+        itemID: MenuBarItemID?
+    ) -> MenuBarActionReceipt {
+        let receipt = recoveryLedger.begin(kind: kind, before: before)
+        currentActionReceipt = receipt
+        menuBarActionState = .moving(itemID: itemID)
+        return receipt
+    }
+
+    func completeMenuBarAction(
+        id: MenuBarActionID,
+        result: MenuBarActionResult,
+        after: MenuBarSnapshot?
+    ) {
+        guard let receipt = recoveryLedger.complete(id: id, result: result, after: after) else {
+            return
+        }
+        currentActionReceipt = receipt
+        menuBarActionState = .result(result)
+    }
+
+    private func clearVisibleMenuBarAction() {
+        currentActionReceipt = nil
+        menuBarActionState = .idle
     }
 
     private nonisolated static func readCodeIdentity() async -> CodeIdentity? {
