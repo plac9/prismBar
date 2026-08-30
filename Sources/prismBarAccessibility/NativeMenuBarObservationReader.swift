@@ -32,10 +32,12 @@ public enum RunningApplicationCatalog {
 }
 
 public actor NativeMenuBarObservationReader: MenuBarObservationReading {
+    static let maximumConcurrentSources = 2
+
     private let reader = ResilientMenuBarObservationReader(
         source: ConcurrentMenuBarObservationReader(
             sourceReader: NativeApplicationObservationReader(),
-            maximumConcurrentSources: 8
+            maximumConcurrentSources: maximumConcurrentSources
         ),
         attemptLimit: 3
     )

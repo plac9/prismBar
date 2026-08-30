@@ -8,6 +8,11 @@ import Testing
 
 @Suite("Concurrent menu bar observation")
 struct ConcurrentObservationReaderTests {
+    @Test("bounds native AX fan-out for macOS 27 hierarchy safety")
+    func boundsNativeAccessibilityFanOut() {
+        #expect(NativeMenuBarObservationReader.maximumConcurrentSources == 2)
+    }
+
     @Test("limits concurrent source reads to the configured capacity")
     func limitsConcurrentSourceReads() async throws {
         let sourceReader = ConcurrencyProbeSourceReader(delay: .milliseconds(20))
