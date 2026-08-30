@@ -63,9 +63,9 @@ The shipping application is intentionally limited to menu bar discovery, hide an
 - [x] Define typed action identifiers, kinds, phases, and receipts.
 - [x] Add a ten-entry process-local recovery ledger with topology compatibility checks.
 - [x] Route direct moves through receipt-backed application state.
-- [ ] Route section, batch, reset, and recovery operations through the same receipt coordinator.
-- [ ] Implement verified recovery execution against the latest compatible entry.
-- [ ] Clear recovery history on every live trust or signing-identity transition, not only protected-call revocation.
+- [x] Route section, batch, reset, and recovery operations through the same receipt coordinator.
+- [x] Implement verified recovery execution against the latest compatible entry.
+- [x] Clear recovery history on every live trust or signing-identity transition, not only protected-call revocation.
 
 ## Phase 4A: Verified rebuild sequence
 
