@@ -71,15 +71,11 @@ final class AppModel {
             let isTrusted = await Self.readAccessibilityTrust(prompt: false)
 
             guard let self, revision == permissionRevision else { return }
-            accessibilityState = permissionSession.refreshTrust(
+            let refreshedState = permissionSession.refreshTrust(
                 isStableInstall: isStableInstall,
                 isTrusted: isTrusted
             )
-            if accessibilityState == .granted {
-                refreshMenuBar()
-            } else {
-                invalidateMenuBar()
-            }
+            acceptAccessibilityState(refreshedState)
         }
     }
 
@@ -100,24 +96,19 @@ final class AppModel {
             guard prerequisiteState != .requiresStableInstall,
                   prerequisiteState != .identityMismatch
             else {
-                accessibilityState = prerequisiteState
+                acceptAccessibilityState(prerequisiteState)
                 return
             }
 
             let isTrusted = await Self.readAccessibilityTrust(prompt: true)
             guard revision == permissionRevision else { return }
 
-            accessibilityState = permissionSession.requestAccess(
+            let requestedState = permissionSession.requestAccess(
                 isStableInstall: isStableInstall,
                 identity: identity
             ) { isTrusted }
             defaults.set(permissionSession.hasRequestedAccess, forKey: Self.requestHistoryKey)
-
-            if accessibilityState == .granted {
-                refreshMenuBar()
-            } else {
-                invalidateMenuBar()
-            }
+            acceptAccessibilityState(requestedState)
         }
     }
 
@@ -171,6 +162,27 @@ final class AppModel {
         accessibilityState = .denied
         recoveryLedger.clear()
         clearVisibleMenuBarAction()
+        invalidateMenuBar()
+    }
+
+    func acceptAccessibilityState(
+        _ state: AccessibilityPermissionState,
+        refreshMenuBarWhenGranted: Bool = true
+    ) {
+        let didLoseTrust = accessibilityState == .granted && state != .granted
+        accessibilityState = state
+
+        if state == .granted {
+            if refreshMenuBarWhenGranted {
+                refreshMenuBar()
+            }
+            return
+        }
+
+        if didLoseTrust {
+            recoveryLedger.clear()
+            clearVisibleMenuBarAction()
+        }
         invalidateMenuBar()
     }
 

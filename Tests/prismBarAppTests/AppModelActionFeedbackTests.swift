@@ -51,6 +51,23 @@ final class AppModelActionFeedbackTests: XCTestCase {
         XCTAssertEqual(model.menuBarActionState, .idle)
     }
 
+    func testForegroundTrustLossClearsPrivilegedRecoveryState() {
+        let model = makeModel()
+        model.acceptAccessibilityState(.granted, refreshMenuBarWhenGranted: false)
+        let before = snapshot(generation: 1)
+        let after = snapshot(generation: 2, reversed: true)
+        retainRecoveryEntry(in: model, before: before, after: after)
+        model.acceptVerifiedMenuBarSnapshot(after)
+
+        model.acceptAccessibilityState(.identityMismatch, refreshMenuBarWhenGranted: false)
+
+        XCTAssertEqual(model.accessibilityState, .identityMismatch)
+        XCTAssertNil(model.currentActionReceipt)
+        XCTAssertEqual(model.recentActionReceipts, [])
+        XCTAssertNil(model.menuBarSnapshot)
+        XCTAssertEqual(model.menuBarActionState, .idle)
+    }
+
     func testVerifyingReceiptProjectsToMovingState() {
         let model = makeModel()
 
