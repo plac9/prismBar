@@ -53,6 +53,11 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 
 ### Fixed
 
+- Classified macOS-owned menu bar extras such as Clock, Control Center, and Siri as fixed anchors even when Accessibility reports them as movable.
+- Removed drag, keyboard, batch, reset, and recovery move paths for fixed macOS-owned anchors while preserving application-item movement.
+- Clarified partial menu bar scans so nonresponsive sources are reported without presenting incomplete inventory as complete.
+- Bounded native Accessibility observation retries and fan-out to avoid indefinite refreshes and stale concurrent reads.
+- Protected macOS 27 menu bar agent processes from hide, move, reset, and recovery actions.
 - Closed the temporary SwiftUI bootstrap workspace after opening prismCalc from a cold, menu-bar-only launch.
 - Removed unlabeled app-owned accessibility containers, redundant ownership announcements, and a plugin health role override.
 - Explained the auto-hide and full-screen recovery when macOS exposes no safe menu bar input surface.
