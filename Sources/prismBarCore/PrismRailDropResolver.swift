@@ -36,6 +36,16 @@ public struct PrismRailLayout: Equatable, Sendable {
         hiddenItems = Self.items(in: .hidden, snapshot: snapshot, surfaceID: surfaceID)
     }
 
+    public init(snapshot: MenuBarSnapshot, currentSurfaceID: MenuBarSurfaceID?) {
+        self.init(
+            snapshot: snapshot,
+            surfaceID: PrismRailSurfaceResolver().resolve(
+                in: snapshot,
+                current: currentSurfaceID
+            )
+        )
+    }
+
     public var itemCount: Int {
         visibleItems.count + hiddenItems.count
     }

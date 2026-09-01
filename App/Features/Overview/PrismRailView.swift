@@ -62,7 +62,7 @@ struct PrismRailView: View {
 
 private extension PrismRailView {
     var layout: PrismRailLayout {
-        PrismRailLayout(snapshot: snapshot, surfaceID: selectedSurfaceID)
+        PrismRailLayout(snapshot: snapshot, currentSurfaceID: selectedSurfaceID)
     }
 
     var header: some View {

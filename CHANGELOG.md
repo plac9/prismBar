@@ -55,6 +55,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 
 ### Fixed
 
+- Made Rail resolve a stale display selection before its first render so an existing topology cannot temporarily appear as an empty menu bar until Refresh.
 - Removed obsolete release-workflow requirements for a bundled prismCalc XPC service while retaining independent dormant-plugin security verification.
 - Canonicalized the generated root Xcode package reference so reproducibility checks also hold in the primary `prismBar` checkout.
 - Made Xcode project reproducibility checks independent of whether XcodeGen quotes the checkout directory name.
