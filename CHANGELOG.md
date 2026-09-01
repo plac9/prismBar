@@ -53,6 +53,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 
 ### Fixed
 
+- Restored process-local Undo after verified moves during stable partial scans while still rejecting changed source coverage, item identity, ownership, role, surface, availability, or order.
 - Classified macOS-owned menu bar extras such as Clock, Control Center, and Siri as fixed anchors even when Accessibility reports them as movable.
 - Removed drag, keyboard, batch, reset, and recovery move paths for fixed macOS-owned anchors while preserving application-item movement.
 - Clarified partial menu bar scans so nonresponsive sources are reported without presenting incomplete inventory as complete.

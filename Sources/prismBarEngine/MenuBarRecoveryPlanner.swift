@@ -91,7 +91,7 @@ public struct MenuBarRecoveryPlanner: Sendable {
         current: MenuBarSnapshot,
         target: MenuBarSnapshot
     ) throws {
-        guard current.isComplete, target.isComplete else {
+        guard current.unavailableSourceCount == target.unavailableSourceCount else {
             throw MenuBarRecoveryPlanningError.incompleteSnapshot
         }
         let currentByID = Dictionary(uniqueKeysWithValues: current.items.map { ($0.id, $0) })

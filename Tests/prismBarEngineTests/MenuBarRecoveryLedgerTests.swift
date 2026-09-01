@@ -110,6 +110,11 @@ struct MenuBarRecoveryLedgerTests {
         #expect(ledger.latestCompatible(with: snapshot(generation: 3, reversed: true)) != nil)
         #expect(ledger.latestCompatible(with: snapshot(generation: 3, missingItem: true)) == nil)
         #expect(ledger.latestCompatible(with: snapshot(generation: 3, alternateSurface: true)) == nil)
+        #expect(ledger.latestCompatible(with: snapshot(
+            generation: 3,
+            reversed: true,
+            systemOwnedVisibleItem: true
+        )) == nil)
     }
 
     @Test("begins recovery only from the exact verified after topology")
@@ -213,7 +218,9 @@ struct MenuBarRecoveryLedgerTests {
             after: snapshot(generation: 4)
         ) == nil)
     }
+}
 
+private extension MenuBarRecoveryLedgerTests {
     private func completedLedger() -> MenuBarRecoveryLedger {
         var ledger = MenuBarRecoveryLedger()
         let pending = ledger.begin(kind: .directMove, before: snapshot(generation: 1))
@@ -229,7 +236,9 @@ struct MenuBarRecoveryLedgerTests {
         generation: UInt64,
         reversed: Bool = false,
         missingItem: Bool = false,
-        alternateSurface: Bool = false
+        alternateSurface: Bool = false,
+        systemOwnedVisibleItem: Bool = false,
+        unavailableSourceCount: Int = 0
     ) -> MenuBarSnapshot {
         let surface = MenuBarSurfaceID(
             rawValue: alternateSurface ? "fixture.display.alternate" : "fixture.display.primary"
@@ -242,7 +251,12 @@ struct MenuBarRecoveryLedgerTests {
                 surface: surface,
                 role: .hiddenSectionDivider
             ),
-            item("fixture.visible", position: 2, surface: surface),
+            item(
+                "fixture.visible",
+                position: 2,
+                surface: surface,
+                ownership: systemOwnedVisibleItem ? .system : .application
+            ),
         ]
         if missingItem {
             items.removeLast()
@@ -261,25 +275,62 @@ struct MenuBarRecoveryLedgerTests {
                 )
             }
         }
-        return MenuBarSnapshot(generation: generation, items: items)
+        return MenuBarSnapshot(
+            generation: generation,
+            items: items,
+            unavailableSourceCount: unavailableSourceCount
+        )
     }
 
     private func item(
         _ identifier: String,
         position: Int,
         surface: MenuBarSurfaceID,
-        role: MenuBarItemRole = .item
+        role: MenuBarItemRole = .item,
+        ownership: MenuBarItemOwnership = .application
     ) -> MenuBarItem {
         MenuBarItem(
             id: MenuBarItemID(rawValue: identifier),
             position: position,
             isMovable: role == .item,
             displayName: "Synthetic item",
-            ownership: .application,
+            ownership: ownership,
             availability: .controllable,
             role: role,
             frame: MenuBarItemFrame(minX: Double(position * 24), minY: 0, width: 20, height: 20),
             surfaceID: surface
         )
+    }
+}
+
+extension MenuBarRecoveryLedgerTests {
+    @Test("retains recovery when partial coverage stays identical")
+    func retainsStablePartialCoverage() {
+        var ledger = MenuBarRecoveryLedger()
+        let before = snapshot(generation: 1, unavailableSourceCount: 3)
+        let after = snapshot(
+            generation: 2,
+            reversed: true,
+            unavailableSourceCount: 3
+        )
+        let pending = ledger.begin(kind: .directMove, before: before)
+
+        let receipt = ledger.complete(
+            id: pending.id,
+            result: .success("Verified"),
+            after: after
+        )
+
+        #expect(receipt?.canRecover == true)
+        #expect(ledger.latestCompatible(with: snapshot(
+            generation: 3,
+            reversed: true,
+            unavailableSourceCount: 3
+        )) != nil)
+        #expect(ledger.latestCompatible(with: snapshot(
+            generation: 4,
+            reversed: true,
+            unavailableSourceCount: 2
+        )) == nil)
     }
 }

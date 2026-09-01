@@ -112,6 +112,25 @@ struct MenuBarRecoveryPlannerTests {
         #expect(plan.destinationIndex == 0)
     }
 
+    @Test("restores stable observed order during a partial scan")
+    func restoresStablePartialCoverage() throws {
+        let target = snapshot(
+            order: ["one", "two", "divider", "control"],
+            unavailableSourceCount: 3
+        )
+        let current = snapshot(
+            generation: 2,
+            order: ["two", "one", "divider", "control"],
+            unavailableSourceCount: 3
+        )
+
+        let candidate = try planner.nextPlan(current: current, restoring: target)
+        let plan = try #require(candidate)
+
+        #expect(plan.item == id("one"))
+        #expect(plan.destinationIndex == 0)
+    }
+
     @Test("fails closed for incompatible or incomplete topology", arguments: [
         RecoveryMutation.missingItem,
         .changedRole,
@@ -194,7 +213,8 @@ struct MenuBarRecoveryPlannerTests {
         generation: UInt64 = 1,
         order: [String],
         surfaces: [String: String] = [:],
-        ownership: [String: MenuBarItemOwnership] = [:]
+        ownership: [String: MenuBarItemOwnership] = [:],
+        unavailableSourceCount: Int = 0
     ) -> MenuBarSnapshot {
         MenuBarSnapshot(
             generation: generation,
@@ -224,7 +244,8 @@ struct MenuBarRecoveryPlannerTests {
                         rawValue: surfaces[name, default: "display.main"]
                     )
                 )
-            }
+            },
+            unavailableSourceCount: unavailableSourceCount
         )
     }
 

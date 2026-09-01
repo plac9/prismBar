@@ -187,8 +187,7 @@ public struct MenuBarRecoveryLedger: Sendable {
         _ first: MenuBarSnapshot,
         _ second: MenuBarSnapshot
     ) -> Bool {
-        guard first.isComplete,
-              second.isComplete,
+        guard first.unavailableSourceCount == second.unavailableSourceCount,
               snapshotsAreCompatible(first, second)
         else {
             return false
@@ -197,6 +196,7 @@ public struct MenuBarRecoveryLedger: Sendable {
         guard first.items.allSatisfy({ firstItem in
             guard let secondItem = secondByID[firstItem.id] else { return false }
             return firstItem.role == secondItem.role &&
+                firstItem.ownership == secondItem.ownership &&
                 firstItem.surfaceID == secondItem.surfaceID &&
                 firstItem.isMovable == secondItem.isMovable &&
                 (secondItem.role != .item ||

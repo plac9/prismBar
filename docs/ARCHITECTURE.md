@@ -102,7 +102,7 @@ The user interface never optimistically mutates the authoritative topology. It m
 
 Every protected action creates a monotonic process-local identifier and a typed receipt. Receipts move through verifying and one terminal phase: applied, partial, blocked, or recovered. They contain only bounded user-facing results and never enter production logs.
 
-The trusted host owns a bounded recovery ledger with at most ten entries. An entry contains an in-memory before snapshot and its verified after snapshot. Recovery is available only when the current item and display-surface sets are compatible. The ledger is never encoded, persisted, exported, or sent across XPC, and it clears on Accessibility trust loss, signing-identity change, or process termination.
+The trusted host owns a bounded recovery ledger with at most ten entries. An entry contains an in-memory before snapshot and its verified after snapshot. Recovery is available only when the current unavailable-source count, observed item identities, ownership, roles, availability, display surfaces, and verified after-order match the retained entry. A stable partial scan may therefore recover the observed layout, but any coverage or topology change fails closed. The ledger is never encoded, persisted, exported, or sent across XPC, and it clears on Accessibility trust loss, signing-identity change, or process termination.
 
 Persistent Scenes are not an extension of this ledger. They require a separate privacy design because stable cross-launch menu identities may reveal application inventory.
 

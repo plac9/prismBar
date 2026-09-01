@@ -86,7 +86,7 @@ prismBar must provide useful menu bar control without becoming a route for infor
 - The recovery ledger exists only in host-process memory and holds at most ten verified entries.
 - Receipts and snapshots do not conform to a persistence contract and are never written to `UserDefaults`, files, logs, diagnostics, or XPC messages.
 - Accessibility revocation, signing-identity change, and process termination invalidate recovery state.
-- Recovery requires equal item and display-surface sets between the verified after snapshot and current topology.
+- Recovery requires the same unavailable-source count, observed item identities, ownership, roles, availability, display surfaces, and verified after-order. Stable partial scans may recover only their observed layout; any coverage or topology change fails closed.
 - A recovery attempt is a new protected action and must be verified before the interface reports success.
 - Persistent Scenes remain disabled until a separate privacy design addresses stable cross-launch identity.
 
