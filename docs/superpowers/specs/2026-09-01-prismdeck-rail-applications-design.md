@@ -2,7 +2,7 @@
 
 ## Status
 
-Direction A was approved by Patrick LaClair on 2026-09-01 after reviewing three visual directions. This written specification is pending final owner review before implementation planning. It adopts Rail plus an Applications drawer, with Prism Cards subordinate to the menu-bar workflow.
+Approved by Patrick LaClair on 2026-09-01 after reviewing three visual directions and the complete written specification. This specification adopts Direction A: Rail plus an Applications drawer, with Prism Cards subordinate to the menu-bar workflow.
 
 ## Product decision
 
