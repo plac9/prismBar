@@ -65,13 +65,12 @@ done < <(find "$candidate_directory" -maxdepth 1 -type f \
 archive_path="${archive_matches[0]}"
 evidence_path="${evidence_matches[0]}"
 application_path="$archive_path/Products/Applications/prismBar.app"
-plugin_path="$application_path/Contents/XPCServices/prismCalcPluginService.xpc"
 
 [ "$(jq -r '.sourceRevision' "$evidence_path")" = "$source_revision" ] || \
   fail 'candidate evidence does not match the current source revision'
 [ "$(jq -r '.sourceState' "$evidence_path")" = 'clean local commit' ] || \
   fail 'candidate evidence does not describe a clean source state'
-[ -d "$application_path" ] && [ -d "$plugin_path" ] || fail 'candidate application is incomplete'
+[ -d "$application_path" ] || fail 'candidate application is incomplete'
 bundle_source_revision="$(/usr/libexec/PlistBuddy -c 'Print :PrismSourceRevision' \
   "$application_path/Contents/Info.plist")"
 [ "$bundle_source_revision" = "$source_revision" ] || \
@@ -79,7 +78,6 @@ bundle_source_revision="$(/usr/libexec/PlistBuddy -c 'Print :PrismSourceRevision
 
 codesign --verify --deep --strict --verbose=4 "$application_path"
 ./scripts/audit-release-bundle.sh "$application_path"
-./scripts/audit-live-signing-boundaries.sh "$application_path"
 
 version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$application_path/Contents/Info.plist")"
 build_number="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$application_path/Contents/Info.plist")"
@@ -132,7 +130,6 @@ xcrun stapler validate "$application_path"
 codesign --verify --deep --strict --verbose=4 "$application_path"
 spctl --assess --type execute --verbose=4 "$application_path"
 ./scripts/audit-release-bundle.sh "$application_path"
-./scripts/audit-live-signing-boundaries.sh "$application_path"
 
 disk_image_root="$staging_root/disk-image"
 mkdir -p "$disk_image_root"
@@ -169,7 +166,6 @@ codesign --verify --strict --verbose=4 "$disk_image_path"
 spctl --assess --type open --context context:primary-signature --verbose=4 "$disk_image_path"
 
 host_hash="$(shasum -a 256 "$application_path/Contents/MacOS/prismBar" | awk '{print $1}')"
-plugin_hash="$(shasum -a 256 "$plugin_path/Contents/MacOS/prismCalcPluginService" | awk '{print $1}')"
 disk_image_hash="$(shasum -a 256 "$disk_image_path" | awk '{print $1}')"
 application_submission_id="$(jq -r '.id' "$application_result_path")"
 disk_image_submission_id="$(jq -r '.id' "$disk_image_result_path")"
@@ -177,14 +173,12 @@ disk_image_submission_id="$(jq -r '.id' "$disk_image_result_path")"
 jq \
   --arg generatedAt "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
   --arg hostSHA256 "$host_hash" \
-  --arg pluginSHA256 "$plugin_hash" \
   --arg applicationSubmissionID "$application_submission_id" \
   --arg diskImageSubmissionID "$disk_image_submission_id" \
   --arg diskImageSHA256 "$disk_image_hash" \
   '.generatedAt = $generatedAt
    | .notarized = true
    | .host.executableSHA256 = $hostSHA256
-   | .plugin.executableSHA256 = $pluginSHA256
    | .notarization = {
        applicationSubmissionID: $applicationSubmissionID,
        diskImageSubmissionID: $diskImageSubmissionID,

@@ -91,6 +91,12 @@ rg -Fq -- 'Nine exact-revision shipping surfaces reviewed' \
   exit 1
 }
 
+if rg -n '"plugin"|Reciprocal plugin trust|plugin readiness' \
+  scripts/generate-assurance-report.sh docs/assurance-report.template.html; then
+  printf 'Assurance contract failed: core-only release evidence still requires the dormant plugin.\n' >&2
+  exit 1
+fi
+
 for required in \
   'git status --porcelain=v1' \
   'PRISM_SOURCE_REVISION="$revision"' \

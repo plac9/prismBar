@@ -31,13 +31,19 @@ for required in \
   'codesign --force' \
   '--sign "$release_signing_identity"' \
   'spctl --assess' \
-  'audit-release-bundle.sh' \
-  'audit-live-signing-boundaries.sh'; do
+  'audit-release-bundle.sh'; do
   rg -Fq -- "$required" scripts/notarize-release-candidate.sh || {
     printf 'Notarization contract failed: missing %s.\n' "$required" >&2
     exit 1
   }
 done
+
+
+if rg -n 'prismCalcPluginService|pluginSHA256|audit-live-signing-boundaries' \
+  scripts/notarize-release-candidate.sh; then
+  printf 'Notarization contract failed: the core-only release workflow still requires the dormant plugin.\n' >&2
+  exit 1
+fi
 
 if rg -n 'hdiutil create' scripts/notarize-release-candidate.sh; then
   printf 'Notarization contract failed: deprecated hdiutil creation remains.\n' >&2

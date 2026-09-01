@@ -29,6 +29,12 @@ if rg -Fq "CODE_SIGN_IDENTITY='Developer ID Application:" scripts/archive-releas
   exit 1
 fi
 
+if rg -n 'prismCalcPluginService|pluginIdentifier|pluginSHA256|audit-live-signing-boundaries' \
+  scripts/archive-release-candidate.sh; then
+  printf 'Archive contract failed: the core-only release workflow still requires the dormant plugin.\n' >&2
+  exit 1
+fi
+
 if rejection="$('./scripts/archive-release-candidate.sh' \
   --signing-keychain '/tmp/login.keychain-db' \
   --signing-identity '0000000000000000000000000000000000000000' 2>&1)"; then

@@ -2,7 +2,7 @@
 
 ## System shape
 
-prismBar is a native macOS menu-bar manager with one trusted host process and separately sandboxed bundled Prism Card processes. The full product uses signed, notarized direct distribution because its cross-process Accessibility behavior is incompatible with App Sandbox.
+prismBar is a native macOS menu-bar manager with one trusted host process. The first release is deliberately core-only: Prism Card code remains in the source tree but is not linked, embedded, launched, or exposed by the shipping application. The product uses signed, notarized direct distribution because its Accessibility behavior is incompatible with App Sandbox.
 
 ```text
 User
@@ -12,28 +12,21 @@ prismBar host process
   |  SwiftUI and AppKit UI
   |  permission coordinator
   |  menu bar topology and action engine
-  |  plugin registry and declarative renderer
   |
   +---- public Accessibility APIs ----> macOS menu bar processes
-  |
-  +---- signed NSXPCConnection -------> prismCalc plugin service
-                                         calculator state only
-                                         no Accessibility
-                                         no network
-                                         no arbitrary files
 ```
 
 ## Trust zones
 
 ### Host
 
-The host is the only component allowed to use Accessibility APIs. It owns the menu bar status item, windows, user preferences, topology model, action verification, and plugin rendering.
+The host is the only shipping process and the only component allowed to use Accessibility APIs. It owns the menu bar status item, windows, user preferences, topology model, and action verification.
 
 The host never passes AX objects, raw process inventory, PIDs, menu titles, application paths, file handles, environment data, or Accessibility-derived values to a plugin.
 
-### Bundled plugins
+### Dormant Prism Card design
 
-Plugins run as embedded XPC services. Version 1 accepts only build-time bundled first-party plugins. Each service:
+No plugin service ships in the core release. If Prism Cards resume after core physical acceptance, the preserved design requires each first-party service to:
 
 - has a fixed bundle identifier and manifest
 - is signed by the same development team
@@ -55,9 +48,9 @@ macOS owns permission state, menu bar processes, application lifecycle, code sig
 | `prismBarCore` | Immutable domain models, topology planning, action outcomes, preferences contracts | AppKit, Accessibility, XPC |
 | `prismBarAccessibility` | Public AX wrappers, permission state, element discovery, action execution | UI, plugins, persistence |
 | `prismBarEngine` | Reconciliation, move planning, verification, retries, recovery | SwiftUI views, plugin implementation |
-| `prismPluginKit` | Manifest, capabilities, commands, declarative panel schema, XPC protocol values | Accessibility, application internals |
-| `prismBarApp` | Lifecycle, public AppKit status items, windows, settings, navigation, host renderer | plugin implementation details |
-| `prismCalcPluginService` | Basic calculator reducer, bounded history, plugin protocol adapter | Accessibility, host engine, network, proprietary prismCalc app modules |
+| `prismBarApp` | Lifecycle, public AppKit status items, windows, settings, and navigation | plugin implementation details |
+| `prismPluginKit` | Preserved, non-shipping manifest, command, panel, and XPC value types | Accessibility, application internals |
+| `prismCalcPluginService` | Preserved, non-shipping calculator and protocol adapter | Accessibility, host engine, network, proprietary prismCalc app modules |
 
 ## Concurrency
 
@@ -106,9 +99,9 @@ The trusted host owns a bounded recovery ledger with at most ten entries. An ent
 
 Persistent Scenes are not an extension of this ledger. They require a separate privacy design because stable cross-launch menu identities may reveal application inventory.
 
-## Prism Card protocol
+## Dormant Prism Card protocol
 
-Prism Cards use the existing `prismPluginKit` versioned Codable wire contract with these top-level messages:
+The preserved, non-shipping Prism Card implementation uses a versioned Codable wire contract with these top-level messages:
 
 - `PluginHandshake`
 - `PluginManifest`
@@ -122,7 +115,7 @@ Prism Cards use the existing `prismPluginKit` versioned Codable wire contract wi
 
 Panel descriptors support a bounded set of host-rendered elements: text, result display, button, keypad grid, text field, divider, status, and action group. Descriptors contain data, semantic roles, accessibility labels, and stable identifiers. They cannot contain SwiftUI views, closures, selectors, class names, scripts, attributed HTML, file URLs, or executable payloads.
 
-The host and service enforce reciprocal exact code-signing requirements on every `NSXPCConnection`. The host validates the sealed embedded XPC bundle, exact bundle identifier, Team ID, protocol version, and declared capability set. Protocol version and capabilities are checked during handshake before any panel data is requested. Wire messages, descriptors, request concurrency, response size, timeout, and reconnect behavior are bounded.
+If Card integration resumes, the host and service must enforce reciprocal exact code-signing requirements on every `NSXPCConnection`. The preserved implementation validates the sealed embedded XPC bundle, exact bundle identifier, Team ID, protocol version, and declared capability set. It is excluded from the current application target and release artifact.
 
 The host owns a bounded build-time registry of bundled Card registrations. Each registration fixes the service identifier, display name, version, capability set, allowed application identifiers, default enabled state, and preference key before the app is signed. Duplicate or malformed registrations fail closed. A user can disable a Card at any time, which invalidates its XPC connection and removes its panel without affecting menu bar control. Version 1 does not scan directories or accept downloaded bundles. Card integration remains frozen until the installed core menu-bar product passes physical macOS 27 acceptance.
 
@@ -130,8 +123,8 @@ The host owns a bounded build-time registry of bundled Card registrations. Each 
 
 - Accessibility unavailable: keep Settings and privacy explanations functional; disable protected actions.
 - Topology changed: discard the stale plan, refresh, and offer the action again.
-- Plugin timeout: invalidate the connection, preserve the host, show plugin unavailable, and allow one manual retry.
-- Plugin crash loop: disable the plugin for the session and show a recoverable status.
+- Dormant Card timeout behavior: invalidate the connection, preserve the host, show the Card unavailable, and allow one manual retry if Card integration resumes.
+- Dormant Card crash-loop behavior: disable the Card for the session if Card integration resumes.
 - Corrupt preferences: quarantine the invalid payload locally and restore documented defaults without deleting unrelated files.
 - Unknown error: show a stable error code and local recovery action; keep sensitive diagnostics out of the normal UI.
 

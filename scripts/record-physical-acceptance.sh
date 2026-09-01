@@ -128,7 +128,6 @@ gates=(
   menuMovement
   multipleDisplays
   permissionRelaunch
-  plugin
   reboot
   reducedMotion
   reducedTransparency
@@ -205,7 +204,6 @@ initialize_evidence() {
         menuMovement: false,
         multipleDisplays: false,
         permissionRelaunch: false,
-        plugin: false,
         reboot: false,
         reducedMotion: false,
         reducedTransparency: false,
@@ -241,7 +239,7 @@ validate_existing_evidence() {
       (.gates | keys | sort) == ([
         "accessibilityGrant", "cleanAccountGatekeeper", "dark", "fullScreen",
         "increasedContrast", "largerText", "light", "logout", "menuMovement",
-        "multipleDisplays", "permissionRelaunch", "plugin", "reboot",
+        "multipleDisplays", "permissionRelaunch", "reboot",
         "reducedMotion", "reducedTransparency", "signedUpgrade", "sleepWake",
         "spaces", "statusItem", "voiceOver"
       ] | sort) and

@@ -44,7 +44,6 @@ short_revision="$(git rev-parse --short=12 HEAD)"
 candidate_directory="build/ReleaseCandidate"
 archive_path="$candidate_directory/prismBar-0.1.0-$short_revision.xcarchive"
 application_path="$archive_path/Products/Applications/prismBar.app"
-plugin_path="$application_path/Contents/XPCServices/prismCalcPluginService.xpc"
 evidence_path="$candidate_directory/prismBar-0.1.0-$short_revision-evidence.json"
 
 mkdir -p "$candidate_directory"
@@ -67,23 +66,17 @@ xcodebuild archive \
 
 codesign --verify --deep --strict --verbose=4 "$application_path"
 ./scripts/audit-release-bundle.sh "$application_path"
-./scripts/audit-live-signing-boundaries.sh "$application_path"
 
 host_identifier="$(codesign -d --verbose=4 "$application_path" 2>&1 | awk -F= '$1 == "Identifier" {print $2}')"
 host_team="$(codesign -d --verbose=4 "$application_path" 2>&1 | awk -F= '$1 == "TeamIdentifier" {print $2}')"
-plugin_identifier="$(codesign -d --verbose=4 "$plugin_path" 2>&1 | awk -F= '$1 == "Identifier" {print $2}')"
-plugin_team="$(codesign -d --verbose=4 "$plugin_path" 2>&1 | awk -F= '$1 == "TeamIdentifier" {print $2}')"
 bundle_source_revision="$(/usr/libexec/PlistBuddy -c 'Print :PrismSourceRevision' \
   "$application_path/Contents/Info.plist")"
 
 [ "$host_identifier" = 'com.laclairtech.prismbar' ] || fail 'host identifier differs from the release contract'
-[ "$plugin_identifier" = 'com.laclairtech.prismbar.plugin.prismcalc' ] || fail 'plugin identifier differs from the release contract'
 [ "$host_team" = 'N8A5T2PZY9' ] || fail 'host team differs from the release contract'
-[ "$plugin_team" = 'N8A5T2PZY9' ] || fail 'plugin team differs from the release contract'
 [ "$bundle_source_revision" = "$source_revision" ] || fail 'bundle source revision differs from Git'
 
 host_hash="$(shasum -a 256 "$application_path/Contents/MacOS/prismBar" | awk '{print $1}')"
-plugin_hash="$(shasum -a 256 "$plugin_path/Contents/MacOS/prismCalcPluginService" | awk '{print $1}')"
 privacy_hash="$(shasum -a 256 "$application_path/Contents/Resources/PrivacyInfo.xcprivacy" | awk '{print $1}')"
 
 jq -n \
@@ -93,9 +86,6 @@ jq -n \
   --arg hostIdentifier "$host_identifier" \
   --arg hostTeam "$host_team" \
   --arg hostSHA256 "$host_hash" \
-  --arg pluginIdentifier "$plugin_identifier" \
-  --arg pluginTeam "$plugin_team" \
-  --arg pluginSHA256 "$plugin_hash" \
   --arg privacyManifestSHA256 "$privacy_hash" \
   '{
     schemaVersion: 1,
@@ -114,12 +104,7 @@ jq -n \
       executableSHA256: $hostSHA256,
       entitlements: []
     },
-    plugin: {
-      identifier: $pluginIdentifier,
-      teamIdentifier: $pluginTeam,
-      executableSHA256: $pluginSHA256,
-      entitlements: ["com.apple.security.app-sandbox"]
-    },
+    plugins: [],
     privacyManifestSHA256: $privacyManifestSHA256
   }' > "$evidence_path"
 

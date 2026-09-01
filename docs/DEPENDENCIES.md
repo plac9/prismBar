@@ -5,13 +5,13 @@
 | Component | Origin | License | Distribution status |
 |---|---|---|---|
 | prismBar host and modules | Independently authored in this repository | MPL-2.0 | Shipped as covered source and executable code |
-| Bundled prismCalc plugin and XPC service | Independently authored in this repository | MPL-2.0 | Shipped as covered source and executable code |
+| Dormant prismPluginKit and prismCalc Card sources | Independently authored in this repository | MPL-2.0 | Covered source only; not linked, embedded, launched, or distributed in the core executable |
 | Apple system frameworks and Swift runtime | Apple platform | Apple SDK and platform terms | Dynamically linked or supplied by macOS, not redistributed by prismBar |
 | Prism artwork and application icon | Original project artwork | Included as part of the MPL-covered source distribution | Shipped in the application asset catalog |
 
-SwiftPM resolves no external package dependencies. The Release bundle contains two executables, no embedded third-party frameworks, and only links libraries supplied by macOS.
+SwiftPM resolves no external package dependencies. The Release bundle contains one executable, no XPC services, no embedded third-party frameworks, and only links libraries supplied by macOS.
 
-The bundled service integrity boundary relies on the sealed application bundle, reciprocal exact code-signing requirements, fixed bundle identifiers and Team ID, protocol version, and a bounded declared capability set. No separately fetched digest catalog or runtime plugin download is used.
+The core release has no active plugin boundary. Preserved Card code remains subject to reciprocal signing, fixed-identity, protocol-version, capability, privacy, and entitlement review before it may be reintroduced. No separately fetched catalog or runtime plugin download is used.
 
 ## Build and verification tools
 

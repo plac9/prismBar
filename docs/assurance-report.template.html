@@ -49,7 +49,7 @@
   <h2>Shipping surface audit</h2>
   <div class="grid">
     <section class="card"><h3>Overview</h3><p class="muted"><code>OverviewView.swift</code></p>
-      <p>Live permission, menu topology, plugin readiness, stable-install recovery, and explicit recheck actions.</p></section>
+      <p>Live permission, menu topology, stable-install recovery, and explicit recheck actions.</p></section>
     <section class="card"><h3>Menu Bar</h3><p class="muted"><code>MenuBarView.swift</code></p>
       <p>Direct arbitrary-position moves, order-preserving batch actions, recovery, visible progress, and verified results.</p></section>
     <section class="card"><h3>Plugins</h3><p class="muted"><code>PluginPanelView.swift</code></p>
@@ -76,7 +76,7 @@
   <div class="grid">
     <section class="card"><h3 class="pass">No network surface</h3><p>No listener, telemetry, updater, remote API, downloaded plugin, or cloud storage.</p></section>
     <section class="card"><h3 class="pass">Bounded Accessibility</h3><p>Live trust, 250 ms source timeout, bounded traversal and strings, and 2,048 observations total.</p></section>
-    <section class="card"><h3 class="pass">Reciprocal plugin trust</h3><p>Exact host and XPC identifier plus team requirements, sandbox-only service, bounded wire schema.</p></section>
+    <section class="card"><h3 class="pass">Core-only process boundary</h3><p>One allowlisted executable, no embedded XPC service, no plugin runtime, and an empty host entitlement allowlist.</p></section>
     <section class="card"><h3 class="pass">Safe local mutations</h3><p>Bounded pasteboard text and an explicit launch of only a same-team, allowlisted prismCalc app.</p></section>
   </div>
 

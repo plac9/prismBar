@@ -9,9 +9,9 @@ prismBar must provide useful menu bar control without becoming a route for infor
 - the user's menu bar contents and application inventory
 - Accessibility consent and the authority it grants
 - keyboard and pointer event integrity
-- local preferences and calculator history
+- local core preferences
 - application signing and release credentials
-- plugin protocol integrity
+- dormant plugin protocol integrity before any future reintroduction
 - process-local action and recovery state
 - build, CI, and release provenance
 
@@ -20,8 +20,8 @@ prismBar must provide useful menu bar control without becoming a route for infor
 | Boundary | Trusted side | Untrusted or less-trusted side | Control |
 |---|---|---|---|
 | Accessibility | signed prismBar host | every other local process | host-only AX access, no delegation |
-| XPC | host protocol validator | plugin service input and availability | code-signing requirement, schema limits, timeouts |
-| Plugin renderer | host-owned native views | plugin-provided descriptors | closed element vocabulary, size limits, semantic validation |
+| Dormant XPC design | future host protocol validator | future plugin service input and availability | excluded from the shipping target; reciprocal signing and protocol limits required before reintroduction |
+| Dormant plugin renderer | future host-owned native views | future plugin-provided descriptors | excluded from the shipping target; closed element vocabulary and validation preserved in source |
 | Preferences | typed domain layer | corrupted or stale stored data | versioned decoding, validation, safe defaults |
 | Recovery ledger | trusted host memory | stale topology and information disclosure | verified snapshots, compatibility checks, ten-entry bound, trust-loss clearing, no persistence or XPC |
 | Release | signed source revision | build machine and artifacts | clean build, SBOM, signature, notarization, stapling, hash publication |
@@ -40,6 +40,8 @@ prismBar must provide useful menu bar control without becoming a route for infor
 - Menu bar commands originate from host-owned UI and are validated against a fresh host-owned topology.
 - Plugin identifiers cannot be used as menu item identifiers.
 
+The shipping core contains no plugin process or plugin invocation surface, so this boundary is not active in the release artifact.
+
 ### Malicious or substituted plugin
 
 **Threat:** A modified XPC service connects to the host or an unrelated process connects to the service.
@@ -52,6 +54,8 @@ prismBar must provide useful menu bar control without becoming a route for infor
 - Wire messages, descriptors, request concurrency, response size, timeout, and reconnect behavior are bounded.
 - Hardened Runtime and library validation remain enabled.
 - No third-party install directory is scanned.
+
+These controls describe preserved future-facing code. The core release prevents this threat more directly by embedding no XPC service and linking no plugin framework.
 
 ### Descriptor abuse
 
@@ -129,8 +133,8 @@ prismBar must provide useful menu bar control without becoming a route for infor
 - Release builds come from a clean signed commit and generate an SBOM and checksums.
 - Release automation requires an explicit dedicated keychain containing exactly one valid code-signing identity and the approved certificate fingerprint. Login and system keychains are rejected so signing cannot fall back to interactive personal credentials or unrelated identities.
 - Routine UI tests and visual captures force local ad-hoc signing, so development automation cannot search the login Keychain or request its password.
-- DEBUG UI testing omits reciprocal XPC signing checks on both peers so crash, hang, timeout, and recovery can run with ad-hoc signatures. Release compilation always restores the exact host, service, Apple anchor, and team requirements.
-- The privacy-safe ready-state plugin fixture is compiled only into Debug builds; release builds retain the reciprocal signed-host and signed-service requirement with no fixture path.
+- Dormant plugin tests use DEBUG-only ad-hoc trust seams for isolated protocol testing. Neither those seams nor the plugin service are present in the shipping application target.
+- The release bundle audit rejects any embedded XPC service or linked plugin runtime in the core release.
 - Binary contents, entitlements, linked libraries, and network strings are audited before notarization.
 - CI builds the unsigned Release application and rejects unexpected executables, non-system libraries, local paths, credential-shaped strings, bundle-identifier drift, or entitlement drift.
 
@@ -146,10 +150,7 @@ prismBar must provide useful menu bar control without becoming a route for infor
 
 ### Plugin services
 
-- App Sandbox enabled.
-- No network client or server entitlement.
-- No user-selected files, downloads, pictures, music, movies, contacts, calendars, location, microphone, camera, Bluetooth, USB, app groups, or iCloud.
-- No temporary exceptions.
+No plugin service is included in the core release. Any future service must use App Sandbox and must not receive network, file, media, personal-data, device, app-group, iCloud, or temporary-exception entitlements without a new threat-model and privacy review.
 
 Every entitlement addition requires an ADR, privacy update, threat-model update, and physical verification.
 
@@ -164,7 +165,7 @@ Every entitlement addition requires an ADR, privacy update, threat-model update,
 - event cleanup releases modifier and pointer states on every error path
 - logs contain no menu titles, process names, paths, expressions, environment values, or secret canaries
 - release bundle contains only expected executables and libraries
-- host and plugins have the exact entitlement allowlists
+- the core release contains exactly one executable, an empty host entitlement allowlist, and no XPC service
 - deterministic hostile wire and calculator corpora remain bounded under Address Sanitizer and Thread Sanitizer
 - `codesign --verify --deep --strict`, `spctl`, notarization, and stapler validation pass
 - notarization accepts only a named Keychain credential profile; raw Apple IDs, passwords, API keys, key identifiers, and issuer values are not accepted by repository automation

@@ -106,7 +106,7 @@ if [ -f "$physical_evidence" ]; then
       (.gates | keys | sort) == ([
         "accessibilityGrant", "cleanAccountGatekeeper", "dark", "fullScreen",
         "increasedContrast", "largerText", "light", "logout", "menuMovement",
-        "multipleDisplays", "permissionRelaunch", "plugin", "reboot",
+        "multipleDisplays", "permissionRelaunch", "reboot",
         "reducedMotion", "reducedTransparency", "signedUpgrade", "sleepWake",
         "spaces", "statusItem", "voiceOver"
       ] | sort) and (.gates | all(. == true))

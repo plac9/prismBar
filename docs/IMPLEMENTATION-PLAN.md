@@ -99,7 +99,7 @@ Repository work is preserved, but this phase is frozen and excluded from the shi
 - [x] Add sandboxed service entitlements with no network or file authority.
 - [x] Implement bounded timeout, failure-budget disable, stale-callback suppression, and manual recovery behavior.
 - [x] Prove hostile descriptor, hang, crash, and version mismatch behavior.
-- [x] Prove the shipping host and plugin requirements reject identically named, ad-hoc signed impostors.
+- [x] Prove the preserved host and plugin requirements reject identically named, ad-hoc signed impostors before freezing Card integration out of the shipping target.
 - [x] Finish the user-facing plugin health state for off, verifying, ready, interrupted, and safety-paused conditions.
 
 ## Phase 7: prismCalc plugin
@@ -144,7 +144,7 @@ Repository work is preserved, but this phase is frozen and excluded from the shi
 - [ ] Confirm the public source revision exactly matches every distributed MPL-covered binary.
 - [x] Exercise plugin decoding and calculator commands with deterministic hostile-input corpora.
 - [x] Run static analysis plus Address Sanitizer and Thread Sanitizer across the Swift modules.
-- [x] Reconcile the current source controls against the threat model and verify reciprocal signing on the preserved Developer ID archive.
+- [x] Reconcile the current source controls against the threat model and verify the preserved dormant reciprocal-signing implementation independently of the core-only release.
 - [x] Repeat long-duration host, permission, movement, and plugin lifecycle stress tests on clean revision `2a3c087fda0faddcd1e7ee33d67900b0d0e5681c`: 2 complete cycles across 1,130 seconds, including 40 UI-test executions with zero failures. Physical signed-app movement stress remains a release gate.
 - [x] Produce and inspect the revision-bound dark HTML assurance report for clean revision `2a3c087fda0faddcd1e7ee33d67900b0d0e5681c`; automated and visual evidence pass while physical, distribution, and publication gates remain on hold.
 

@@ -132,7 +132,7 @@ jq -e '.result == "incomplete" and .gates.light == true and
 
 gates=(
   accessibilityGrant cleanAccountGatekeeper dark fullScreen increasedContrast
-  largerText logout menuMovement multipleDisplays permissionRelaunch plugin reboot
+  largerText logout menuMovement multipleDisplays permissionRelaunch reboot
   reducedMotion reducedTransparency signedUpgrade sleepWake spaces statusItem voiceOver
 )
 for gate in "${gates[@]}"; do
