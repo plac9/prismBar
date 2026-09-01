@@ -89,6 +89,7 @@
 		3A6F51D219AFA0CC326CFE1F /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		3A97AC1465267631E11123FA /* UIAuditWindowConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIAuditWindowConfiguration.swift; sourceTree = "<group>"; };
 		3BA0C421D62741B8383FEFA7 /* PrismBarCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismBarCommands.swift; sourceTree = "<group>"; };
+		3DA42353B48097F47E64CF57 /* prismBar */ = {isa = PBXFileReference; lastKnownFileType = folder; name = prismBar; path = .; sourceTree = SOURCE_ROOT; };
 		42DE507D28E83BE99B7CC5CE /* prismBar.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = prismBar.icon; sourceTree = "<group>"; };
 		469614A59BF1325BAA234EFD /* PrismRailViewSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismRailViewSupport.swift; sourceTree = "<group>"; };
 		4FF06CC224C8F6F6B057A2B3 /* AccessibilityAuditTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityAuditTests.swift; sourceTree = "<group>"; };
@@ -121,7 +122,6 @@
 		CF5C720A82C49A3A2A93918D /* PrismRailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismRailView.swift; sourceTree = "<group>"; };
 		D7ECE0DDE2F817119ECD1316 /* SceneActionRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneActionRouter.swift; sourceTree = "<group>"; };
 		DB6BE812961FA45556F1A760 /* PrivacyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyView.swift; sourceTree = "<group>"; };
-		E4CDBDB75C61C314E456E3DD /* verified-deck-rebuild */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "verified-deck-rebuild"; path = .; sourceTree = SOURCE_ROOT; };
 		ED2184D0F302BEBEA3AD3520 /* prismBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = prismBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE5604D54BCB73D186D8E912 /* prismBarAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = prismBarAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EEF4DD93279456074BB6F7FD /* AppLifecycleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLifecycleTests.swift; sourceTree = "<group>"; };
@@ -222,7 +222,7 @@
 		7C1F12E9DBAA984AB82267BE /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				E4CDBDB75C61C314E456E3DD /* verified-deck-rebuild */,
+				3DA42353B48097F47E64CF57 /* prismBar */,
 			);
 			name = Packages;
 			sourceTree = "<group>";
