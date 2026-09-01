@@ -24,4 +24,14 @@ final class PrismDeckApplicationsCommandTests: XCTestCase {
         XCTAssertEqual(PrismDeckApplicationCommand.last(11).destinationPosition, 11)
         XCTAssertNil(PrismDeckApplicationCommand.toggle(.visible).destinationPosition)
     }
+
+    func testShippingLayoutKeepsMenuBarControlPrimary() {
+        XCTAssertEqual(
+            PrismDeckLayoutPolicy.managementSections,
+            [.topology, .rail, .applications, .actionStatus]
+        )
+        XCTAssertEqual(PrismDeckLayoutPolicy.maximumHeight, 620)
+        XCTAssertFalse(PrismDeckLayoutPolicy.showsPrismCards)
+        XCTAssertFalse(PrismDeckLayoutPolicy.showsReset)
+    }
 }

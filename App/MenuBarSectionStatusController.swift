@@ -20,7 +20,7 @@ final class MenuBarSectionStatusController: NSObject {
         let popover = NSPopover()
         popover.behavior = .transient
         popover.animates = true
-        popover.contentSize = NSSize(width: 440, height: 500)
+        popover.contentSize = NSSize(width: 440, height: PrismDeckLayoutPolicy.maximumHeight)
         popover.delegate = self
         popover.contentViewController = NSHostingController(
             rootView: PrismDeckView(
@@ -28,6 +28,9 @@ final class MenuBarSectionStatusController: NSObject {
                 openWorkspace: { [weak self] in
                     self?.dismissCommandCenter()
                     SceneActionRouter.shared.openWorkspace()
+                },
+                dismissDeck: { [weak self] in
+                    self?.dismissCommandCenter()
                 }
             )
         )

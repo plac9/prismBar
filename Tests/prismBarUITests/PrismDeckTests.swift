@@ -20,6 +20,22 @@ final class PrismDeckTests: XCTestCase {
         XCTAssertTrue(application.buttons["Open prismBar"].exists)
         XCTAssertFalse(application.buttons["Open prismCalc"].exists)
         XCTAssertFalse(application.radioButtons["Tools"].exists)
+        XCTAssertFalse(application.staticTexts["Prism Cards"].exists)
+
+        let rail = application.descendants(matching: .any)["prismRail"]
+        if rail.waitForExistence(timeout: 2) {
+            XCTAssertTrue(
+                application.descendants(matching: .any)["prismDeck.applications"]
+                    .waitForExistence(timeout: 2),
+                application.debugDescription
+            )
+            XCTAssertFalse(application.buttons["Show Every Movable Item"].exists)
+        } else {
+            XCTAssertTrue(
+                application.staticTexts["Accessibility needed"].exists ||
+                    application.staticTexts["Reading menu bar"].exists
+            )
+        }
 
         application.typeKey(.escape, modifierFlags: [])
         XCTAssertTrue(deckTitle.waitForNonExistence(timeout: 3))
@@ -41,7 +57,11 @@ final class PrismDeckTests: XCTestCase {
         XCTAssertTrue(statusItem.waitForExistence(timeout: 5), application.debugDescription)
         statusItem.click()
 
-        let settings = application.buttons["Settings"]
+        let more = application.descendants(matching: .any)["prismDeck.more"]
+        XCTAssertTrue(more.waitForExistence(timeout: 3))
+        more.click()
+
+        let settings = application.menuItems["Settings"]
         XCTAssertTrue(settings.waitForExistence(timeout: 3))
         settings.click()
 
@@ -59,6 +79,8 @@ final class PrismDeckTests: XCTestCase {
         XCTAssertTrue(settingsWindow.waitForNonExistence(timeout: 3))
 
         statusItem.click()
+        XCTAssertTrue(more.waitForExistence(timeout: 3))
+        more.click()
         XCTAssertTrue(settings.waitForExistence(timeout: 3))
         settings.click()
         XCTAssertTrue(settingsWindow.waitForExistence(timeout: 5))

@@ -8,18 +8,23 @@ import prismBarEngine
 import SwiftUI
 
 struct PrismDeckView: View {
+    @Environment(\.openSettings) private var openSettings
     @Bindable private var model: AppModel
     private let openWorkspace: () -> Void
-    @State private var isResetConfirmationPresented = false
+    private let dismissDeck: () -> Void
     @State private var selectedRailSurfaceID: MenuBarSurfaceID = .unknown
     @State private var selectedRailItemID: MenuBarItemID?
+    @State private var applicationSearchText = ""
+    @State private var applicationsExpanded = true
 
     init(
         model: AppModel,
-        openWorkspace: @escaping () -> Void
+        openWorkspace: @escaping () -> Void,
+        dismissDeck: @escaping () -> Void
     ) {
         self.model = model
         self.openWorkspace = openWorkspace
+        self.dismissDeck = dismissDeck
     }
 
     var body: some View {
@@ -30,18 +35,15 @@ struct PrismDeckView: View {
             Divider()
             footer
         }
-        .frame(width: 440, height: 500)
+        .frame(width: 440, height: PrismDeckLayoutPolicy.maximumHeight)
         .environment(model)
-        .confirmationDialog(
-            "Show every movable menu bar item?",
-            isPresented: $isResetConfirmationPresented
-        ) {
-            Button("Show Every Item") {
-                model.resetMenuBar()
+        .onDisappear {
+            clearEphemeralState()
+        }
+        .onChange(of: model.accessibilityState) {
+            if model.accessibilityState != .granted {
+                clearEphemeralState()
             }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("This preserves item order and leaves the tucked-away section open.")
         }
     }
 }
@@ -86,18 +88,7 @@ private extension PrismDeckView {
         if model.accessibilityState != .granted {
             permissionContent
         } else if let snapshot = model.menuBarSnapshot {
-            VStack(alignment: .leading, spacing: 10) {
-                topologyTruth(snapshot)
-                PrismRailView(
-                    snapshot: snapshot,
-                    selectedSurfaceID: $selectedRailSurfaceID,
-                    selectedItemID: $selectedRailItemID
-                )
-                actionStatus
-                immediateActions(snapshot)
-            }
-            .padding(14)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            managementContent(snapshot)
         } else {
             ProgressView("Reading menu bar")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -121,6 +112,39 @@ private extension PrismDeckView {
             .buttonStyle(.glass)
         }
         .padding(18)
+    }
+
+    func managementContent(_ snapshot: MenuBarSnapshot) -> some View {
+        let surfaceID = PrismRailSurfaceResolver().resolve(
+            in: snapshot,
+            current: selectedRailSurfaceID
+        )
+        let applications = PrismDeckApplicationsPresenter().make(
+            snapshot: snapshot,
+            surfaceID: surfaceID,
+            query: applicationSearchText
+        )
+
+        return ScrollView {
+            VStack(alignment: .leading, spacing: 10) {
+                topologyTruth(snapshot)
+                PrismRailView(
+                    snapshot: snapshot,
+                    selectedSurfaceID: $selectedRailSurfaceID,
+                    selectedItemID: $selectedRailItemID
+                )
+                PrismDeckApplicationsView(
+                    presentation: applications,
+                    selectedItemID: $selectedRailItemID,
+                    searchText: $applicationSearchText,
+                    isExpanded: $applicationsExpanded
+                )
+                actionRecovery
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .topLeading)
+        }
+        .scrollIndicators(.automatic)
     }
 
     func topologyTruth(_ snapshot: MenuBarSnapshot) -> some View {
@@ -184,55 +208,59 @@ private extension PrismDeckView {
         }
     }
 
-    func immediateActions(_ snapshot: MenuBarSnapshot) -> some View {
-        HStack(spacing: 8) {
-            Button("Undo", systemImage: "arrow.uturn.backward") {
-                model.recoverLastMenuBarAction()
-            }
-            .disabled(!model.canRecoverLastAction || model.isMenuBarActionInProgress)
-            .accessibilityIdentifier("statusMenu.undoLastChange")
-
-            Button(
-                model.isHiddenSectionCollapsed ? "Reveal" : "Tuck Away",
-                systemImage: model.isHiddenSectionCollapsed ? "eye" : "eye.slash"
-            ) {
-                model.setHiddenSectionCollapsed(!model.isHiddenSectionCollapsed)
-            }
-            .disabled(snapshot.hiddenSectionDivider == nil)
-
+    var actionRecovery: some View {
+        HStack(spacing: 10) {
+            actionStatus
             Spacer()
-
-            Menu("More", systemImage: "ellipsis") {
-                Button("Show Every Movable Item", systemImage: "eye") {
-                    isResetConfirmationPresented = true
+            if model.canRecoverLastAction {
+                Button("Undo", systemImage: "arrow.uturn.backward") {
+                    model.recoverLastMenuBarAction()
                 }
                 .disabled(model.isMenuBarActionInProgress)
+                .buttonStyle(.glass)
+                .accessibilityIdentifier("statusMenu.undoLastChange")
             }
-            .menuStyle(.button)
         }
-        .buttonStyle(.glass)
+        .padding(12)
+        .background(.background.secondary, in: .rect(cornerRadius: 14))
+        .accessibilityIdentifier("prismDeck.actionStatus")
     }
 
     var footer: some View {
         HStack(spacing: 8) {
+            if model.menuBarSnapshot?.hiddenSectionDivider != nil {
+                Button(
+                    model.isHiddenSectionCollapsed ? "Reveal" : "Tuck Away",
+                    systemImage: model.isHiddenSectionCollapsed ? "eye" : "eye.slash"
+                ) {
+                    model.setHiddenSectionCollapsed(!model.isHiddenSectionCollapsed)
+                }
+                .disabled(model.isMenuBarActionInProgress)
+            }
+
             Button("Open prismBar", systemImage: "rectangle.on.rectangle") {
                 openWorkspace()
             }
 
             Spacer()
 
-            SettingsLink {
-                Label("Settings", systemImage: "gearshape")
-                    .labelStyle(.iconOnly)
-            }
-            .help("Open prismBar Settings")
-            .accessibilityLabel("Settings")
+            Menu("More", systemImage: "ellipsis") {
+                Button("Settings", systemImage: "gearshape") {
+                    dismissDeck()
+                    openSettings()
+                }
 
-            Button("Quit prismBar", systemImage: "power") {
-                NSApplication.shared.terminate(nil)
+                Divider()
+
+                Button("Quit prismBar", systemImage: "power") {
+                    NSApplication.shared.terminate(nil)
+                }
+                .keyboardShortcut("q")
             }
             .labelStyle(.iconOnly)
-            .keyboardShortcut("q")
+            .menuStyle(.button)
+            .help("More prismBar actions")
+            .accessibilityIdentifier("prismDeck.more")
         }
         .buttonStyle(.glass)
         .padding(.horizontal, 12)
@@ -258,15 +286,24 @@ private extension PrismDeckView {
     }
 
     var accessibilityTitle: String {
-        model.accessibilityState == .granted ? "Menu bar control ready" : "Accessibility needs attention"
+        guard model.accessibilityState == .granted else {
+            return "Accessibility needs attention"
+        }
+        return model.menuBarSnapshot?.isComplete == false
+            ? "Menu bar ready · partial scan"
+            : "Menu bar ready"
     }
 
     var accessibilitySymbol: String {
-        model.accessibilityState == .granted ? "checkmark.shield.fill" : "exclamationmark.shield.fill"
+        model.accessibilityState == .granted && model.menuBarSnapshot?.isComplete != false
+            ? "checkmark.shield.fill"
+            : "exclamationmark.shield.fill"
     }
 
     var accessibilityColor: Color {
-        model.accessibilityState == .granted ? .green : .orange
+        model.accessibilityState == .granted && model.menuBarSnapshot?.isComplete != false
+            ? .green
+            : .orange
     }
 
     func resultColor(for kind: MenuBarActionResultKind) -> Color {
@@ -275,5 +312,11 @@ private extension PrismDeckView {
         case .warning: .orange
         case .failure: .red
         }
+    }
+
+    func clearEphemeralState() {
+        selectedRailSurfaceID = .unknown
+        selectedRailItemID = nil
+        applicationSearchText = ""
     }
 }

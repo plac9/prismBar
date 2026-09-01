@@ -25,8 +25,9 @@ if [ "$test_selection" = "--source-audit" ]; then
     echo "Exactly one SwiftUI Settings scene is required." >&2
     exit 1
   fi
-  if ! rg -q 'SettingsLink[[:space:]]*\{' App/Features/Overview/PrismDeckView.swift; then
-    echo "Prism Deck must use SettingsLink." >&2
+  if ! rg -q '@Environment\(\\\.openSettings\)' App/Features/Overview/PrismDeckView.swift ||
+      ! rg -q 'openSettings\(\)' App/Features/Overview/PrismDeckView.swift; then
+    echo "prismDeck must route Settings through SwiftUI OpenSettingsAction." >&2
     exit 1
   fi
   if ! rg -q 'WindowGroup\("prismBar", id: PrismSceneID\.workspace\)' App/prismBarApp.swift; then
@@ -37,8 +38,9 @@ if [ "$test_selection" = "--source-audit" ]; then
     echo "The workspace scene must not appear until the user requests it." >&2
     exit 1
   fi
-  if ! rg -q 'UtilityWindow\("prismCalc", id: PrismSceneID\.prismCalc\)' App/prismBarApp.swift; then
-    echo "prismCalc must be owned by a SwiftUI utility scene." >&2
+  if rg -n 'UtilityWindow\("prismCalc"|Open prismCalc|Prism Cards' \
+      App/prismBarApp.swift App/Features/Overview/PrismDeckView.swift; then
+    echo "Core prismDeck must not expose prismCalc or Prism Cards before physical acceptance." >&2
     exit 1
   fi
   if rg -n 'AppWindowController|NSWindow\(|NSHostingController' App/AppLifecycle.swift App/Features; then
