@@ -76,6 +76,21 @@ final class AccessibilityAuditTests: XCTestCase {
 
         let deckTitle = application.staticTexts["prismDeck"]
         XCTAssertTrue(deckTitle.waitForExistence(timeout: 3), application.debugDescription)
+
+        let rail = application.descendants(matching: .any)["prismRail"]
+        if rail.waitForExistence(timeout: 2) {
+            XCTAssertTrue(
+                application.descendants(matching: .any)["prismDeck.applications"]
+                    .waitForExistence(timeout: 2),
+                application.debugDescription
+            )
+        } else {
+            XCTAssertTrue(
+                application.staticTexts["Accessibility needed"].exists ||
+                    application.staticTexts["Reading menu bar"].exists,
+                application.debugDescription
+            )
+        }
         try performAudit(in: application)
     }
 

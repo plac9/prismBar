@@ -18,6 +18,7 @@ enum PrismDeckLayoutPolicy {
         .applications,
         .actionStatus,
     ]
+    static let width: CGFloat = 440
     static let maximumHeight: CGFloat = 620
     static let showsPrismCards = false
     static let showsReset = false

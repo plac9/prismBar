@@ -82,6 +82,10 @@ final class VisualAuditTests: XCTestCase {
         XCTAssertTrue(deckTitle.waitForExistence(timeout: 3))
         let deck = application.popovers.firstMatch
         XCTAssertTrue(deck.waitForExistence(timeout: 3))
+        // XCUI reports the NSPopover's native 13-point chrome around its
+        // 440-by-620 content view, rather than the SwiftUI content frame.
+        XCTAssertEqual(deck.frame.width, 466, accuracy: 4)
+        XCTAssertLessThanOrEqual(deck.frame.height, 646)
         assertShippingSurfaceIsUnobscured()
         attach(deck.screenshot(), named: "08-prismDeck")
 

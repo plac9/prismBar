@@ -30,6 +30,7 @@ final class PrismDeckApplicationsCommandTests: XCTestCase {
             PrismDeckLayoutPolicy.managementSections,
             [.topology, .rail, .applications, .actionStatus]
         )
+        XCTAssertEqual(PrismDeckLayoutPolicy.width, 440)
         XCTAssertEqual(PrismDeckLayoutPolicy.maximumHeight, 620)
         XCTAssertFalse(PrismDeckLayoutPolicy.showsPrismCards)
         XCTAssertFalse(PrismDeckLayoutPolicy.showsReset)

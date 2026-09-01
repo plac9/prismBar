@@ -72,8 +72,8 @@ The shipping application is intentionally limited to menu bar discovery, hide an
 - [x] Confirm signed, hardened, notarized direct distribution as the required channel for the full menu-bar manager.
 - [x] Reject the physically disproven Mac App Store organizer experiment as a shipping alternative.
 - [x] Land the typed receipt and bounded in-memory recovery foundation.
-- [ ] Rebuild Rail around stable drag state, destination previews, typed receipts, recovery, keyboard parity, and multi-display truth.
-- [ ] Rebuild `prismDeck` with topology truth, Rail, current receipt, recovery, Settings, and Quit as the primary compact workflow.
+- [x] Rebuild Rail around stable drag state, destination previews, typed receipts, recovery, keyboard parity, and multi-display truth.
+- [x] Rebuild `prismDeck` with topology truth, Rail, a searchable Applications drawer, current receipt, recovery, Settings, and Quit as the primary compact workflow.
 - [ ] Design persistent Scenes only after a separate privacy review of cross-launch item identity.
 - [ ] Resume Prism Cards only after the installed core passes physical macOS 27 acceptance.
 
