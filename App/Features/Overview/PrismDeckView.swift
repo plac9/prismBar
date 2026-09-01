@@ -35,7 +35,12 @@ struct PrismDeckView: View {
             Divider()
             footer
         }
-        .frame(width: PrismDeckLayoutPolicy.width, height: PrismDeckLayoutPolicy.maximumHeight)
+        .frame(
+            width: PrismDeckLayoutPolicy.width,
+            height: PrismDeckLayoutPolicy.height(
+                accessibilityGranted: model.accessibilityState == .granted
+            )
+        )
         .environment(model)
         .onDisappear {
             clearEphemeralState()

@@ -31,7 +31,16 @@ final class PrismDeckApplicationsCommandTests: XCTestCase {
             [.topology, .rail, .applications, .actionStatus]
         )
         XCTAssertEqual(PrismDeckLayoutPolicy.width, 440)
+        XCTAssertEqual(PrismDeckLayoutPolicy.compactHeight, 360)
         XCTAssertEqual(PrismDeckLayoutPolicy.maximumHeight, 620)
+        XCTAssertEqual(
+            PrismDeckLayoutPolicy.height(accessibilityGranted: false),
+            PrismDeckLayoutPolicy.compactHeight
+        )
+        XCTAssertEqual(
+            PrismDeckLayoutPolicy.height(accessibilityGranted: true),
+            PrismDeckLayoutPolicy.maximumHeight
+        )
         XCTAssertFalse(PrismDeckLayoutPolicy.showsPrismCards)
         XCTAssertFalse(PrismDeckLayoutPolicy.showsReset)
     }
