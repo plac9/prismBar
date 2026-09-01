@@ -39,7 +39,8 @@ The shipping application is intentionally limited to menu bar discovery, hide an
 - [x] Reject undocumented System Settings URL schemes from the product.
 - [x] Implement runtime revocation behavior.
 - [x] Render onboarding and recovery states using native macOS 27 components.
-- [ ] Prove grant, revoke, relaunch, and signed-upgrade behavior in `/Applications`.
+- [x] Prove relaunch and signed-upgrade behavior in `/Applications` with installed Development revision `96be5046ab3b00cb15572d7feb3e8fc4bdce1520` while preserving live Accessibility trust.
+- [ ] Prove fresh grant and runtime revoke behavior in `/Applications` on the final notarized candidate.
 
 ## Phase 3: Menu bar topology engine
 
@@ -152,7 +153,7 @@ Repository work is preserved, but this phase is frozen and excluded from the shi
 - [x] Verify Apple identifier and signing configuration for `com.laclairtech.prismbar`.
 - [x] Require an explicit dedicated release keychain containing only the approved certificate fingerprint so archive and notarization cannot fall back to the interactive login Keychain or another signing identity.
 - [x] Add a fail-closed physical acceptance recorder that revalidates exact installed provenance and requires one explicit physical observation per gate.
-- [x] Prove a direct multi-position application-item move and process-local Undo during a stable partial scan on physical macOS 27 using signed installed Development revision `dec3fd5402c804e9274ab2d9ece29bae53bad6f6`; the original order was restored and the protected macOS-owned anchors remained fixed.
+- [x] Prove a direct multi-position application-item move and process-local Undo during a stable partial scan on physical macOS 27 using signed installed Development revision `96be5046ab3b00cb15572d7feb3e8fc4bdce1520`; RocketSim moved directly from position 1 to the last movable position, Undo restored the exact original order, relaunch preserved that order and Accessibility trust, and the protected macOS-owned anchors remained fixed.
 - [ ] Archive the final clean revision with Xcode 27 using Developer ID and Hardened Runtime.
 - [ ] Verify nested signing order and exact entitlement allowlists on that archive.
 - [ ] Package, notarize, staple, and validate the distribution artifact.

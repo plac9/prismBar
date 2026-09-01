@@ -9,6 +9,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 ### Added
 
 - Rail drag-to-place controls for direct, verified multi-position menu bar moves.
+- A searchable `prismDeck` Applications drawer with current order, role, availability, direct placement, and protected-anchor state.
 - VoiceOver actions for Rail show, hide, first-position, and last-position moves without requiring drag input.
 - Automated macOS accessibility audits for every workspace destination, native Settings, and Prism Deck.
 - Privacy-safe visual audit captures for every shipping workspace surface and the status item.
@@ -53,6 +54,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 
 ### Fixed
 
+- Kept the compact `prismDeck` permission state visible without allowing it to crowd out menu bar controls.
 - Restored process-local Undo after verified moves during stable partial scans while still rejecting changed source coverage, item identity, ownership, role, surface, availability, or order.
 - Classified macOS-owned menu bar extras such as Clock, Control Center, and Siri as fixed anchors even when Accessibility reports them as movable.
 - Removed drag, keyboard, batch, reset, and recovery move paths for fixed macOS-owned anchors while preserving application-item movement.
