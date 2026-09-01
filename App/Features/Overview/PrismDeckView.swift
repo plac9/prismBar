@@ -11,6 +11,8 @@ struct PrismDeckView: View {
     @Bindable private var model: AppModel
     private let openWorkspace: () -> Void
     @State private var isResetConfirmationPresented = false
+    @State private var selectedRailSurfaceID: MenuBarSurfaceID = .unknown
+    @State private var selectedRailItemID: MenuBarItemID?
 
     init(
         model: AppModel,
@@ -86,7 +88,11 @@ private extension PrismDeckView {
         } else if let snapshot = model.menuBarSnapshot {
             VStack(alignment: .leading, spacing: 10) {
                 topologyTruth(snapshot)
-                PrismRailView(snapshot: snapshot)
+                PrismRailView(
+                    snapshot: snapshot,
+                    selectedSurfaceID: $selectedRailSurfaceID,
+                    selectedItemID: $selectedRailItemID
+                )
                 actionStatus
                 immediateActions(snapshot)
             }

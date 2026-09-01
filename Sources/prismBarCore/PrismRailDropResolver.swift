@@ -123,6 +123,28 @@ public struct PrismRailSurfaceResolver: Sendable {
     }
 }
 
+public struct PrismRailSelectionResolver: Sendable {
+    public init() {}
+
+    public func resolve(
+        _ selectedItemID: MenuBarItemID?,
+        in snapshot: MenuBarSnapshot,
+        surfaceID: MenuBarSurfaceID
+    ) -> MenuBarItemID? {
+        guard let selectedItemID,
+              snapshot.items.contains(where: { item in
+                  item.id == selectedItemID &&
+                      item.surfaceID == surfaceID &&
+                      item.role == .item &&
+                      item.ownership == .application
+              })
+        else {
+            return nil
+        }
+        return selectedItemID
+    }
+}
+
 public struct PrismRailDropResolver: Sendable {
     public init() {}
 

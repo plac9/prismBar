@@ -126,6 +126,18 @@ struct PrismRailDropResolverTests {
         )
     }
 
+    @Test("rejects selection that is absent or on another display")
+    func validatesSelectedItemForSurface() {
+        let secondary = MenuBarSurfaceID(rawValue: "secondary")
+        let snapshot = railSnapshot(batterySurface: secondary)
+        let resolver = PrismRailSelectionResolver()
+
+        #expect(resolver.resolve(id("mail"), in: snapshot, surfaceID: .unknown) == id("mail"))
+        #expect(resolver.resolve(id("battery"), in: snapshot, surfaceID: .unknown) == nil)
+        #expect(resolver.resolve(id("missing"), in: snapshot, surfaceID: .unknown) == nil)
+        #expect(resolver.resolve(id("clock"), in: protectedClusterSnapshot(), surfaceID: .unknown) == nil)
+    }
+
     @Test("resolves a direct drop to the target item position")
     func resolvesDirectPosition() {
         let snapshot = railSnapshot()

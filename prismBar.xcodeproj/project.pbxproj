@@ -111,7 +111,7 @@
 		CF5C720A82C49A3A2A93918D /* PrismRailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismRailView.swift; sourceTree = "<group>"; };
 		D7ECE0DDE2F817119ECD1316 /* SceneActionRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneActionRouter.swift; sourceTree = "<group>"; };
 		DB6BE812961FA45556F1A760 /* PrivacyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyView.swift; sourceTree = "<group>"; };
-		E4CDBDB75C61C314E456E3DD /* prismBar */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "prismBar"; path = .; sourceTree = SOURCE_ROOT; };
+		E4CDBDB75C61C314E456E3DD /* verified-deck-rebuild */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "verified-deck-rebuild"; path = .; sourceTree = SOURCE_ROOT; };
 		ED2184D0F302BEBEA3AD3520 /* prismBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = prismBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE5604D54BCB73D186D8E912 /* prismBarAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = prismBarAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EEF4DD93279456074BB6F7FD /* AppLifecycleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLifecycleTests.swift; sourceTree = "<group>"; };
@@ -208,7 +208,7 @@
 		7C1F12E9DBAA984AB82267BE /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				E4CDBDB75C61C314E456E3DD /* prismBar */,
+				E4CDBDB75C61C314E456E3DD /* verified-deck-rebuild */,
 			);
 			name = Packages;
 			sourceTree = "<group>";

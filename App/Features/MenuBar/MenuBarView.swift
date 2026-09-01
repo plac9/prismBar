@@ -12,6 +12,8 @@ struct MenuBarView: View {
     @State private var isResetConfirmationPresented = false
     @State private var isBulkOrganizationExpanded = false
     @State private var selectedItemIDs: Set<MenuBarItemID> = []
+    @State private var selectedRailSurfaceID: MenuBarSurfaceID = .unknown
+    @State private var selectedRailItemID: MenuBarItemID?
 
     var body: some View {
         ScrollView {
@@ -58,7 +60,11 @@ private extension MenuBarView {
             VStack(alignment: .leading, spacing: 14) {
                 topologyTruth(snapshot)
                 actionStatus
-                PrismRailView(snapshot: snapshot)
+                PrismRailView(
+                    snapshot: snapshot,
+                    selectedSurfaceID: $selectedRailSurfaceID,
+                    selectedItemID: $selectedRailItemID
+                )
                 immediateActions(snapshot)
                 bulkOrganization(snapshot)
             }

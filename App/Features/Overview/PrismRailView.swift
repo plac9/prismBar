@@ -10,16 +10,21 @@ struct PrismRailView: View {
     @Environment(AppModel.self) private var model
     let snapshot: MenuBarSnapshot
 
-    @State private var selectedSurfaceID: MenuBarSurfaceID
+    @Binding private var selectedSurfaceID: MenuBarSurfaceID
+    @Binding private var selectedItemID: MenuBarItemID?
     @State private var dragTokens: [MenuBarItemID: String]
     @State private var targetedItemID: MenuBarItemID?
     @State private var targetedSection: MenuBarSection?
+    @AccessibilityFocusState private var focusedItemID: MenuBarItemID?
 
-    init(snapshot: MenuBarSnapshot) {
+    init(
+        snapshot: MenuBarSnapshot,
+        selectedSurfaceID: Binding<MenuBarSurfaceID>,
+        selectedItemID: Binding<MenuBarItemID?>
+    ) {
         self.snapshot = snapshot
-        _selectedSurfaceID = State(
-            initialValue: PrismRailSurfaceResolver().resolve(in: snapshot, current: nil)
-        )
+        _selectedSurfaceID = selectedSurfaceID
+        _selectedItemID = selectedItemID
         _dragTokens = State(initialValue: Self.makeDragTokens(for: snapshot))
     }
 
@@ -33,19 +38,23 @@ struct PrismRailView: View {
         .padding(14)
         .background(.background.secondary, in: .rect(cornerRadius: 18))
         .accessibilityIdentifier("prismRail")
+        .onAppear {
+            resolveSelection()
+        }
         .onChange(of: snapshot.generation) {
             dragTokens = Self.makeDragTokens(for: snapshot)
             targetedItemID = nil
             targetedSection = nil
-            selectedSurfaceID = PrismRailSurfaceResolver().resolve(
-                in: snapshot,
-                current: selectedSurfaceID
-            )
+            resolveSelection()
         }
         .onChange(of: snapshot.surfaceIDs) {
-            selectedSurfaceID = PrismRailSurfaceResolver().resolve(
+            resolveSelection()
+        }
+        .onChange(of: selectedSurfaceID) {
+            selectedItemID = PrismRailSelectionResolver().resolve(
+                selectedItemID,
                 in: snapshot,
-                current: selectedSurfaceID
+                surfaceID: selectedSurfaceID
             )
         }
     }
@@ -117,26 +126,36 @@ private extension PrismRailView {
                     .foregroundStyle(.tertiary)
             }
 
-            ScrollView(.horizontal) {
-                LazyHStack(spacing: 7) {
-                    if laneItems.isEmpty {
-                        emptyLane(section)
-                    } else {
-                        ForEach(laneItems) { item in
-                            railItem(item, section: section)
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal) {
+                    LazyHStack(spacing: 7) {
+                        if laneItems.isEmpty {
+                            emptyLane(section)
+                        } else {
+                            ForEach(laneItems) { item in
+                                railItem(item, section: section)
+                                    .id(item.id)
+                            }
                         }
                     }
+                    .scrollTargetLayout()
+                    .padding(4)
                 }
-                .scrollTargetLayout()
-                .padding(4)
-            }
-            .scrollIndicators(.never)
-            .scrollTargetBehavior(.viewAligned)
-            .frame(height: 48)
-            .dropDestination(for: String.self) { tokens, _ in
-                performDrop(tokens: tokens, targetItemID: nil, section: section)
-            } isTargeted: { isTargeted in
-                targetedSection = isTargeted ? section : nil
+                .scrollIndicators(.never)
+                .scrollTargetBehavior(.viewAligned)
+                .frame(height: 48)
+                .dropDestination(for: String.self) { tokens, _ in
+                    performDrop(tokens: tokens, targetItemID: nil, section: section)
+                } isTargeted: { isTargeted in
+                    targetedSection = isTargeted ? section : nil
+                }
+                .onChange(of: selectedItemID) {
+                    guard let selectedItemID,
+                          laneItems.contains(where: { $0.id == selectedItemID })
+                    else { return }
+                    proxy.scrollTo(selectedItemID, anchor: .center)
+                    focusedItemID = selectedItemID
+                }
             }
             .background(laneBackground(section), in: .rect(cornerRadius: 12))
             .overlay {
@@ -192,9 +211,13 @@ private extension PrismRailView {
         .frame(height: 34)
         .overlay {
             Capsule()
-                .strokeBorder(itemStroke(item), lineWidth: targetedItemID == item.id ? 2 : 0.5)
+                .strokeBorder(itemStroke(item), lineWidth: itemStrokeWidth(item))
         }
         .contentShape(.capsule)
+        .onTapGesture {
+            guard item.ownership == .application else { return }
+            selectedItemID = item.id
+        }
         .contextMenu {
             railMenu(item, section: section)
         }
@@ -202,6 +225,7 @@ private extension PrismRailView {
         .accessibilityElement(children: .ignore)
         .accessibilityIdentifier("prismRail.\(section.rawValue).item.\(position)")
         .accessibilityLabel(item.displayName)
+        .accessibilityFocused($focusedItemID, equals: item.id)
         .accessibilityValue(
             canMove(item)
                 ? "\(sectionTitle(section)), position \(position) of \(laneItems.count), draggable"
@@ -383,8 +407,25 @@ private extension PrismRailView {
 
     func itemStroke(_ item: MenuBarItem) -> Color {
         if targetedItemID == item.id { return .accentColor }
+        if selectedItemID == item.id { return .accentColor }
         if movingItemID == item.id { return .accentColor.opacity(0.7) }
         return Color(nsColor: .separatorColor).opacity(0.65)
+    }
+
+    func itemStrokeWidth(_ item: MenuBarItem) -> CGFloat {
+        targetedItemID == item.id || selectedItemID == item.id ? 2 : 0.5
+    }
+
+    func resolveSelection() {
+        selectedSurfaceID = PrismRailSurfaceResolver().resolve(
+            in: snapshot,
+            current: selectedSurfaceID
+        )
+        selectedItemID = PrismRailSelectionResolver().resolve(
+            selectedItemID,
+            in: snapshot,
+            surfaceID: selectedSurfaceID
+        )
     }
 
     static func makeDragTokens(for snapshot: MenuBarSnapshot) -> [MenuBarItemID: String] {
