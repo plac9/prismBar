@@ -150,6 +150,8 @@ Repository work is preserved, but this phase is frozen and excluded from the shi
 
 ## Phase 10: Signed physical release proof
 
+Exact revision `ed4b6b8f4b3fa196f14c290f44b9b4fed4cb256e` passed the full core-only CI contract on September 1, 2026. Its first secure release run was intentionally stopped at the interactive certificate-transfer passphrase gate during session wrap-up; no current archive, notarized distribution, or installed release candidate was produced.
+
 - [x] Verify Apple identifier and signing configuration for `com.laclairtech.prismbar`.
 - [x] Require an explicit dedicated release keychain containing only the approved certificate fingerprint so archive and notarization cannot fall back to the interactive login Keychain or another signing identity.
 - [x] Add a fail-closed physical acceptance recorder that revalidates exact installed provenance and requires one explicit physical observation per gate.

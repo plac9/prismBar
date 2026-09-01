@@ -42,6 +42,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 
 ### Changed
 
+- Aligned archive, notarization, physical-acceptance, assurance, architecture, security, and dependency evidence with the core-only shipping scope; the preserved Cards and prismCalc XPC work remain dormant and excluded from the application bundle.
 - Replaced repeated material-backed content cards with open native sections and restrained semantic accent rules.
 - Let the native macOS list own the Menu Bar inventory surface and reduced Rail chrome to separators.
 - Rebuilt the workspace around one adaptive Prism Field canvas, a native floating sidebar, open content sections,
@@ -54,6 +55,8 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 
 ### Fixed
 
+- Removed obsolete release-workflow requirements for a bundled prismCalc XPC service while retaining independent dormant-plugin security verification.
+- Canonicalized the generated root Xcode package reference so reproducibility checks also hold in the primary `prismBar` checkout.
 - Made Xcode project reproducibility checks independent of whether XcodeGen quotes the checkout directory name.
 - Kept managed worktrees and their generated build artifacts outside the shipping-source SwiftLint boundary.
 - Made the noncooperative-observation timeout test preserve its early-return guarantee under sanitizer overhead without weakening the no-late-input assertion.
