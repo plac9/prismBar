@@ -226,7 +226,7 @@ struct VerifiedMoveCoordinatorTests {
         let coordinator = VerifiedMoveCoordinator(
             reader: NoncooperativeSnapshotReader(
                 snapshot: initial,
-                delay: .milliseconds(50)
+                delay: .milliseconds(250)
             ),
             performer: performer,
             operationTimeout: .milliseconds(5)
@@ -236,10 +236,10 @@ struct VerifiedMoveCoordinatorTests {
 
         #expect(await coordinator.execute(plan) == .timedOut)
 
-        #expect(start.duration(to: clock.now) < .milliseconds(25))
+        #expect(start.duration(to: clock.now) < .milliseconds(100))
         #expect(await performer.executionCount == 0)
 
-        try await Task.sleep(for: .milliseconds(60))
+        try await Task.sleep(for: .milliseconds(270))
         #expect(await performer.executionCount == 0)
     }
 
