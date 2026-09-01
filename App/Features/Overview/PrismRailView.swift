@@ -25,7 +25,7 @@ struct PrismRailView: View {
         self.snapshot = snapshot
         _selectedSurfaceID = selectedSurfaceID
         _selectedItemID = selectedItemID
-        _dragTokens = State(initialValue: Self.makeDragTokens(for: snapshot))
+        _dragTokens = State(initialValue: PrismRailViewSupport.makeDragTokens(for: snapshot))
     }
 
     var body: some View {
@@ -42,7 +42,7 @@ struct PrismRailView: View {
             resolveSelection()
         }
         .onChange(of: snapshot.generation) {
-            dragTokens = Self.makeDragTokens(for: snapshot)
+            dragTokens = PrismRailViewSupport.makeDragTokens(for: snapshot)
             targetedItemID = nil
             targetedSection = nil
             resolveSelection()
@@ -108,11 +108,11 @@ private extension PrismRailView {
 
         return VStack(alignment: .leading, spacing: 7) {
             HStack(spacing: 6) {
-                Image(systemName: sectionSymbol(section))
+                Image(systemName: PrismRailViewSupport.sectionSymbol(section))
                     .foregroundStyle(section == .visible ? Color.accentColor : .secondary)
                     .accessibilityHidden(true)
 
-                Text(sectionTitle(section))
+                Text(PrismRailViewSupport.sectionTitle(section))
                     .font(.caption.weight(.semibold))
 
                 Text("\(laneItems.count)")
@@ -121,48 +121,52 @@ private extension PrismRailView {
 
                 Spacer()
 
-                Text(sectionHint(section))
+                Text(PrismRailViewSupport.sectionHint(section))
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
 
-            ScrollViewReader { proxy in
-                ScrollView(.horizontal) {
-                    LazyHStack(spacing: 7) {
-                        if laneItems.isEmpty {
-                            emptyLane(section)
-                        } else {
-                            ForEach(laneItems) { item in
-                                railItem(item, section: section)
-                                    .id(item.id)
-                            }
-                        }
-                    }
-                    .scrollTargetLayout()
-                    .padding(4)
-                }
-                .scrollIndicators(.never)
-                .scrollTargetBehavior(.viewAligned)
-                .frame(height: 48)
-                .dropDestination(for: String.self) { tokens, _ in
-                    performDrop(tokens: tokens, targetItemID: nil, section: section)
-                } isTargeted: { isTargeted in
-                    targetedSection = isTargeted ? section : nil
-                }
-                .onChange(of: selectedItemID) {
-                    guard let selectedItemID,
-                          laneItems.contains(where: { $0.id == selectedItemID })
-                    else { return }
-                    proxy.scrollTo(selectedItemID, anchor: .center)
-                    focusedItemID = selectedItemID
-                }
-            }
+            laneScroller(laneItems, section: section)
             .background(laneBackground(section), in: .rect(cornerRadius: 12))
             .overlay {
                 RoundedRectangle(cornerRadius: 12)
                     .strokeBorder(laneStroke(section), style: .init(lineWidth: 1, dash: [4, 4]))
             }
             .accessibilityIdentifier("prismRail.\(section.rawValue)")
+        }
+    }
+
+    func laneScroller(_ laneItems: [MenuBarItem], section: MenuBarSection) -> some View {
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal) {
+                LazyHStack(spacing: 7) {
+                    if laneItems.isEmpty {
+                        emptyLane(section)
+                    } else {
+                        ForEach(laneItems) { item in
+                            railItem(item, section: section)
+                                .id(item.id)
+                        }
+                    }
+                }
+                .scrollTargetLayout()
+                .padding(4)
+            }
+            .scrollIndicators(.never)
+            .scrollTargetBehavior(.viewAligned)
+            .frame(height: 48)
+            .dropDestination(for: String.self) { tokens, _ in
+                performDrop(tokens: tokens, targetItemID: nil, section: section)
+            } isTargeted: { isTargeted in
+                targetedSection = isTargeted ? section : nil
+            }
+            .onChange(of: selectedItemID) {
+                guard let selectedItemID,
+                      laneItems.contains(where: { $0.id == selectedItemID })
+                else { return }
+                proxy.scrollTo(selectedItemID, anchor: .center)
+                focusedItemID = selectedItemID
+            }
         }
     }
 
@@ -221,15 +225,17 @@ private extension PrismRailView {
         .contextMenu {
             railMenu(item, section: section)
         }
-        .help(itemHelp(item))
+        .help(PrismRailViewSupport.itemHelp(item, canMove: canMove(item)))
         .accessibilityElement(children: .ignore)
         .accessibilityIdentifier("prismRail.\(section.rawValue).item.\(position)")
         .accessibilityLabel(item.displayName)
         .accessibilityFocused($focusedItemID, equals: item.id)
         .accessibilityValue(
             canMove(item)
-                ? "\(sectionTitle(section)), position \(position) of \(laneItems.count), draggable"
-                : "\(sectionTitle(section)), \(fixedItemDescription(item))"
+                ? "\(PrismRailViewSupport.sectionTitle(section)), position \(position) " +
+                    "of \(laneItems.count), draggable"
+                : "\(PrismRailViewSupport.sectionTitle(section)), " +
+                    PrismRailViewSupport.fixedItemDescription(item)
         )
         .accessibilityActions {
             railAccessibilityActions(item, section: section)
@@ -289,7 +295,9 @@ private extension PrismRailView {
             .font(.caption)
             .foregroundStyle(.secondary)
             .frame(minWidth: 150, minHeight: 34)
-            .accessibilityLabel("Empty \(sectionTitle(section)). Drop an item here.")
+            .accessibilityLabel(
+                "Empty \(PrismRailViewSupport.sectionTitle(section)). Drop an item here."
+            )
     }
 
     func performDrop(
@@ -332,69 +340,29 @@ private extension PrismRailView {
             !model.isMenuBarActionInProgress
     }
 
-    func itemHelp(_ item: MenuBarItem) -> String {
-        if item.ownership == .system {
-            return "macOS keeps this item in place"
-        }
-        return canMove(item) ? "Drag to reposition \(item.displayName)" : "This item cannot be moved"
-    }
-
-    func fixedItemDescription(_ item: MenuBarItem) -> String {
-        item.ownership == .system ? "fixed by macOS" : "unavailable"
-    }
-
     var movingItemID: MenuBarItemID? {
         guard case let .moving(itemID) = model.menuBarActionState else { return nil }
         return itemID
     }
 
-    func sectionTitle(_ section: MenuBarSection) -> String {
-        section == .hidden ? "Tucked Away" : "On Bar"
-    }
-
-    func sectionHint(_ section: MenuBarSection) -> String {
-        section == .hidden ? "Reveal when needed" : "Always visible"
-    }
-
-    func sectionSymbol(_ section: MenuBarSection) -> String {
-        section == .hidden ? "eye.slash" : "menubar.rectangle"
-    }
-
-    func itemSymbol(_ item: MenuBarItem) -> String {
-        if movingItemID == item.id { return "arrow.left.arrow.right" }
-        return canMove(item) ? "line.3.horizontal" : "lock.fill"
-    }
-
     @ViewBuilder
     func itemIcon(_ item: MenuBarItem) -> some View {
-        if let icon = applicationIcon(item) {
-            Image(nsImage: icon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 16, height: 16)
-                .accessibilityHidden(true)
+        let symbol = PrismRailViewSupport.itemSymbol(
+            isMoving: movingItemID == item.id,
+            canMove: canMove(item)
+        )
+        if item.ownership == .application {
+            MenuBarApplicationIcon(
+                bundleIdentifier: item.ownerBundleIdentifier,
+                fallbackSymbol: symbol,
+                size: 16
+            )
         } else {
-            Image(systemName: itemSymbol(item))
+            Image(systemName: symbol)
                 .font(.caption2.weight(.semibold))
-                .foregroundStyle(itemTint(item))
+                .foregroundStyle(movingItemID == item.id ? Color.accentColor : .secondary)
                 .accessibilityHidden(true)
         }
-    }
-
-    func applicationIcon(_ item: MenuBarItem) -> NSImage? {
-        guard item.ownership == .application,
-              let bundleIdentifier = item.ownerBundleIdentifier,
-              let applicationURL = NSWorkspace.shared.urlForApplication(
-                  withBundleIdentifier: bundleIdentifier
-              )
-        else {
-            return nil
-        }
-        return NSWorkspace.shared.icon(forFile: applicationURL.path)
-    }
-
-    func itemTint(_ item: MenuBarItem) -> Color {
-        movingItemID == item.id ? .accentColor : .secondary
     }
 
     func laneBackground(_ section: MenuBarSection) -> Color {
@@ -428,11 +396,4 @@ private extension PrismRailView {
         )
     }
 
-    static func makeDragTokens(for snapshot: MenuBarSnapshot) -> [MenuBarItemID: String] {
-        Dictionary(
-            uniqueKeysWithValues: snapshot.items
-                .filter { $0.role == .item }
-                .map { ($0.id, UUID().uuidString) }
-        )
-    }
 }
