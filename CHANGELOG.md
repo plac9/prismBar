@@ -55,6 +55,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 ### Fixed
 
 - Made Xcode project reproducibility checks independent of whether XcodeGen quotes the checkout directory name.
+- Kept managed worktrees and their generated build artifacts outside the shipping-source SwiftLint boundary.
 - Kept the compact `prismDeck` permission state visible without allowing it to crowd out menu bar controls.
 - Restored process-local Undo after verified moves during stable partial scans while still rejecting changed source coverage, item identity, ownership, role, surface, availability, or order.
 - Classified macOS-owned menu bar extras such as Clock, Control Center, and Siri as fixed anchors even when Accessibility reports them as movable.

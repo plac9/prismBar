@@ -81,7 +81,7 @@ if [ -z "${CI_VERIFICATION_ROOT:-}" ]; then
   trap cleanup EXIT INT TERM
 fi
 
-swiftlint lint --strict
+Tests/ReleaseWorkflowTests/swiftlint_scope_contract.sh
 swift test
 swift test -c release
 
