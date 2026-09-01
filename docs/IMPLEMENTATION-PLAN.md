@@ -152,6 +152,7 @@ Repository work is preserved, but this phase is frozen and excluded from the shi
 - [x] Verify Apple identifier and signing configuration for `com.laclairtech.prismbar`.
 - [x] Require an explicit dedicated release keychain containing only the approved certificate fingerprint so archive and notarization cannot fall back to the interactive login Keychain or another signing identity.
 - [x] Add a fail-closed physical acceptance recorder that revalidates exact installed provenance and requires one explicit physical observation per gate.
+- [x] Prove a direct multi-position application-item move and process-local Undo during a stable partial scan on physical macOS 27 using signed installed Development revision `dec3fd5402c804e9274ab2d9ece29bae53bad6f6`; the original order was restored and the protected macOS-owned anchors remained fixed.
 - [ ] Archive the final clean revision with Xcode 27 using Developer ID and Hardened Runtime.
 - [ ] Verify nested signing order and exact entitlement allowlists on that archive.
 - [ ] Package, notarize, staple, and validate the distribution artifact.
