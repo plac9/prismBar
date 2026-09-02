@@ -129,6 +129,7 @@ These controls describe preserved future-facing code. The core release prevents 
 - No third-party runtime dependencies in the first release.
 - Swift packages use checked-in resolution when dependencies are eventually added.
 - CI permissions are read-only by default and actions are pinned by commit digest.
+- CI installs SwiftLint only from the official versioned release archive after verifying its reviewed SHA-256 digest; a moving Homebrew formula cannot select the linter version.
 - Signing credentials remain in Apple tooling or 1Password and are never printed.
 - Release builds come from a clean signed commit and generate an SBOM and checksums.
 - Release automation requires an explicit dedicated keychain containing exactly one valid code-signing identity and the approved certificate fingerprint. Login and system keychains are rejected so signing cannot fall back to interactive personal credentials or unrelated identities.

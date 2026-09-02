@@ -33,6 +33,7 @@ Tests/ReleaseWorkflowTests/physical_acceptance_contract.sh
 Tests/ReleaseWorkflowTests/release_signing_keychain_contract.sh
 Tests/ReleaseWorkflowTests/release_readiness_contract.sh
 Tests/ReleaseWorkflowTests/install_release_contract.sh
+Tests/ReleaseWorkflowTests/pinned_swiftlint_install_contract.sh
 Tests/ReleaseWorkflowTests/core_shipping_contract.sh
 Tests/ReleaseWorkflowTests/local_package_normalization_contract.sh
 Tests/ReleaseWorkflowTests/clean_room_similarity_contract.sh

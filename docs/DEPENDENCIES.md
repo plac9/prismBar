@@ -22,7 +22,7 @@ These tools run during development or CI and are not included in the application
 | Apple Xcode and SDK | 27 | Apple terms | Compiler, SDK, analyzer, asset compilation, and signing tools |
 | Swift | 6.4 | Apache-2.0 | Language compiler and SwiftPM test runner |
 | XcodeGen | 2.46.0 | MIT | Deterministic Xcode project generation |
-| SwiftLint | 0.65.1 | MIT | Source linting |
+| SwiftLint | 0.65.1 | MIT | Source linting; CI uses the official portable release pinned to SHA-256 `c1e429b0599cf1b516f369a2d9ec04eaf0e436f3c12b637df8851fa52ff694d0` |
 | Gitleaks | 8.30.1 | MIT | Git secret scanning |
 | actionlint | 1.7.12 | MIT | GitHub Actions workflow validation |
 | ripgrep | 15.2.0 | Unlicense | Repository and artifact policy checks |

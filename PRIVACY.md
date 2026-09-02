@@ -23,7 +23,7 @@ Preferences use app-owned local storage. Sensitive values are not expected. If a
 
 ## Network
 
-The initial product has no runtime network capability. Project and release links open only after an explicit user action through the system browser. Update delivery and licensing must not be added until their data flows, retention, authentication, and failure behavior are documented and reviewed.
+The initial product has no runtime network capability. Project and release links open only after an explicit user action through the system browser. CI downloads reviewed build tools from versioned upstream releases and verifies their recorded digests; this build-time traffic is not present in the application. Update delivery and licensing must not be added until their data flows, retention, authentication, and failure behavior are documented and reviewed.
 
 ## Plugins
 
