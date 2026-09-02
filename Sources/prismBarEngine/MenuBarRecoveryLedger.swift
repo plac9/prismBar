@@ -187,7 +187,7 @@ public struct MenuBarRecoveryLedger: Sendable {
         _ first: MenuBarSnapshot,
         _ second: MenuBarSnapshot
     ) -> Bool {
-        guard first.unavailableSourceCount == second.unavailableSourceCount,
+        guard snapshotsHaveCompatibleCoverage(first, second),
               snapshotsAreCompatible(first, second)
         else {
             return false
@@ -212,5 +212,13 @@ public struct MenuBarRecoveryLedger: Sendable {
             guard firstOrder == secondOrder else { return false }
         }
         return true
+    }
+
+    private static func snapshotsHaveCompatibleCoverage(
+        _ first: MenuBarSnapshot,
+        _ second: MenuBarSnapshot
+    ) -> Bool {
+        first.unavailableSourceCount == second.unavailableSourceCount ||
+            (first.unavailableSourceCount > 0 && second.unavailableSourceCount > 0)
     }
 }

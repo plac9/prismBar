@@ -62,7 +62,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 - Kept managed worktrees and their generated build artifacts outside the shipping-source SwiftLint boundary.
 - Made the noncooperative-observation timeout test preserve its early-return guarantee under sanitizer overhead without weakening the no-late-input assertion.
 - Kept the compact `prismDeck` permission state visible without allowing it to crowd out menu bar controls.
-- Restored process-local Undo after verified moves during stable partial scans while still rejecting changed source coverage, item identity, ownership, role, surface, availability, or order.
+- Kept process-local Undo usable when macOS varies the nonresponsive-source count between otherwise identical partial scans, while still rejecting complete-to-partial coverage changes and any item identity, ownership, role, surface, availability, or order change.
 - Classified macOS-owned menu bar extras such as Clock, Control Center, and Siri as fixed anchors even when Accessibility reports them as movable.
 - Removed drag, keyboard, batch, reset, and recovery move paths for fixed macOS-owned anchors while preserving application-item movement.
 - Clarified partial menu bar scans so nonresponsive sources are reported without presenting incomplete inventory as complete.

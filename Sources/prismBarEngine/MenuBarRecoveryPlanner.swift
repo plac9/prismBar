@@ -91,7 +91,7 @@ public struct MenuBarRecoveryPlanner: Sendable {
         current: MenuBarSnapshot,
         target: MenuBarSnapshot
     ) throws {
-        guard current.unavailableSourceCount == target.unavailableSourceCount else {
+        guard coverageIsCompatible(current, target) else {
             throw MenuBarRecoveryPlanningError.incompleteSnapshot
         }
         let currentByID = Dictionary(uniqueKeysWithValues: current.items.map { ($0.id, $0) })
@@ -132,6 +132,14 @@ public struct MenuBarRecoveryPlanner: Sendable {
                 throw MenuBarRecoveryPlanningError.incompatibleAnchorOrder(surfaceID)
             }
         }
+    }
+
+    private func coverageIsCompatible(
+        _ first: MenuBarSnapshot,
+        _ second: MenuBarSnapshot
+    ) -> Bool {
+        first.unavailableSourceCount == second.unavailableSourceCount ||
+            (first.unavailableSourceCount > 0 && second.unavailableSourceCount > 0)
     }
 
     private func plan(

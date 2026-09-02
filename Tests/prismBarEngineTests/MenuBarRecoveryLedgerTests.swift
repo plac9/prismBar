@@ -331,6 +331,11 @@ extension MenuBarRecoveryLedgerTests {
             generation: 4,
             reversed: true,
             unavailableSourceCount: 2
+        )) != nil)
+        #expect(ledger.latestCompatible(with: snapshot(
+            generation: 5,
+            reversed: true,
+            unavailableSourceCount: 0
         )) == nil)
     }
 }
