@@ -39,6 +39,14 @@ struct AccessibilityPermissionTests {
         #expect(evaluator.state(for: snapshot) == .granted)
     }
 
+    @Test("menu bar control requires Accessibility and event posting")
+    func requiresBothControlAuthorities() {
+        #expect(MenuBarControlTrust.isGranted(accessibility: true, eventPosting: true))
+        #expect(!MenuBarControlTrust.isGranted(accessibility: false, eventPosting: true))
+        #expect(!MenuBarControlTrust.isGranted(accessibility: true, eventPosting: false))
+        #expect(!MenuBarControlTrust.isGranted(accessibility: false, eventPosting: false))
+    }
+
     @Test("distinguishes first request from a denied request")
     func distinguishesRequestHistory() {
         let firstRequest = permissionSnapshot(hasRequestedAccess: false)

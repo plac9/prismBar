@@ -34,8 +34,8 @@ The shipping application is intentionally limited to menu bar discovery, hide an
 
 - [x] Write failing tests for every permission state and transition.
 - [x] Implement stable-install detection and current signing identity inspection.
-- [x] Implement live Accessibility trust checks without cached truth.
-- [x] Use Apple's documented Accessibility prompt and recheck whenever the app returns to the foreground.
+- [x] Implement live Accessibility and event-synthesis trust checks without cached truth.
+- [x] Use Apple's documented Accessibility and PostEvent request APIs and recheck both authorities whenever the app returns to the foreground.
 - [x] Reject undocumented System Settings URL schemes from the product.
 - [x] Implement runtime revocation behavior.
 - [x] Render onboarding and recovery states using native macOS 27 components.

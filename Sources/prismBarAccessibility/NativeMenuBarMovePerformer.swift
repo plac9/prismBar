@@ -171,8 +171,27 @@ public actor NativeMenuBarMovePerformer: MenuBarMovePerforming {
     private let lifecycle = DeadlineAwareMenuBarDragLifecycle(
         pauser: SystemMenuBarDragPauser()
     )
+    private let authorizationCheck: @Sendable () -> Bool
+    private let surfaceCatalog: @Sendable () async -> [MenuBarInputSurface]
 
-    public init() {}
+    public init() {
+        authorizationCheck = {
+            AXIsProcessTrusted() && CGPreflightPostEventAccess()
+        }
+        surfaceCatalog = {
+            await NativeMenuBarSurfaceCatalog.current()
+        }
+    }
+
+    init(
+        authorizationCheck: @escaping @Sendable () -> Bool,
+        surfaceCatalog: @escaping @Sendable () async -> [MenuBarInputSurface] = {
+            NativeMenuBarSurfaceCatalog.current()
+        }
+    ) {
+        self.authorizationCheck = authorizationCheck
+        self.surfaceCatalog = surfaceCatalog
+    }
 
     public func move(
         source: MenuBarItemFrame,
@@ -181,11 +200,11 @@ public actor NativeMenuBarMovePerformer: MenuBarMovePerforming {
         deadline: OperationDeadline
     ) async throws {
         try deadline.check()
-        guard AXIsProcessTrusted() else {
+        guard authorizationCheck() else {
             throw MenuBarAuthorizationError.permissionRevoked
         }
         try Task.checkCancellation()
-        let surfaces = await NativeMenuBarSurfaceCatalog.current()
+        let surfaces = await surfaceCatalog()
         guard MenuBarInputSafetyValidator().allows(
             source: source,
             destination: destination,
@@ -200,6 +219,9 @@ public actor NativeMenuBarMovePerformer: MenuBarMovePerforming {
             insertionEdge: insertionEdge
         )
         let prepared = try prepare(gesture: gesture)
+        guard authorizationCheck() else {
+            throw MenuBarAuthorizationError.permissionRevoked
+        }
         try await perform(prepared, deadline: deadline)
     }
 

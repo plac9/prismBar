@@ -4,6 +4,7 @@
 
 @testable import prismBarAccessibility
 import CoreGraphics
+import Foundation
 import prismBarCore
 import Testing
 
@@ -86,6 +87,75 @@ struct MenuBarDragGeometryTests {
         )
 
         #expect(gesture.path == [gesture.end])
+    }
+}
+
+@Suite("Menu bar move authorization")
+struct MenuBarMoveAuthorizationTests {
+    @Test("revoked event-posting access stops the move at the action boundary")
+    func rejectsRevokedAuthorization() async {
+        let performer = NativeMenuBarMovePerformer(
+            authorizationCheck: { false }
+        )
+        let frame = MenuBarItemFrame(minX: 0, minY: 0, width: 24, height: 24)
+
+        await #expect(throws: MenuBarAuthorizationError.permissionRevoked) {
+            try await performer.move(
+                source: frame,
+                destination: frame,
+                insertionEdge: .before,
+                deadline: OperationDeadline(timeout: .seconds(1))
+            )
+        }
+    }
+
+    @Test("authorization is rechecked immediately before posting events")
+    func rechecksAuthorizationAfterValidation() async {
+        let authorization = AuthorizationProbe(results: [true, false])
+        let performer = NativeMenuBarMovePerformer(
+            authorizationCheck: { authorization.next() },
+            surfaceCatalog: {
+                [
+                    MenuBarInputSurface(
+                        frame: MenuBarItemFrame(minX: 0, minY: 0, width: 1200, height: 900),
+                        reservedMenuBarHeight: 40
+                    ),
+                ]
+            }
+        )
+        let source = MenuBarItemFrame(minX: 900, minY: 8, width: 24, height: 24)
+        let destination = MenuBarItemFrame(minX: 800, minY: 8, width: 24, height: 24)
+
+        await #expect(throws: MenuBarAuthorizationError.permissionRevoked) {
+            try await performer.move(
+                source: source,
+                destination: destination,
+                insertionEdge: .before,
+                deadline: OperationDeadline(timeout: .seconds(1))
+            )
+        }
+        #expect(authorization.observedCallCount == 2)
+    }
+}
+
+private final class AuthorizationProbe: @unchecked Sendable {
+    private let lock = NSLock()
+    private var results: [Bool]
+    private var callCount = 0
+
+    var observedCallCount: Int {
+        lock.withLock { callCount }
+    }
+
+    init(results: [Bool]) {
+        self.results = results
+    }
+
+    func next() -> Bool {
+        lock.withLock {
+            callCount += 1
+            return results.isEmpty ? false : results.removeFirst()
+        }
     }
 }
 

@@ -14,6 +14,7 @@ prismBar host process
   |  menu bar topology and action engine
   |
   +---- public Accessibility APIs ----> macOS menu bar processes
+  +---- public CoreGraphics events ----> verified Command-drag input
 ```
 
 ## Trust zones
@@ -39,7 +40,7 @@ No plugin service ships in the core release. If Prism Cards resume after core ph
 
 ### Operating system
 
-macOS owns permission state, menu bar processes, application lifecycle, code signing, Gatekeeper, and notarization. prismBar treats every Accessibility action as fallible and verifies results from a fresh observation.
+macOS owns permission state, menu bar processes, application lifecycle, code signing, Gatekeeper, and notarization. prismBar requires both Accessibility observation and CoreGraphics event-synthesis authority before it reports menu-bar control as ready. It treats every Accessibility action as fallible and verifies results from a fresh observation.
 
 ## Modules
 
@@ -75,7 +76,7 @@ notGranted -> requesting -> waitingForSystem -> checking
 granted -> monitoring -> revoked -> notGranted
 ```
 
-Permission state is never persisted as truth. Every foreground transition and protected action queries the operating system again.
+Permission state is never persisted as truth. Every foreground transition and protected action queries both `AXIsProcessTrusted` and `CGPreflightPostEventAccess` again. A user-initiated permission request calls the corresponding public request APIs for both authorities; either denial keeps protected actions disabled.
 
 ## Topology and action model
 

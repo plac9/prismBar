@@ -2,7 +2,7 @@
 
 ## Executive summary
 
-prismBar is a single-user, local-only macOS 27 utility with one intentionally powerful authority: Accessibility access to observe and move menu bar items. The highest-risk areas are the signed host boundary, stale menu bar geometry, synthesized input, and release provenance. The shipping target limits these risks with live permission checks, exact host signing requirements, bounded parsing and execution, fresh topology verification, one core executable, no embedded XPC service, no network stack, public-safety release audits, and source-matched verification. No critical or high residual threat was identified in the current source. A current-source Developer ID archive, notarization, final shipping-artifact reconciliation, and physical Accessibility testing remain release gates.
+prismBar is a single-user, local-only macOS 27 utility with two intentionally powerful, jointly required authorities: Accessibility access to observe menu bar items and CoreGraphics event-synthesis access to move them. The highest-risk areas are the signed host boundary, stale menu bar geometry, synthesized input, and release provenance. The shipping target limits these risks with live permission checks, exact host signing requirements, bounded parsing and execution, fresh topology verification, one core executable, no embedded XPC service, no network stack, public-safety release audits, and source-matched verification. No critical or high residual threat was identified in the current source. A current-source Developer ID archive, notarization, final shipping-artifact reconciliation, and physical authorization testing remain release gates.
 
 ## Scope and assumptions
 
@@ -45,7 +45,7 @@ Current reconciliation evidence:
 ### Primary components
 
 - **SwiftUI host:** Presents the status item, prismDeck command center, settings, and recovery surfaces. `App/prismBarApp.swift`, `App/AppLifecycle.swift`.
-- **Permission and topology engine:** Validates the canonical install and signing identity, checks live Accessibility trust, discovers menu bar elements, resolves physical display surfaces, and verifies movements. `Sources/prismBarEngine/SystemPermissionClients.swift`, `Sources/prismBarAccessibility/MenuBarTopologyDiscovery.swift`, `Sources/prismBarAccessibility/DisplaySurfaceResolver.swift`.
+- **Permission and topology engine:** Validates the canonical install and signing identity, checks live Accessibility and event-synthesis trust, discovers menu bar elements, resolves physical display surfaces, and verifies movements. `Sources/prismBarEngine/SystemPermissionClients.swift`, `Sources/prismBarAccessibility/MenuBarTopologyDiscovery.swift`, `Sources/prismBarAccessibility/DisplaySurfaceResolver.swift`.
 - **Native input performer:** Produces one bounded Command-drag on a validated display surface and guarantees mouse-up, Command-up, and pointer restoration. `Sources/prismBarAccessibility/NativeMenuBarMovePerformer.swift`.
 - **Dormant Card sources:** Preserve bounded protocol, renderer, calculator, and reciprocal-signing work for future review, but are excluded from the application target and release bundle. `Sources/prismPluginKit`, `Sources/prismCalcPlugin`, `XPC/prismCalcPluginService`.
 - **Build and release gates:** Pin tools, reject dependencies and sensitive artifacts, scan Git history, analyze code, run sanitizers from temporary directories outside the package root, and require a one-executable/no-XPC core Release bundle. `scripts/ci-verify.sh`, `scripts/audit-public-safety.sh`, `scripts/audit-release-bundle.sh`.
@@ -74,7 +74,8 @@ flowchart LR
 
 | Asset | Why it matters | Security objective |
 |---|---|---|
-| Accessibility authority | Can observe and move local menu bar items | C, I, A |
+| Accessibility authority | Can observe local menu bar items | C, I |
+| Event-synthesis authority | Can perform the bounded verified Command-drag used to move an item | I, A |
 | Menu item labels and topology | Reveal installed applications and user workflow | C, I |
 | Pointer and mouse-button state | Incorrect cleanup can disrupt user input | I, A |
 | Host signing identity | Establishes which code may exercise privileged paths | I |
@@ -139,7 +140,7 @@ flowchart LR
 
 | Path | Why it matters | Related Threat IDs |
 |---|---|---|
-| `Sources/prismBarEngine/SystemPermissionClients.swift` | Defines the host signing identity and authoritative Accessibility trust check | TM-001, TM-007, TM-008 |
+| `Sources/prismBarEngine/SystemPermissionClients.swift` | Defines the host signing identity and authoritative combined Accessibility and event-synthesis trust check | TM-001, TM-007, TM-008 |
 | `Sources/prismBarAccessibility/NativeMenuBarObservationReader.swift` | Processes data exposed by every running GUI application | TM-004, TM-005 |
 | `Sources/prismBarAccessibility/DisplaySurfaceResolver.swift` | Maps observed geometry to bounded physical display surfaces without persisting display identities | TM-004, TM-005 |
 | `Sources/prismBarAccessibility/NativeMenuBarMovePerformer.swift` | Converts verified plans into privileged synthetic input | TM-001, TM-004 |

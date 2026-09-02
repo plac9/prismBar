@@ -60,6 +60,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 
 ### Fixed
 
+- Required both Accessibility and event-synthesis authorization before reporting menu-bar control as ready, and requested the separate PostEvent authority now enforced by macOS 27.
 - Kept hosted verification honest when GitHub provides the Xcode 27 SDK on a pre-macOS 27 runtime: app tests compile there, while execution remains a physical macOS 27 gate.
 - Pinned CI SwiftLint to its reviewed official release digest and accepted only GitHub's generic synthetic PR-merge committer alongside the approved owner address.
 - Retried direct-move verification when a transient macOS scan omits prismBar's section divider, preventing a verified move from publishing an empty Rail or disabling recovery.

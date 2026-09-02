@@ -68,7 +68,7 @@ final class AppModel {
         let isStableInstall = StableInstall.isCanonical(Bundle.main.bundleURL)
 
         Task { [weak self] in
-            let isTrusted = await Self.readAccessibilityTrust(prompt: false)
+            let isTrusted = await Self.readMenuBarControlTrust(prompt: false)
 
             guard let self, revision == permissionRevision else { return }
             let refreshedState = permissionSession.refreshTrust(
@@ -100,7 +100,7 @@ final class AppModel {
                 return
             }
 
-            let isTrusted = await Self.readAccessibilityTrust(prompt: true)
+            let isTrusted = await Self.readMenuBarControlTrust(prompt: true)
             guard revision == permissionRevision else { return }
 
             let requestedState = permissionSession.requestAccess(
@@ -248,9 +248,9 @@ final class AppModel {
         }.value
     }
 
-    private nonisolated static func readAccessibilityTrust(prompt: Bool) async -> Bool {
+    private nonisolated static func readMenuBarControlTrust(prompt: Bool) async -> Bool {
         await Task.detached(priority: .userInitiated) {
-            SystemAccessibilityTrust.isTrusted(prompt: prompt)
+            SystemMenuBarControlTrust.isTrusted(prompt: prompt)
         }.value
     }
 }
