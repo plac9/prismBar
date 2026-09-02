@@ -105,21 +105,30 @@ struct PrismContentSection<Content: View>: View {
 
     var body: some View {
         content
-            .padding(.vertical, 16)
-            .padding(.leading, tint == nil ? 0 : 16)
+            .padding(16)
+            .padding(.leading, tint == nil ? 0 : 4)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .overlay(alignment: .top) {
-                Divider()
+            .background(
+                Color(nsColor: .controlBackgroundColor),
+                in: RoundedRectangle(cornerRadius: 16, style: .continuous)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(Color(nsColor: .separatorColor).opacity(0.45), lineWidth: 0.5)
+                    .accessibilityHidden(true)
             }
             .overlay(alignment: .leading) {
                 if let tint {
                     Capsule()
                         .fill(tint.gradient)
                         .frame(width: 3)
-                        .padding(.vertical, 16)
+                        .padding(.vertical, 14)
+                        .padding(.leading, 8)
                         .accessibilityHidden(true)
                 }
             }
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("workspace.contentSection")
     }
 }
 

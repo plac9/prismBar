@@ -124,6 +124,7 @@ Repository work is preserved, but this phase is frozen and excluded from the shi
 - [x] Build onboarding, empty, unavailable, revoked, error, and recovery surfaces.
 - [x] Integrate the native system window background, semantic content surfaces, and standard interactive glass controls.
 - [x] Adopt system Liquid Glass components and remove decorative legacy styling.
+- [x] Refine informational destinations into native system-color groups with consistent margins and testable semantic structure.
 - [x] Record current Apple guidance and public macOS 27 menu bar failure reports in a maintained compatibility matrix with explicit safeguards and physical gates.
 - [x] Implement keyboard navigation, help, focus, and accessibility actions.
 - [x] Run automated action, non-text contrast, element-detection, hit-region, hierarchy, and description audits across every shipping workspace destination, native Settings, and `prismDeck`. Xcode 27 beta static-text contrast false positives remain covered by semantic-color source policy and visual review.

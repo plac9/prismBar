@@ -32,6 +32,14 @@ rg -Fq 'struct PrismContentSection' App/Design/PrismVisuals.swift || {
   fail 'the native content section is missing'
 }
 
+rg -Fq 'Color(nsColor: .controlBackgroundColor)' App/Design/PrismVisuals.swift || {
+  fail 'informational content is not grouped with a native system surface'
+}
+
+rg -Fq '.accessibilityIdentifier("workspace.contentSection")' App/Design/PrismVisuals.swift || {
+  fail 'native content groups are not exposed to accessibility verification'
+}
+
 if rg -q '\.regularMaterial' App/Design/PrismVisuals.swift; then
   fail 'persistent content sections still create repeated material cards'
 fi
@@ -75,4 +83,4 @@ rg -Fq 'Move to First Position' App/Features/Overview/PrismRailView.swift || {
   fail 'Rail items do not provide direct positional accessibility actions'
 }
 
-printf 'Liquid Glass audit passed: native navigation, open content sections, and interactive custom glass remain separated.\n'
+printf 'Liquid Glass audit passed: native navigation, semantic content groups, and interactive custom glass remain separated.\n'

@@ -43,10 +43,12 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 
 ### Changed
 
+- Refined Home, Automation, Privacy, and About into restrained native grouped surfaces with consistent margins,
+  clearer hierarchy, and a distinct local-privacy summary on Home.
 - Aligned archive, notarization, physical-acceptance, assurance, architecture, security, and dependency evidence with the core-only shipping scope; the preserved Cards and prismCalc XPC work remain dormant and excluded from the application bundle.
-- Replaced repeated material-backed content cards with open native sections and restrained semantic accent rules.
+- Replaced repeated material-backed content cards with semantic system-color groups and restrained accent rules.
 - Let the native macOS list own the Menu Bar inventory surface and reduced Rail chrome to separators.
-- Rebuilt the workspace around one adaptive Prism Field canvas, a native floating sidebar, open content sections,
+- Rebuilt the workspace around one adaptive Prism Field canvas, a native floating sidebar, semantic content groups,
   and interactive Liquid Glass reserved for controls and draggable Rail items.
 - Replaced the custom canvas palette and Settings backdrop with native window backgrounds, semantic accent color,
   native Settings forms, macOS title typography, and increased-contrast-aware presentation.

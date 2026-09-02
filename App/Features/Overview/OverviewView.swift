@@ -49,24 +49,26 @@ struct OverviewView: View {
 
                 permissionSurface
 
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Private by construction")
-                        .font(.headline)
+                PrismContentSection {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Private by construction")
+                            .font(.headline)
 
-                    ViewThatFits(in: .horizontal) {
-                        HStack(spacing: 24) {
-                            LocalBoundary(title: "No screen capture", symbol: "eye.slash")
-                            LocalBoundary(title: "No telemetry", symbol: "waveform.path.ecg.rectangle")
-                            LocalBoundary(title: "No uploads", symbol: "lock.shield")
-                        }
+                        ViewThatFits(in: .horizontal) {
+                            HStack(spacing: 24) {
+                                LocalBoundary(title: "No screen capture", symbol: "eye.slash")
+                                LocalBoundary(title: "No telemetry", symbol: "waveform.path.ecg.rectangle")
+                                LocalBoundary(title: "No uploads", symbol: "lock.shield")
+                            }
 
-                        VStack(alignment: .leading, spacing: 10) {
-                            LocalBoundary(title: "No screen capture", symbol: "eye.slash")
-                            LocalBoundary(title: "No telemetry", symbol: "waveform.path.ecg.rectangle")
-                            LocalBoundary(title: "No uploads", symbol: "lock.shield")
+                            VStack(alignment: .leading, spacing: 10) {
+                                LocalBoundary(title: "No screen capture", symbol: "eye.slash")
+                                LocalBoundary(title: "No telemetry", symbol: "waveform.path.ecg.rectangle")
+                                LocalBoundary(title: "No uploads", symbol: "lock.shield")
+                            }
                         }
+                        .foregroundStyle(.secondary)
                     }
-                    .foregroundStyle(.secondary)
                 }
             }
             .frame(maxWidth: 720, alignment: .leading)

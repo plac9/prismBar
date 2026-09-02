@@ -47,7 +47,7 @@ if [ "$test_selection" = "--source-audit" ]; then
     echo "Manual AppKit ownership remains for a SwiftUI application window." >&2
     exit 1
   fi
-  echo "UI source audit passed: native navigation, open content sections, and interactive glass are separated."
+  echo "UI source audit passed: native navigation, semantic content groups, and interactive glass are separated."
   exit 0
 fi
 

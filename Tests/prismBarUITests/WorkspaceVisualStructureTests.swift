@@ -18,4 +18,52 @@ final class WorkspaceVisualStructureTests: XCTestCase {
                 .firstMatch.exists
         )
     }
+
+    func testInformationalDestinationsExposeFocusedGroupedContent() {
+        let application = prismBarApplication()
+        application.launch()
+
+        let canvas = application.descendants(matching: .any)["workspace.prismaticCanvas"]
+        XCTAssertTrue(canvas.waitForExistence(timeout: 5))
+
+        for destination in ["Home", "Automation", "Privacy", "About"] {
+            let cell = application.descendants(matching: .any)["workspace.sidebar"].cells
+                .containing(.staticText, identifier: destination)
+                .element
+            XCTAssertTrue(cell.waitForExistence(timeout: 5))
+            cell.click()
+
+            let section = application.descendants(matching: .any)
+                .matching(identifier: "workspace.contentSection")
+                .firstMatch
+            XCTAssertTrue(
+                section.waitForExistence(timeout: 5),
+                "Missing grouped content in \(destination)"
+            )
+            XCTAssertGreaterThan(
+                section.frame.minX,
+                canvas.frame.minX + 20,
+                "\(destination) content touches the canvas edge"
+            )
+            XCTAssertLessThan(
+                section.frame.maxX,
+                canvas.frame.maxX - 20,
+                "\(destination) content touches the canvas edge"
+            )
+        }
+    }
+
+    func testHomeKeepsReadinessRecoveryAndPrivacyInDistinctGroups() {
+        let application = prismBarApplication()
+        application.launch()
+
+        let sections = application.descendants(matching: .any)
+            .matching(identifier: "workspace.contentSection")
+
+        XCTAssertEqual(
+            sections.count,
+            3,
+            "Home should separate readiness, recovery, and the local privacy boundary"
+        )
+    }
 }
