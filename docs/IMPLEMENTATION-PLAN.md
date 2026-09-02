@@ -141,7 +141,7 @@ Repository work is preserved, but this phase is frozen and excluded from the shi
 - [x] Audit release executables, linked libraries, local paths, credential-shaped strings, bundle identifiers, and entitlement allowlists in CI.
 - [x] Scan Git history, source, tests, tracked artifacts, public metadata, release products, and symbols for secrets and personal information.
 - [x] Dependency license inventory, build-tool inventory, and SPDX 2.3 source SBOM.
-- [ ] Similarity audit against the frozen GPL reference.
+- [x] Add and execute a privacy-safe exact-content and normalized-source similarity audit against frozen GPL reference revision `06f6483c1a7efcad6c3f578505c4d7b1d3bb1e6b` without emitting reference identifiers or content.
 - [ ] Confirm the public source revision exactly matches every distributed MPL-covered binary.
 - [x] Exercise plugin decoding and calculator commands with deterministic hostile-input corpora.
 - [x] Run static analysis plus Address Sanitizer and Thread Sanitizer across the Swift modules.
