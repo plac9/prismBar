@@ -250,7 +250,7 @@ final class AppModel {
 
     private nonisolated static func readAccessibilityTrust(prompt: Bool) async -> Bool {
         await Task.detached(priority: .userInitiated) {
-            SystemAccessibilityTrust.isTrusted(prompt: prompt)
+            SystemMenuBarControlTrust.isTrusted(prompt: prompt)
         }.value
     }
 }

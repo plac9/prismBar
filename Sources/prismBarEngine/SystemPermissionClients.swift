@@ -3,17 +3,30 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 @preconcurrency import ApplicationServices
+import CoreGraphics
 import Foundation
 import Security
 
-public enum SystemAccessibilityTrust {
+public enum SystemMenuBarControlTrust {
     public static func isTrusted(prompt: Bool = false) -> Bool {
-        guard prompt else {
-            return AXIsProcessTrusted()
+        let accessibility: Bool
+        let eventPosting: Bool
+
+        if prompt {
+            let options = [
+                kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true
+            ] as CFDictionary
+            accessibility = AXIsProcessTrustedWithOptions(options)
+            eventPosting = CGRequestPostEventAccess()
+        } else {
+            accessibility = AXIsProcessTrusted()
+            eventPosting = CGPreflightPostEventAccess()
         }
 
-        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: prompt] as CFDictionary
-        return AXIsProcessTrustedWithOptions(options)
+        return MenuBarControlTrust.isGranted(
+            accessibility: accessibility,
+            eventPosting: eventPosting
+        )
     }
 }
 

@@ -22,6 +22,12 @@ public enum AccessibilityPermissionState: Equatable, Sendable {
     case granted
 }
 
+public enum MenuBarControlTrust {
+    public static func isGranted(accessibility: Bool, eventPosting: Bool) -> Bool {
+        accessibility && eventPosting
+    }
+}
+
 public struct AccessibilityPermissionSnapshot: Equatable, Sendable {
     public let isStableInstall: Bool
     public let identity: CodeIdentity?
