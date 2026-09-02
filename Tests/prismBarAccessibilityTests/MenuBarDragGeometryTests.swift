@@ -119,7 +119,7 @@ struct MenuBarMoveAuthorizationTests {
                     MenuBarInputSurface(
                         frame: MenuBarItemFrame(minX: 0, minY: 0, width: 1200, height: 900),
                         reservedMenuBarHeight: 40
-                    )
+                    ),
                 ]
             }
         )
