@@ -4,6 +4,7 @@
 
 @testable import prismBarAccessibility
 import CoreGraphics
+import Foundation
 import prismBarCore
 import Testing
 
@@ -105,6 +106,55 @@ struct MenuBarMoveAuthorizationTests {
                 insertionEdge: .before,
                 deadline: OperationDeadline(timeout: .seconds(1))
             )
+        }
+    }
+
+    @Test("authorization is rechecked immediately before posting events")
+    func rechecksAuthorizationAfterValidation() async {
+        let authorization = AuthorizationProbe(results: [true, false])
+        let performer = NativeMenuBarMovePerformer(
+            authorizationCheck: { authorization.next() },
+            surfaceCatalog: {
+                [
+                    MenuBarInputSurface(
+                        frame: MenuBarItemFrame(minX: 0, minY: 0, width: 1200, height: 900),
+                        reservedMenuBarHeight: 40
+                    )
+                ]
+            }
+        )
+        let source = MenuBarItemFrame(minX: 900, minY: 8, width: 24, height: 24)
+        let destination = MenuBarItemFrame(minX: 800, minY: 8, width: 24, height: 24)
+
+        await #expect(throws: MenuBarAuthorizationError.permissionRevoked) {
+            try await performer.move(
+                source: source,
+                destination: destination,
+                insertionEdge: .before,
+                deadline: OperationDeadline(timeout: .seconds(1))
+            )
+        }
+        #expect(authorization.observedCallCount == 2)
+    }
+}
+
+private final class AuthorizationProbe: @unchecked Sendable {
+    private let lock = NSLock()
+    private var results: [Bool]
+    private var callCount = 0
+
+    var observedCallCount: Int {
+        lock.withLock { callCount }
+    }
+
+    init(results: [Bool]) {
+        self.results = results
+    }
+
+    func next() -> Bool {
+        lock.withLock {
+            callCount += 1
+            return results.isEmpty ? false : results.removeFirst()
         }
     }
 }
