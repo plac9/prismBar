@@ -270,6 +270,14 @@ private extension VerifiedMoveCoordinator {
            observed.section(for: plan.item) == verificationSection {
             return .success
         }
+        if plan.verificationSection == nil,
+           plan.requiresSectionObservation,
+           !directMoveSectionIsObservable(plan, observed: observed) {
+            if let observedIndex = observed.items.firstIndex(where: { $0.id == plan.item }) {
+                return .partial(observedIndex: observedIndex)
+            }
+            return .itemUnavailable
+        }
         if moveScopeOrder(
             item: plan.item,
             destination: plan.destinationItem,
@@ -291,6 +299,18 @@ private extension VerifiedMoveCoordinator {
             return .partial(observedIndex: observedIndex)
         }
         return .itemUnavailable
+    }
+
+    private func directMoveSectionIsObservable(
+        _ plan: MovePlan,
+        observed: MenuBarSnapshot
+    ) -> Bool {
+        guard let sourceSection = observed.section(for: plan.item),
+              let destinationSection = observed.section(for: plan.destinationItem)
+        else {
+            return false
+        }
+        return sourceSection == destinationSection && sourceSection != .controller
     }
 
     private func directPlacementMatches(

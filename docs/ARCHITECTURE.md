@@ -89,7 +89,7 @@ The engine separates observation, planning, execution, verification, and recover
 6. Compare the requested invariant with the observed result.
 7. Report success, partial movement, rejection, topology change, permission loss, timeout, or unsupported item.
 
-The user interface never optimistically mutates the authoritative topology. It may show progress tied to the action identifier.
+The user interface never optimistically mutates the authoritative topology. It may show progress tied to the action identifier. Direct-move success also requires the source and destination to remain classifiable within the same observed section; a transient scan that omits the app-owned section divider is retried and is never published as the verified interface or recovery snapshot.
 
 ### Action receipts and recovery
 

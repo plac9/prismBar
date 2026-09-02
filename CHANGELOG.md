@@ -55,6 +55,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 
 ### Fixed
 
+- Retried direct-move verification when a transient macOS scan omits prismBar's section divider, preventing a verified move from publishing an empty Rail or disabling recovery.
 - Made Rail resolve a stale display selection before its first render so an existing topology cannot temporarily appear as an empty menu bar until Refresh.
 - Removed obsolete release-workflow requirements for a bundled prismCalc XPC service while retaining independent dormant-plugin security verification.
 - Canonicalized the generated root Xcode package reference so reproducibility checks also hold in the primary `prismBar` checkout.

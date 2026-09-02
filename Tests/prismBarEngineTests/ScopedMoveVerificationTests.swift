@@ -140,6 +140,42 @@ struct ScopedMoveVerificationTests {
         #expect(result.verifiedSnapshot == observed)
     }
 
+    @Test("retries an anchored placement until the menu bar section is observable")
+    func retriesAnchoredPlacementWithoutDivider() async throws {
+        let initial = sectionedSnapshot(
+            hiddenNames: [],
+            visibleNames: ["one", "two", "three", "four"],
+            generation: 1
+        )
+        let stable = sectionedSnapshot(
+            hiddenNames: [],
+            visibleNames: ["four", "one", "two", "three"],
+            generation: 3
+        )
+        let missingDivider = MenuBarSnapshot(
+            generation: 2,
+            items: stable.items.filter { $0.role != .hiddenSectionDivider },
+            unavailableSourceCount: 1
+        )
+        let destinationIndex = try #require(
+            initial.items.firstIndex(where: { $0.id == id("one") })
+        )
+        let plan = try MovePlanner().plan(
+            item: id("four"),
+            to: destinationIndex,
+            in: initial
+        )
+        let coordinator = VerifiedMoveCoordinator(
+            reader: ScopedSnapshotSequenceReader(snapshots: [initial, missingDivider, stable]),
+            performer: ScopedRecordingMovePerformer()
+        )
+
+        let result = await coordinator.executeWithObservation(plan)
+
+        #expect(result.outcome == .success)
+        #expect(result.verifiedSnapshot == stable)
+    }
+
     @Test("rejects target placement when surviving anchors are scrambled")
     func rejectsScrambledSurvivingAnchors() async throws {
         let initial = sectionedSnapshot(

@@ -15,6 +15,7 @@ public struct MovePlan: Equatable, Sendable {
     public let sourceScopeOrder: [MenuBarItemID]
     public let expectedScopeOrder: [MenuBarItemID]
     public let verificationSection: MenuBarSection?
+    public let requiresSectionObservation: Bool
 
     public init(
         item: MenuBarItemID,
@@ -26,7 +27,8 @@ public struct MovePlan: Equatable, Sendable {
         expectedOrder: [MenuBarItemID],
         sourceScopeOrder: [MenuBarItemID],
         expectedScopeOrder: [MenuBarItemID],
-        verificationSection: MenuBarSection? = nil
+        verificationSection: MenuBarSection? = nil,
+        requiresSectionObservation: Bool = false
     ) {
         self.item = item
         self.destinationItem = destinationItem
@@ -38,6 +40,7 @@ public struct MovePlan: Equatable, Sendable {
         self.sourceScopeOrder = sourceScopeOrder
         self.expectedScopeOrder = expectedScopeOrder
         self.verificationSection = verificationSection
+        self.requiresSectionObservation = requiresSectionObservation
     }
 }
 
@@ -131,7 +134,9 @@ public struct MovePlanner: Sendable {
             expectedOrder: expectedOrder,
             sourceScopeOrder: sourceScopeOrder,
             expectedScopeOrder: expectedScopeOrder,
-            verificationSection: nil
+            verificationSection: nil,
+            requiresSectionObservation: snapshot.section(for: itemID) != nil &&
+                snapshot.section(for: itemID) == snapshot.section(for: destinationItem)
         )
     }
 }
