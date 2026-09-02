@@ -171,8 +171,17 @@ public actor NativeMenuBarMovePerformer: MenuBarMovePerforming {
     private let lifecycle = DeadlineAwareMenuBarDragLifecycle(
         pauser: SystemMenuBarDragPauser()
     )
+    private let authorizationCheck: @Sendable () -> Bool
 
-    public init() {}
+    public init() {
+        authorizationCheck = {
+            AXIsProcessTrusted() && CGPreflightPostEventAccess()
+        }
+    }
+
+    init(authorizationCheck: @escaping @Sendable () -> Bool) {
+        self.authorizationCheck = authorizationCheck
+    }
 
     public func move(
         source: MenuBarItemFrame,
@@ -181,7 +190,7 @@ public actor NativeMenuBarMovePerformer: MenuBarMovePerforming {
         deadline: OperationDeadline
     ) async throws {
         try deadline.check()
-        guard AXIsProcessTrusted() else {
+        guard authorizationCheck() else {
             throw MenuBarAuthorizationError.permissionRevoked
         }
         try Task.checkCancellation()

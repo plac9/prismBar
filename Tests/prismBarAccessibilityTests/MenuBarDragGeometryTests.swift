@@ -89,6 +89,26 @@ struct MenuBarDragGeometryTests {
     }
 }
 
+@Suite("Menu bar move authorization")
+struct MenuBarMoveAuthorizationTests {
+    @Test("revoked event-posting access stops the move at the action boundary")
+    func rejectsRevokedAuthorization() async {
+        let performer = NativeMenuBarMovePerformer(
+            authorizationCheck: { false }
+        )
+        let frame = MenuBarItemFrame(minX: 0, minY: 0, width: 24, height: 24)
+
+        await #expect(throws: MenuBarAuthorizationError.permissionRevoked) {
+            try await performer.move(
+                source: frame,
+                destination: frame,
+                insertionEdge: .before,
+                deadline: OperationDeadline(timeout: .seconds(1))
+            )
+        }
+    }
+}
+
 @Suite("Menu bar event timing")
 struct MenuBarEventTimingTests {
     @Test("refreshes a prepared event at the moment it is posted")
