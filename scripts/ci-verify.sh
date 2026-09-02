@@ -23,6 +23,7 @@ done
 ./scripts/audit-tool-versions.sh
 ./scripts/audit-licensing.sh
 ./scripts/audit-public-safety.sh
+Tests/ReleaseWorkflowTests/public_safety_github_merge_contract.sh
 ./scripts/audit-liquid-glass.sh
 ./scripts/audit-macos-27-compatibility.sh
 Tests/ReleaseWorkflowTests/archive_contract.sh

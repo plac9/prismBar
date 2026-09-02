@@ -54,7 +54,7 @@ while IFS= read -r revision; do
 done < <(git rev-list --all)
 
 if git log --all --format='%ae%n%ce' | LC_ALL=C sort -u | \
-  rg -v -q '^[0-9]+\+plac9@users\.noreply\.github\.com$'; then
+  rg -v -q '^([0-9]+\+plac9@users\.noreply\.github\.com|noreply@github\.com)$'; then
   fail 'Git history contains an author or committer email outside the approved public address'
 fi
 
