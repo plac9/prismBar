@@ -58,6 +58,7 @@ The shipping application is intentionally limited to menu bar discovery, hide an
 - [x] Implement order-preserving multi-item Hide and Show with a fresh verification for every item.
 - [x] Implement hide, show, section visibility, and reset semantics.
 - [x] Verify every operation against a fresh topology snapshot before reporting success.
+- [x] Require anchored move verification to keep its section divider observable; retry a transient partial scan instead of publishing incomplete topology or invalidating recovery.
 - [x] Reject input when the target display has no reserved menu bar area or geometry crosses displays.
 - [x] Add equivalent keyboard and accessibility actions.
 - [x] Prove mouse-up, Command-up, and pointer restoration on cancellation and failure after one bounded Command-drag.
@@ -129,7 +130,7 @@ Repository work is preserved, but this phase is frozen and excluded from the shi
 - [x] Verify every shipping destination remains operational in light, dark, increased contrast, reduced transparency, and reduced motion launch variants.
 - [ ] Complete physical VoiceOver, text-size, and visual accessibility verification.
 - [x] Implement original application and template menu bar icons with no thaw imagery.
-- [x] Generate and visually inspect the required HTML UI audit from exact shipping surfaces.
+- [x] Generate and visually inspect the required HTML UI audit from exact shipping surfaces for Development revision `ec5345f26baadfe9f673bf78c6761ae5da822bf5`.
 
 ## Phase 9: Security, privacy, and licensing assurance
 
@@ -150,12 +151,12 @@ Repository work is preserved, but this phase is frozen and excluded from the shi
 
 ## Phase 10: Signed physical release proof
 
-Exact revision `ed4b6b8f4b3fa196f14c290f44b9b4fed4cb256e` passed the full core-only CI contract on September 1, 2026. Its first secure release run was intentionally stopped at the interactive certificate-transfer passphrase gate during session wrap-up; no current archive, notarized distribution, or installed release candidate was produced.
+Exact revision `ec5345f26baadfe9f673bf78c6761ae5da822bf5` passed the full core-only CI contract, strict lint, history secret scan, sanitizers, static analysis, signed Development archive audit, and revision-bound UI audit on September 1, 2026. The Development archive is installed at `/Applications/prismBar.app`; it is not a notarized distribution candidate.
 
 - [x] Verify Apple identifier and signing configuration for `com.laclairtech.prismbar`.
 - [x] Require an explicit dedicated release keychain containing only the approved certificate fingerprint so archive and notarization cannot fall back to the interactive login Keychain or another signing identity.
 - [x] Add a fail-closed physical acceptance recorder that revalidates exact installed provenance and requires one explicit physical observation per gate.
-- [x] Prove a direct multi-position application-item move and process-local Undo during a stable partial scan on physical macOS 27 using signed installed Development revision `96be5046ab3b00cb15572d7feb3e8fc4bdce1520`; RocketSim moved directly from position 1 to the last movable position, Undo restored the exact original order, relaunch preserved that order and Accessibility trust, and the protected macOS-owned anchors remained fixed.
+- [x] Prove direct multi-position movement and process-local Undo during a stable partial scan on physical macOS 27 using signed installed Development revision `ec5345f26baadfe9f673bf78c6761ae5da822bf5`; 1Password moved directly from position 2 to position 5, the Rail remained populated with all eight observed items, Undo restored the exact original order, and Accessibility remained ready.
 - [ ] Archive the final clean revision with Xcode 27 using Developer ID and Hardened Runtime.
 - [ ] Verify nested signing order and exact entitlement allowlists on that archive.
 - [ ] Package, notarize, staple, and validate the distribution artifact.
