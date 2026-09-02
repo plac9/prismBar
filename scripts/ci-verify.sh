@@ -24,6 +24,7 @@ done
 ./scripts/audit-licensing.sh
 ./scripts/audit-public-safety.sh
 Tests/ReleaseWorkflowTests/public_safety_github_merge_contract.sh
+Tests/ReleaseWorkflowTests/hosted_app_test_boundary_contract.sh
 ./scripts/audit-liquid-glass.sh
 ./scripts/audit-macos-27-compatibility.sh
 Tests/ReleaseWorkflowTests/archive_contract.sh
@@ -90,16 +91,12 @@ Tests/ReleaseWorkflowTests/swiftlint_scope_contract.sh
 swift test
 swift test -c release
 
-xcodebuild \
-  -project prismBar.xcodeproj \
-  -scheme prismBar \
-  -destination 'platform=macOS,arch=arm64' \
-  -derivedDataPath "$verification_root/AppTests" \
-  CODE_SIGNING_ALLOWED=NO \
-  CODE_SIGNING_REQUIRED=NO \
-  "PRISM_SOURCE_REVISION=$revision" \
-  test \
-  '-only-testing:prismBarAppTests'
+app_test_result_path="$verification_root/app-test-mode"
+./scripts/verify-app-tests.sh \
+  "$verification_root/AppTests" \
+  "$revision" \
+  "$app_test_result_path"
+app_test_mode="$(cat "$app_test_result_path")"
 
 swift test --sanitize=address --scratch-path \
   "${CI_ADDRESS_SANITIZER_DIR:-$verification_root/SwiftPM-ASan}"
@@ -130,6 +127,7 @@ jq -n \
   --arg revision "$revision" \
   --arg startedAt "$started_at" \
   --arg completedAt "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
+  --arg appTestMode "$app_test_mode" \
   '{
     schemaVersion: 1,
     product: "prismBar",
@@ -143,12 +141,20 @@ jq -n \
       "Git history secret scan",
       "Swift lint",
       "debug and release tests",
-      "hosted application state tests",
+      (if $appTestMode == "executed" then
+        "application state tests executed on macOS 27"
+      else
+        "application state tests compiled for macOS 27; physical execution pending"
+      end),
       "Address Sanitizer",
       "Thread Sanitizer",
       "Xcode static analysis",
       "unsigned release bundle audit"
     ],
+    appTests: {
+      mode: $appTestMode,
+      requiredRuntime: "physical macOS 27"
+    },
     result: "passed"
   }' > "$evidence_path"
 

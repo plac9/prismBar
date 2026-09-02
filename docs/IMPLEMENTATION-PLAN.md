@@ -27,7 +27,7 @@ The shipping application is intentionally limited to menu bar discovery, hide an
 - [x] Add explicit host and sandboxed-service entitlements.
 - [x] Add privacy manifest and generated Info.plists.
 - [x] Add deterministic fixtures containing synthetic menu items only.
-- [x] Add ephemeral GitHub-hosted Xcode 27 CI with no signing or repository secrets.
+- [x] Add ephemeral GitHub-hosted Xcode 27 SDK CI with no signing or repository secrets; compile app tests when the hosted macOS runtime is older than 27 and reserve execution proof for the physical macOS 27 gate.
 - [x] Prove package tests and unsigned app builds with Xcode 27.
 
 ## Phase 2: Permission and identity foundation

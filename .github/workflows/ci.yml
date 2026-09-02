@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Xcode 27 verification
+    name: Xcode 27 SDK verification
     runs-on: xcode-27
     timeout-minutes: 45
     env:
