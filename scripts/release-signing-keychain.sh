@@ -28,7 +28,7 @@ validate_release_signing_keychain() {
   release_signing_keychain="$requested_keychain"
   release_signing_identity="$(printf '%s' "$requested_identity" | tr '[:lower:]' '[:upper:]')"
 
-  identity_output="$(security find-identity -v -p codesigning "$release_signing_keychain")" || \
+  identity_output="$(security find-identity -v -p codesigning "$release_signing_keychain" 2>/dev/null)" || \
     fail 'the dedicated signing keychain could not be inspected without interaction'
 
   identity_count="$(printf '%s\n' "$identity_output" | \

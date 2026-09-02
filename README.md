@@ -64,6 +64,30 @@ invalid observation with `--invalidate GATE`. Every update revalidates the clean
 Developer ID identity, Team ID, Gatekeeper result, notarization ticket, and installed executable hash.
 There is no blanket confirmation mode.
 
+## Release sequence
+
+Release credentials are provisioned out of band in a dedicated, nonsymlink Keychain. The repository
+does not import certificates, read 1Password items, accept raw notarization credentials, or consult the
+login or System Keychain. Before creating an artifact, run `scripts/release-readiness.sh` with the named
+notary profile, dedicated Keychain path, and approved certificate fingerprint. The check is read-only,
+non-interactive, and reports only generic gate status; it requires clean `main`, exact-revision CI and
+nine-surface UI evidence, source audits, the isolated signing identity, and working Apple notarization
+authentication.
+
+After archive and notarization, install only through `scripts/install-release-candidate.sh` using the
+matching absolute DMG and evidence paths under ignored `build/Distribution`. The installer mounts the
+image read-only, verifies hashes, Developer ID identity, Team ID, embedded source revision, signatures,
+staples, Gatekeeper, and the release-bundle allowlist before touching `/Applications`. It stages the new
+bundle beside the destination, preserves the prior app under ignored `build/InstallRollback`, and
+restores that bundle if post-install verification fails. It never escalates privileges or launches the
+application.
+
+The installer does not complete release acceptance. Every physical macOS 27 gate must still be observed
+and recorded individually, including clean-account Gatekeeper behavior. Direct distribution remains the
+only supported channel because the required cross-process Accessibility behavior is incompatible with
+App Sandbox. Publication, pricing, license presentation, source-repository creation, and artifact release
+remain owner-gated.
+
 ## Status
 
 Architecture is locked and the clean-room implementation is in progress. No release claim should be inferred until the physical macOS 27, signing, notarization, security, privacy, and accessibility gates in `docs/IMPLEMENTATION-PLAN.md` pass.

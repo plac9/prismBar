@@ -59,6 +59,7 @@ run_validation
 for required in \
   'exactly one valid code-signing identity' \
   'release_signing_identity' \
+  '2>/dev/null' \
   'Developer ID Application: Patrick LaClair (N8A5T2PZY9)'; do
   rg -Fq -- "$required" "$contract" || {
     printf 'Release signing keychain contract failed: missing %s.\n' "$required" >&2

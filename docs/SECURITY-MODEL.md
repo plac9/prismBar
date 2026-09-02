@@ -132,6 +132,8 @@ These controls describe preserved future-facing code. The core release prevents 
 - Signing credentials remain in Apple tooling or 1Password and are never printed.
 - Release builds come from a clean signed commit and generate an SBOM and checksums.
 - Release automation requires an explicit dedicated keychain containing exactly one valid code-signing identity and the approved certificate fingerprint. Login and system keychains are rejected so signing cannot fall back to interactive personal credentials or unrelated identities.
+- Release readiness validates the isolated identity, exact-revision CI and visual evidence, source audits, and named notarization profile without printing Keychain paths, certificate details, profile details, submission history, environment values, or credentials.
+- Shipping installation accepts only the current revision's notarized DMG and evidence from the ignored release directory. It validates both artifacts before replacing the app, preserves the previous bundle in ignored rollback storage, quarantines a rejected replacement, and restores the prior bundle when post-install verification fails.
 - Routine UI tests and visual captures force local ad-hoc signing, so development automation cannot search the login Keychain or request its password.
 - Dormant plugin tests use DEBUG-only ad-hoc trust seams for isolated protocol testing. Neither those seams nor the plugin service are present in the shipping application target.
 - The release bundle audit rejects any embedded XPC service or linked plugin runtime in the core release.
@@ -170,6 +172,7 @@ Every entitlement addition requires an ADR, privacy update, threat-model update,
 - `codesign --verify --deep --strict`, `spctl`, notarization, and stapler validation pass
 - notarization accepts only a named Keychain credential profile; raw Apple IDs, passwords, API keys, key identifiers, and issuer values are not accepted by repository automation
 - the stapled application and stapled APFS disk image are assessed separately, and revision-bound evidence records both Apple submission identifiers and the final disk-image hash
+- installation revalidates the mounted, staged, and installed application against the same revision-bound executable hash and preserves a recoverable prior bundle
 
 ## Residual risks
 

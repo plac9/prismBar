@@ -31,6 +31,8 @@ Tests/ReleaseWorkflowTests/assurance_contract.sh
 Tests/ReleaseWorkflowTests/ui_qa_signing_contract.sh
 Tests/ReleaseWorkflowTests/physical_acceptance_contract.sh
 Tests/ReleaseWorkflowTests/release_signing_keychain_contract.sh
+Tests/ReleaseWorkflowTests/release_readiness_contract.sh
+Tests/ReleaseWorkflowTests/install_release_contract.sh
 Tests/ReleaseWorkflowTests/core_shipping_contract.sh
 Tests/ReleaseWorkflowTests/local_package_normalization_contract.sh
 Tests/ReleaseWorkflowTests/clean_room_similarity_contract.sh

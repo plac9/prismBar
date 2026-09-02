@@ -152,11 +152,13 @@ Repository work is preserved, but this phase is frozen and excluded from the shi
 
 ## Phase 10: Signed physical release proof
 
-Exact revision `ec5345f26baadfe9f673bf78c6761ae5da822bf5` passed the full core-only CI contract, strict lint, history secret scan, sanitizers, static analysis, signed Development archive audit, and revision-bound UI audit on September 1, 2026. The Development archive is installed at `/Applications/prismBar.app`; it is not a notarized distribution candidate.
+Exact clean revision `924f79cd0d1b1b22ead07e2b57fbe72df2492545` passed the full core-only CI contract and nine-surface revision-bound UI audit on September 2, 2026. The app installed at `/Applications/prismBar.app` remains Apple Development revision `a153e65f3da48a4c9b63109720eb8d4d0d2499ac`; it is neither this source revision nor a notarized distribution candidate.
 
 - [x] Verify Apple identifier and signing configuration for `com.laclairtech.prismbar`.
 - [x] Require an explicit dedicated release keychain containing only the approved certificate fingerprint so archive and notarization cannot fall back to the interactive login Keychain or another signing identity.
 - [x] Add a fail-closed physical acceptance recorder that revalidates exact installed provenance and requires one explicit physical observation per gate.
+- [x] Add a privacy-safe release-readiness gate for clean-main evidence, the isolated signing identity, source audits, and named notarization authentication.
+- [x] Add a transactional shipping installer that validates the notarized candidate before replacement, preserves rollback, and restores the prior app on post-install failure.
 - [x] Prove direct multi-position movement and process-local Undo during a stable partial scan on physical macOS 27 using signed installed Development revision `ec5345f26baadfe9f673bf78c6761ae5da822bf5`; 1Password moved directly from position 2 to position 5, the Rail remained populated with all eight observed items, Undo restored the exact original order, and Accessibility remained ready.
 - [ ] Archive the final clean revision with Xcode 27 using Developer ID and Hardened Runtime.
 - [ ] Verify nested signing order and exact entitlement allowlists on that archive.

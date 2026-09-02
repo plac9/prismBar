@@ -16,6 +16,8 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 - Revision-bound CI, visual, endurance, distribution, public-source, and physical acceptance states in the assurance report.
 - A source-backed macOS 27 compatibility matrix with explicit safeguards and unresolved physical acceptance gates.
 - A dedicated release-keychain contract that prevents archive and notarization workflows from searching the interactive login Keychain.
+- A privacy-safe release-readiness command that verifies exact-revision evidence, isolated signing, source audits, and named notarization authentication before artifact creation.
+- A transactional notarized-release installer that validates before replacement, preserves the prior application, and restores it after failed post-install verification.
 - A DEBUG-only ad-hoc XPC test seam for noninteractive plugin crash, hang, timeout, and recovery assurance without weakening Release trust.
 - A privacy-safe clean-room similarity audit that compares exact hashes and normalized source-line sets without emitting reference identifiers or content.
 - Clean-room repository with independent Git history.
