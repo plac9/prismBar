@@ -28,9 +28,26 @@ done
 rg -Fq '"averageIdleCPUPercent"' "$script" || fail 'aggregate CPU evidence is missing'
 rg -Fq '"maximumPhysicalFootprintMiB"' "$script" || fail 'aggregate footprint evidence is missing'
 rg -Fq '"maximumThreadCount"' "$script" || fail 'aggregate thread evidence is missing'
+rg -Fq '"initialPhysicalFootprintMiB"' "$script" || \
+  fail 'initial aggregate footprint evidence is missing'
+rg -Fq '"endingPhysicalFootprintMiB"' "$script" || \
+  fail 'ending aggregate footprint evidence is missing'
+rg -Fq '"physicalFootprintGrowthMiB"' "$script" || \
+  fail 'aggregate footprint-growth evidence is missing'
+rg -Fq '"initialThreadCount"' "$script" || fail 'initial aggregate thread evidence is missing'
+rg -Fq '"endingThreadCount"' "$script" || fail 'ending aggregate thread evidence is missing'
+rg -Fq '"threadGrowth"' "$script" || fail 'aggregate thread-growth evidence is missing'
+rg -Fq "maximum_footprint_growth_mib='15.0'" "$script" || \
+  fail 'the footprint-growth tolerance must be explicit'
+rg -Fq "maximum_thread_growth='2'" "$script" || \
+  fail 'the thread-growth tolerance must be explicit'
 rg -Fq "fail 'settled idle CPU exceeds the runtime budget'" "$script" || \
   fail 'CPU threshold failures must return nonzero'
 rg -Fq "fail 'physical footprint exceeds the runtime budget'" "$script" || \
   fail 'footprint threshold failures must return nonzero'
+rg -Fq "fail 'physical footprint growth exceeds the runtime budget'" "$script" || \
+  fail 'footprint-growth failures must return nonzero'
+rg -Fq "fail 'thread growth exceeds the runtime budget'" "$script" || \
+  fail 'thread-growth failures must return nonzero'
 
 printf 'Runtime budget contract passed.\n'

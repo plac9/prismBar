@@ -10,6 +10,8 @@ fail() {
 expected_executable='/Applications/prismBar.app/Contents/MacOS/prismBar'
 maximum_idle_cpu_percent='1.0'
 maximum_footprint_mib='100.0'
+maximum_footprint_growth_mib='15.0'
+maximum_thread_growth='2'
 maximum_sample_count='60'
 sample_count='10'
 sample_interval_seconds='1'
@@ -74,6 +76,10 @@ fi
 cpu_total='0'
 maximum_footprint='0'
 maximum_threads='0'
+initial_footprint=''
+ending_footprint=''
+initial_threads=''
+ending_threads=''
 
 sample_footprint_mib() {
   local raw_value magnitude suffix
@@ -101,6 +107,12 @@ for ((sample_index = 1; sample_index <= sample_count; sample_index += 1)); do
     'BEGIN {printf "%.3f", (value > current ? value : current)}')"
   maximum_threads="$(awk -v current="$maximum_threads" -v value="$thread_value" \
     'BEGIN {print (value > current ? value : current)}')"
+  if [ "$sample_index" -eq 1 ]; then
+    initial_footprint="$footprint_value"
+    initial_threads="$thread_value"
+  fi
+  ending_footprint="$footprint_value"
+  ending_threads="$thread_value"
 
   if [ "$sample_index" -lt "$sample_count" ] && [ "$sample_interval_seconds" -gt 0 ]; then
     sleep "$sample_interval_seconds"
@@ -109,10 +121,16 @@ done
 
 average_cpu="$(awk -v total="$cpu_total" -v count="$sample_count" \
   'BEGIN {printf "%.3f", total / count}')"
+footprint_growth="$(awk -v ending="$ending_footprint" -v initial="$initial_footprint" \
+  'BEGIN {printf "%.3f", ending - initial}')"
+thread_growth="$((ending_threads - initial_threads))"
 awk -v value="$average_cpu" -v limit="$maximum_idle_cpu_percent" \
   'BEGIN {exit !(value < limit)}' || fail 'settled idle CPU exceeds the runtime budget'
 awk -v value="$maximum_footprint" -v limit="$maximum_footprint_mib" \
   'BEGIN {exit !(value < limit)}' || fail 'physical footprint exceeds the runtime budget'
+awk -v value="$footprint_growth" -v limit="$maximum_footprint_growth_mib" \
+  'BEGIN {exit !(value <= limit)}' || fail 'physical footprint growth exceeds the runtime budget'
+[ "$thread_growth" -le "$maximum_thread_growth" ] || fail 'thread growth exceeds the runtime budget'
 
 repository_root="$(git rev-parse --show-toplevel)"
 source_revision="$(/usr/libexec/PlistBuddy -c 'Print :PrismSourceRevision' \
@@ -128,10 +146,18 @@ jq -n \
   --arg measuredAt "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
   --argjson sampleCount "$sample_count" \
   --argjson averageCPU "$average_cpu" \
+  --argjson initialFootprint "$initial_footprint" \
+  --argjson endingFootprint "$ending_footprint" \
+  --argjson footprintGrowth "$footprint_growth" \
   --argjson maximumFootprint "$maximum_footprint" \
+  --argjson initialThreads "$initial_threads" \
+  --argjson endingThreads "$ending_threads" \
+  --argjson threadGrowth "$thread_growth" \
   --argjson maximumThreads "$maximum_threads" \
   --argjson cpuBudget "$maximum_idle_cpu_percent" \
   --argjson footprintBudget "$maximum_footprint_mib" \
+  --argjson footprintGrowthBudget "$maximum_footprint_growth_mib" \
+  --argjson threadGrowthBudget "$maximum_thread_growth" \
   '{
     "schemaVersion": 1,
     "product": "prismBar",
@@ -139,11 +165,19 @@ jq -n \
     "measuredAt": $measuredAt,
     "sampleCount": $sampleCount,
     "averageIdleCPUPercent": $averageCPU,
+    "initialPhysicalFootprintMiB": $initialFootprint,
+    "endingPhysicalFootprintMiB": $endingFootprint,
+    "physicalFootprintGrowthMiB": $footprintGrowth,
     "maximumPhysicalFootprintMiB": $maximumFootprint,
+    "initialThreadCount": $initialThreads,
+    "endingThreadCount": $endingThreads,
+    "threadGrowth": $threadGrowth,
     "maximumThreadCount": $maximumThreads,
     "budgets": {
       "maximumIdleCPUPercentExclusive": $cpuBudget,
-      "maximumPhysicalFootprintMiBExclusive": $footprintBudget
+      "maximumPhysicalFootprintMiBExclusive": $footprintBudget,
+      "maximumPhysicalFootprintGrowthMiBInclusive": $footprintGrowthBudget,
+      "maximumThreadGrowthInclusive": $threadGrowthBudget
     },
     "contentCaptured": false,
     "result": "passed"
