@@ -37,7 +37,7 @@
 - Consumes: `MenuBarObservationPresentation(itemCount:unavailableSourceCount:)`
 - Produces: `summary`, `inlineNotice`, and `accessibilityDescription` with consistent complete and limited-scan language.
 
-- [ ] **Step 1: Write failing presentation tests**
+- [x] **Step 1: Write failing presentation tests**
 
 ```swift
 @Test("limited scans remain usable and explain the limitation")
@@ -48,25 +48,25 @@ func limitedScanPresentation() {
 }
 ```
 
-- [ ] **Step 2: Run the focused test and verify the old `partial scan` expectation fails**
+- [x] **Step 2: Run the focused test and verify the old `partial scan` expectation fails**
 
 Run: `DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer swift test --filter PresentationCatalogTests`
 
 Expected: failure because the current summary says `items found, partial scan` and exposes no concise inline notice.
 
-- [ ] **Step 3: Implement the shared presentation contract**
+- [x] **Step 3: Implement the shared presentation contract**
 
 Add a non-optional `inlineNotice` only for limited scans and compose the accessibility description from the summary plus notice. Keep counts normalized to zero or greater.
 
-- [ ] **Step 4: Render the notice consistently**
+- [x] **Step 4: Render the notice consistently**
 
 Display the limited-scan notice directly below topology truth in the workspace and prismDeck with `info.circle`, semantic secondary text, and an accessibility identifier. Do not use a warning-only glyph or force amber text for a usable state.
 
-- [ ] **Step 5: Run focused core and UI-source tests**
+- [x] **Step 5: Run focused core and UI-source tests**
 
 Run the focused Swift test plus the app test target's presentation/visual-structure checks.
 
-- [ ] **Step 6: Commit the independently reviewable state-language change**
+- [x] **Step 6: Commit the independently reviewable state-language change**
 
 Commit message: `fix(ux): explain limited menu bar scans`
 
@@ -260,4 +260,3 @@ Mark only observed gates complete, update the exact public source revision, rege
 - [ ] **Step 6: Prune disposable build scratch and verify the final state**
 
 Retain revision-bound reports, screenshots, release evidence, and rollback artifact. Remove only disposable DerivedData, `.xcresult`, and temporary archives after their durable evidence has been validated. Confirm Git clean, remote synchronized, installed provenance exact, app running, VoiceOver restored off, and vizzini free-space headroom.
-

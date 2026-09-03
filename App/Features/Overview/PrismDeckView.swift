@@ -156,22 +156,29 @@ private extension PrismDeckView {
             unavailableSourceCount: snapshot.unavailableSourceCount
         )
 
-        return HStack(spacing: 8) {
-            Label(
-                presentation.summary,
-                systemImage: snapshot.isComplete ? "checkmark.circle.fill" : "exclamationmark.triangle.fill"
-            )
-            .prismFont(.caption, weight: .medium)
-            .foregroundStyle(snapshot.isComplete ? Color.secondary : .orange)
-            .help(presentation.unavailableSourcesWarning ?? presentation.summary)
-            .accessibilityHint(presentation.unavailableSourcesWarning ?? presentation.summary)
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                Label(
+                    presentation.summary,
+                    systemImage: snapshot.isComplete ? "checkmark.circle.fill" : "exclamationmark.triangle.fill"
+                )
+                .prismFont(.caption, weight: .medium)
+                .foregroundStyle(.secondary)
 
-            Spacer()
+                Spacer()
 
-            if model.isHiddenSectionCollapsed {
-                Label("Tucked away", systemImage: "eye.slash")
-                    .prismFont(.caption)
+                if model.isHiddenSectionCollapsed {
+                    Label("Tucked away", systemImage: "eye.slash")
+                        .prismFont(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            if let notice = presentation.inlineNotice {
+                Label(notice, systemImage: "info.circle")
+                    .prismFont(.caption2)
                     .foregroundStyle(.secondary)
+                    .accessibilityIdentifier("prismDeck.limitedScanNotice")
             }
         }
     }
@@ -293,7 +300,7 @@ private extension PrismDeckView {
             return "Accessibility needs attention"
         }
         return model.menuBarSnapshot?.isComplete == false
-            ? "Menu bar ready · partial scan"
+            ? "Menu bar ready · limited scan"
             : "Menu bar ready"
     }
 

@@ -61,16 +61,21 @@ public struct MenuBarObservationPresentation: Equatable, Sendable {
     public var summary: String {
         let items = "\(itemCount) \(itemCount == 1 ? "item" : "items")"
         guard unavailableSourceCount > 0 else {
-            return items
+            return "\(items) ready"
         }
-        return "\(items) found, partial scan"
+        return "\(items) ready · limited scan"
     }
 
     public var unavailableSourcesWarning: String? {
         guard unavailableSourceCount > 0 else { return nil }
         let application = unavailableSourceCount == 1 ? "application" : "applications"
-        return "\(unavailableSourceCount) running \(application) did not return menu bar data. " +
-            "The items shown remain available and every move is still verified."
+        let shownItems = itemCount == 1 ? "item shown" : "items shown"
+        return "\(unavailableSourceCount) running \(application) did not answer. " +
+            "You can still manage the \(shownItems); prismBar verifies every change."
+    }
+
+    public var inlineNotice: String? {
+        unavailableSourcesWarning
     }
 
     public func sourceAvailabilityNotice(hiddenSectionCollapsed: Bool) -> String? {

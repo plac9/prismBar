@@ -94,26 +94,33 @@ private extension MenuBarView {
             unavailableSourceCount: snapshot.unavailableSourceCount
         )
 
-        return HStack(spacing: 10) {
-            Label(
-                presentation.summary,
-                systemImage: snapshot.isComplete
-                    ? "checkmark.circle.fill"
-                    : "exclamationmark.triangle.fill"
-            )
-            .prismFont(.callout, weight: .medium)
-            .foregroundStyle(snapshot.isComplete ? Color.secondary : .orange)
-            .help(presentation.unavailableSourcesWarning ?? presentation.summary)
-            .accessibilityHint(presentation.unavailableSourcesWarning ?? presentation.summary)
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 10) {
+                Label(
+                    presentation.summary,
+                    systemImage: snapshot.isComplete
+                        ? "checkmark.circle.fill"
+                        : "exclamationmark.triangle.fill"
+                )
+                .prismFont(.callout, weight: .medium)
+                .foregroundStyle(.secondary)
 
-            Spacer()
+                Spacer()
 
-            Label(
-                model.isHiddenSectionCollapsed ? "Tucked away" : "All sections open",
-                systemImage: model.isHiddenSectionCollapsed ? "eye.slash" : "eye"
-            )
-            .prismFont(.callout)
-            .foregroundStyle(.secondary)
+                Label(
+                    model.isHiddenSectionCollapsed ? "Tucked away" : "All sections open",
+                    systemImage: model.isHiddenSectionCollapsed ? "eye.slash" : "eye"
+                )
+                .prismFont(.callout)
+                .foregroundStyle(.secondary)
+            }
+
+            if let notice = presentation.inlineNotice {
+                Label(notice, systemImage: "info.circle")
+                    .prismFont(.caption)
+                    .foregroundStyle(.secondary)
+                    .accessibilityIdentifier("menuBar.limitedScanNotice")
+            }
         }
     }
 

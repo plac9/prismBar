@@ -39,9 +39,9 @@ struct PresentationCatalogTests {
             unavailableSourceCount: 0
         )
 
-        #expect(partial.summary == "18 items found, partial scan")
+        #expect(partial.summary == "18 items ready · limited scan")
         #expect(partial.isComplete == false)
-        #expect(complete.summary == "1 item")
+        #expect(complete.summary == "1 item ready")
         #expect(complete.isComplete)
     }
 
@@ -58,13 +58,20 @@ struct PresentationCatalogTests {
 
         #expect(
             single.unavailableSourcesWarning ==
-                "1 running application did not return menu bar data. " +
-                "The items shown remain available and every move is still verified."
+                "1 running application did not answer. " +
+                "You can still manage the item shown; prismBar verifies every change."
         )
         #expect(
             multiple.unavailableSourcesWarning ==
-                "2 running applications did not return menu bar data. " +
-                "The items shown remain available and every move is still verified."
+                "2 running applications did not answer. " +
+                "You can still manage the item shown; prismBar verifies every change."
+        )
+        #expect(single.inlineNotice == single.unavailableSourcesWarning)
+        #expect(
+            MenuBarObservationPresentation(
+                itemCount: 2,
+                unavailableSourceCount: 0
+            ).inlineNotice == nil
         )
     }
 
