@@ -26,6 +26,8 @@ for forbidden in 'printenv' 'env |' 'ps ax' 'ps aux' 'command=' 'args='; do
 done
 
 rg -Fq '"averageIdleCPUPercent"' "$script" || fail 'aggregate CPU evidence is missing'
+rg -Fq '"maximumIntervalCPUPercent"' "$script" || \
+  fail 'interval CPU evidence is missing'
 rg -Fq '"maximumPhysicalFootprintMiB"' "$script" || fail 'aggregate footprint evidence is missing'
 rg -Fq '"maximumThreadCount"' "$script" || fail 'aggregate thread evidence is missing'
 rg -Fq '"initialPhysicalFootprintMiB"' "$script" || \
@@ -53,6 +55,18 @@ rg -Fq "printf 'Evidence written.\\n'" "$script" || \
   fail 'the audit must confirm evidence without printing its filesystem path'
 if rg -Fq "printf 'Evidence: %s\\n'" "$script"; then
   fail 'the audit must not print the runtime evidence path'
+fi
+rg -Fq "ps -p \"\$pid\" -o cputime=" "$script" || \
+  fail 'CPU usage must derive from process CPU-time deltas'
+rg -Fq 'CLOCK_MONOTONIC' "$script" || \
+  fail 'CPU intervals must use a monotonic wall-time source'
+if rg -Fq -- '-o %cpu=' "$script"; then
+  fail 'the audit must not use the historical ps CPU average'
+fi
+rg -Fq 'thread_listing="$(ps -M -p "$pid")"' "$script" || \
+  fail 'thread sampling failures must propagate'
+if rg -Fq 'ps -M -p "$pid" -o tid=' "$script" || rg -Fq 'ps -M -p "$pid" -o tid= 2>/dev/null || true' "$script"; then
+  fail 'thread sampling must not use an unsupported field or mask failures'
 fi
 
 printf 'Runtime budget contract passed.\n'

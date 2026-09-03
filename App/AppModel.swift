@@ -119,11 +119,8 @@ final class AppModel {
     }
 
     func refreshMenuBar(preservingActionResult: Bool = false) {
-        if !preservingActionResult {
-            clearVisibleMenuBarAction()
-        }
-
         guard accessibilityState == .granted else {
+            clearVisibleMenuBarAction(unlessPreserved: preservingActionResult)
             invalidateMenuBar()
             return
         }
@@ -133,6 +130,7 @@ final class AppModel {
             }
             return
         }
+        clearVisibleMenuBarAction(unlessPreserved: preservingActionResult)
 
         topologyRevision += 1
         let revision = topologyRevision
@@ -178,6 +176,11 @@ final class AppModel {
         guard isRecoveryRefreshPending else { return }
         isRecoveryRefreshPending = false
         refreshMenuBar(preservingActionResult: true)
+    }
+
+    private func clearVisibleMenuBarAction(unlessPreserved isPreserved: Bool) {
+        guard !isPreserved else { return }
+        clearVisibleMenuBarAction()
     }
 
     func handleAccessibilityRevocation() {

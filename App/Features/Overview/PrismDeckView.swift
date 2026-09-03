@@ -174,7 +174,8 @@ private extension PrismDeckView {
                 }
             }
 
-            if let notice = presentation.inlineNotice {
+            if let notice = presentation.sourceAvailabilityNotice(
+                hiddenSectionCollapsed: model.isHiddenSectionCollapsed) {
                 Label(notice, systemImage: "info.circle")
                     .prismFont(.caption2)
                     .foregroundStyle(.secondary)

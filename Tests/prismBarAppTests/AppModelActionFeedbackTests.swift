@@ -301,6 +301,31 @@ final class AppModelActionFeedbackTests: XCTestCase {
 }
 
 extension AppModelActionFeedbackTests {
+    func testManualRefreshDuringRecoveryScanPreservesVisibleActionFeedback() async throws {
+        let reader = ControllableSnapshotReader()
+        let model = makeModel(snapshotReader: reader)
+        let before = snapshot(generation: 1)
+        model.acceptAccessibilityState(.granted, refreshMenuBarWhenGranted: false)
+        model.acceptVerifiedMenuBarSnapshot(before)
+        let pending = model.beginMenuBarAction(
+            kind: .directMove,
+            before: before,
+            itemID: MenuBarItemID(rawValue: "fixture.visible")
+        )
+        let result = MenuBarActionResult.failure("Synthetic failure")
+        model.completeMenuBarAction(id: pending.id, result: result, after: nil)
+
+        model.refreshMenuBar(preservingActionResult: true)
+        try await waitUntil { await reader.callCount == 1 }
+        model.refreshMenuBar()
+
+        XCTAssertEqual(model.currentActionReceipt?.result, result)
+        XCTAssertEqual(model.menuBarActionState, .result(result))
+
+        await reader.complete(with: snapshot(generation: 2))
+        try await waitUntil { model.menuBarState == .ready }
+    }
+
     func testRecoveryRefreshQueuedDuringActiveScanRunsAfterItCompletes() async throws {
         let reader = ControllableSnapshotReader()
         let model = makeModel(snapshotReader: reader)

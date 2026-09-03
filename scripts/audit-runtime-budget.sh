@@ -14,7 +14,7 @@ maximum_footprint_growth_mib='15.0'
 maximum_thread_growth='2'
 maximum_sample_count='60'
 sample_count='10'
-sample_interval_seconds='1'
+sample_interval_seconds='5'
 settle_seconds='5'
 output_path=''
 
@@ -56,7 +56,7 @@ done
 [ "$sample_interval_seconds" -le 10 ] || fail 'sample interval exceeds the bound'
 [ "$settle_seconds" -le 60 ] || fail 'settle period exceeds the bound'
 
-for dependency in awk jq pgrep ps vmmap; do
+for dependency in awk jq perl pgrep ps vmmap; do
   command -v "$dependency" >/dev/null 2>&1 || fail 'a required runtime metric tool is unavailable'
 done
 
@@ -74,6 +74,7 @@ if [ "$settle_seconds" -gt 0 ]; then
 fi
 
 cpu_total='0'
+maximum_interval_cpu='0'
 maximum_footprint='0'
 maximum_threads='0'
 initial_footprint=''
@@ -95,14 +96,62 @@ sample_footprint_mib() {
   esac
 }
 
+sample_cpu_seconds() {
+  local raw_value
+  raw_value="$(ps -p "$pid" -o cputime=)" || fail 'process CPU time is unavailable'
+  awk -v value="$raw_value" '
+    BEGIN {
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+      count = split(value, fields, ":")
+      if (count == 2) {
+        seconds = (fields[1] * 60) + fields[2]
+      } else if (count == 3) {
+        seconds = (fields[1] * 3600) + (fields[2] * 60) + fields[3]
+      } else {
+        exit 1
+      }
+      printf "%.3f", seconds
+    }
+  ' || fail 'process CPU time has an unsupported format'
+}
+
+monotonic_seconds() {
+  perl -MTime::HiRes=clock_gettime,CLOCK_MONOTONIC \
+    -e 'printf "%.6f", clock_gettime(CLOCK_MONOTONIC)'
+}
+
+previous_cpu_seconds="$(sample_cpu_seconds)"
+previous_wall_seconds="$(monotonic_seconds)"
+
 for ((sample_index = 1; sample_index <= sample_count; sample_index += 1)); do
   kill -0 "$pid" 2>/dev/null || fail 'prismBar exited during the audit'
-  cpu_value="$(ps -p "$pid" -o %cpu= | awk '{$1=$1; print}')"
+  if [ "$sample_interval_seconds" -gt 0 ]; then
+    sleep "$sample_interval_seconds"
+  fi
+  current_cpu_seconds="$(sample_cpu_seconds)"
+  current_wall_seconds="$(monotonic_seconds)"
+  cpu_value="$(awk \
+    -v current_cpu="$current_cpu_seconds" \
+    -v previous_cpu="$previous_cpu_seconds" \
+    -v current_wall="$current_wall_seconds" \
+    -v previous_wall="$previous_wall_seconds" '
+      BEGIN {
+        cpu_delta = current_cpu - previous_cpu
+        wall_delta = current_wall - previous_wall
+        if (cpu_delta < 0 || wall_delta <= 0) exit 1
+        printf "%.3f", (cpu_delta / wall_delta) * 100
+      }
+    ')" || fail 'interval CPU usage is unavailable'
+  previous_cpu_seconds="$current_cpu_seconds"
+  previous_wall_seconds="$current_wall_seconds"
   footprint_value="$(sample_footprint_mib)"
-  thread_value="$({ ps -M -p "$pid" -o tid= 2>/dev/null || true; } | \
-    awk 'NF {count += 1} END {print count + 0}')"
+  thread_listing="$(ps -M -p "$pid")" || fail 'thread count is unavailable'
+  thread_value="$(awk 'NR > 1 && NF {count += 1} END {print count + 0}' <<< "$thread_listing")"
+  [ "$thread_value" -gt 0 ] || fail 'thread count is unavailable'
 
   cpu_total="$(awk -v total="$cpu_total" -v value="$cpu_value" 'BEGIN {printf "%.3f", total + value}')"
+  maximum_interval_cpu="$(awk -v current="$maximum_interval_cpu" -v value="$cpu_value" \
+    'BEGIN {printf "%.3f", (value > current ? value : current)}')"
   maximum_footprint="$(awk -v current="$maximum_footprint" -v value="$footprint_value" \
     'BEGIN {printf "%.3f", (value > current ? value : current)}')"
   maximum_threads="$(awk -v current="$maximum_threads" -v value="$thread_value" \
@@ -113,10 +162,6 @@ for ((sample_index = 1; sample_index <= sample_count; sample_index += 1)); do
   fi
   ending_footprint="$footprint_value"
   ending_threads="$thread_value"
-
-  if [ "$sample_index" -lt "$sample_count" ] && [ "$sample_interval_seconds" -gt 0 ]; then
-    sleep "$sample_interval_seconds"
-  fi
 done
 
 average_cpu="$(awk -v total="$cpu_total" -v count="$sample_count" \
@@ -124,7 +169,7 @@ average_cpu="$(awk -v total="$cpu_total" -v count="$sample_count" \
 footprint_growth="$(awk -v ending="$ending_footprint" -v initial="$initial_footprint" \
   'BEGIN {printf "%.3f", ending - initial}')"
 thread_growth="$((ending_threads - initial_threads))"
-awk -v value="$average_cpu" -v limit="$maximum_idle_cpu_percent" \
+awk -v value="$maximum_interval_cpu" -v limit="$maximum_idle_cpu_percent" \
   'BEGIN {exit !(value < limit)}' || fail 'settled idle CPU exceeds the runtime budget'
 awk -v value="$maximum_footprint" -v limit="$maximum_footprint_mib" \
   'BEGIN {exit !(value < limit)}' || fail 'physical footprint exceeds the runtime budget'
@@ -146,6 +191,7 @@ jq -n \
   --arg measuredAt "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
   --argjson sampleCount "$sample_count" \
   --argjson averageCPU "$average_cpu" \
+  --argjson maximumIntervalCPU "$maximum_interval_cpu" \
   --argjson initialFootprint "$initial_footprint" \
   --argjson endingFootprint "$ending_footprint" \
   --argjson footprintGrowth "$footprint_growth" \
@@ -165,6 +211,7 @@ jq -n \
     "measuredAt": $measuredAt,
     "sampleCount": $sampleCount,
     "averageIdleCPUPercent": $averageCPU,
+    "maximumIntervalCPUPercent": $maximumIntervalCPU,
     "initialPhysicalFootprintMiB": $initialFootprint,
     "endingPhysicalFootprintMiB": $endingFootprint,
     "physicalFootprintGrowthMiB": $footprintGrowth,
