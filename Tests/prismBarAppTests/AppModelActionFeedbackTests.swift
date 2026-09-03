@@ -63,6 +63,29 @@ final class AppModelActionFeedbackTests: XCTestCase {
         XCTAssertEqual(model.recentActionReceipts.count, 1)
     }
 
+    func testRepeatedRefreshCoalescesAndPreservesTheLastVerifiedSnapshot() async throws {
+        let reader = ControllableSnapshotReader()
+        let model = makeModel(snapshotReader: reader)
+        let verified = snapshot(generation: 1)
+        let refreshed = snapshot(generation: 2, reversed: true)
+        model.acceptAccessibilityState(.granted, refreshMenuBarWhenGranted: false)
+        model.acceptVerifiedMenuBarSnapshot(verified)
+
+        model.refreshMenuBar()
+        model.refreshMenuBar()
+
+        try await waitUntil { await reader.callCount == 1 }
+        XCTAssertEqual(model.menuBarState, .loading)
+        XCTAssertEqual(model.menuBarSnapshot, verified)
+
+        await reader.complete(with: refreshed)
+        try await waitUntil { model.menuBarState == .ready }
+
+        let finalCallCount = await reader.callCount
+        XCTAssertEqual(finalCallCount, 1)
+        XCTAssertEqual(model.menuBarSnapshot, refreshed)
+    }
+
     func testPermissionRevocationClearsVisibleReceiptAndRecoveryHistory() {
         let model = makeModel()
         let pending = model.beginMenuBarAction(
@@ -191,11 +214,31 @@ final class AppModelActionFeedbackTests: XCTestCase {
         XCTAssertEqual(model.recentActionReceipts.count, 1)
     }
 
-    private func makeModel() -> AppModel {
+    private func makeModel(
+        snapshotReader: (any MenuBarSnapshotReading)? = nil
+    ) -> AppModel {
         let suiteName = "com.laclairtech.prismbar.tests.action-feedback.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
         defaults.removePersistentDomain(forName: suiteName)
-        return AppModel(defaults: defaults, automaticallyRefresh: false)
+        return AppModel(
+            defaults: defaults,
+            automaticallyRefresh: false,
+            snapshotReader: snapshotReader
+        )
+    }
+
+    private func waitUntil(
+        _ condition: @escaping @MainActor () async -> Bool
+    ) async throws {
+        let clock = ContinuousClock()
+        let deadline = clock.now.advanced(by: .seconds(2))
+        while !(await condition()) {
+            guard clock.now < deadline else {
+                XCTFail("Timed out waiting for asynchronous state")
+                return
+            }
+            try await Task.sleep(for: .milliseconds(10))
+        }
     }
 
     private func retainRecoveryEntry(
@@ -254,5 +297,26 @@ final class AppModelActionFeedbackTests: XCTestCase {
             ),
             surfaceID: surface
         )
+    }
+}
+
+private actor ControllableSnapshotReader: MenuBarSnapshotReading {
+    private(set) var callCount = 0
+    private var continuations: [CheckedContinuation<MenuBarSnapshot, any Error>] = []
+
+    func snapshot(deadline: OperationDeadline) async throws -> MenuBarSnapshot {
+        try deadline.check()
+        callCount += 1
+        return try await withCheckedThrowingContinuation { continuation in
+            continuations.append(continuation)
+        }
+    }
+
+    func complete(with snapshot: MenuBarSnapshot) {
+        let pending = continuations
+        continuations.removeAll()
+        for continuation in pending {
+            continuation.resume(returning: snapshot)
+        }
     }
 }

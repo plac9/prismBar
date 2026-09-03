@@ -134,23 +134,23 @@ Commit message: `fix(ux): clarify Rail overflow and section actions`
 - Consumes: current verified snapshot, text-size preference, visible screen frame, action receipt.
 - Produces: immediate cached-state open, bounded refresh, stable header/footer, and deterministic dismiss/reopen behavior.
 
-- [ ] **Step 1: Add failing lifecycle and constrained-size UI tests**
+- [x] **Step 1: Add failing lifecycle and constrained-size UI tests**
 
 Cover normal click, Escape, reopen, workspace routing, Settings routing, 640-point visible height, 200% reading size, and action buttons remaining hittable.
 
-- [ ] **Step 2: Verify tests fail against any missing state**
+- [x] **Step 2: Verify tests fail against any missing state**
 
 Run the focused prismDeck UI suite with local ad-hoc signing and a disposable DerivedData directory.
 
-- [ ] **Step 3: Fix only reproduced lifecycle/layout defects**
+- [x] **Step 3: Fix only reproduced lifecycle/layout defects**
 
 Keep one scrolling content region between the stable header and footer. Clamp to `visibleFrame` on every open. Preserve last verified content during refresh and reject duplicate refresh requests while loading.
 
-- [ ] **Step 4: Verify user feedback states**
+- [x] **Step 4: Verify user feedback states**
 
 Exercise ready, checking, limited scan, moving, applied, partial, access lost, full-screen/auto-hide unavailable, and compatible Undo states. Every state needs text, not color or icon alone.
 
-- [ ] **Step 5: Commit the independently reviewable prismDeck change**
+- [x] **Step 5: Commit the independently reviewable prismDeck change**
 
 Commit message: `fix(ux): harden prismDeck daily workflow`
 
