@@ -32,6 +32,16 @@ final class SceneActionRouter {
     private func presentWindow(id: String) -> Bool {
         NSApplication.shared.setActivationPolicy(.regular)
         NSApplication.shared.activate()
+        if id == PrismSceneID.workspace,
+           let existingWorkspace = Self.existingWorkspace(
+               in: NSApplication.shared.windows
+           ) {
+            if existingWorkspace.isMiniaturized {
+                existingWorkspace.deminiaturize(nil)
+            }
+            existingWorkspace.makeKeyAndOrderFront(nil)
+            return true
+        }
         if let openWindow {
             openWindow(id: id)
             return true
@@ -53,6 +63,24 @@ final class SceneActionRouter {
 
         fileMenu.performActionForItem(at: newWorkspaceIndex)
         return true
+    }
+
+    static func existingWorkspace(in windows: [NSWindow]) -> NSWindow? {
+        windows.first {
+            shouldReuseWorkspace(
+                title: $0.title,
+                isVisible: $0.isVisible,
+                isMiniaturized: $0.isMiniaturized
+            )
+        }
+    }
+
+    static func shouldReuseWorkspace(
+        title: String,
+        isVisible: Bool,
+        isMiniaturized: Bool
+    ) -> Bool {
+        title == "prismBar" && (isVisible || isMiniaturized)
     }
 
 }

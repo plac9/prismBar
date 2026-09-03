@@ -218,6 +218,44 @@ final class LaunchTests: XCTestCase {
         XCTAssertEqual(settingsWindows.count, 1)
     }
 
+    func testSettingsOpenWorkspaceReusesTheExistingWindow() {
+        let application = prismBarApplication()
+        application.launch()
+
+        let mainWindow = application.windows["prismBar"]
+        XCTAssertTrue(mainWindow.waitForExistence(timeout: 5))
+        application.typeKey(",", modifierFlags: .command)
+
+        let settings = application.windows.matching(
+            identifier: "com_apple_SwiftUI_Settings_window"
+        ).firstMatch
+        XCTAssertTrue(settings.waitForExistence(timeout: 5), application.debugDescription)
+        let general = settings.buttons["General"]
+        XCTAssertTrue(general.exists)
+        general.click()
+
+        let openWorkspace = settings.buttons["Open Workspace"]
+        XCTAssertTrue(openWorkspace.waitForExistence(timeout: 3))
+        openWorkspace.click()
+
+        XCTAssertTrue(mainWindow.waitForExistence(timeout: 3))
+        XCTAssertEqual(application.windows.matching(identifier: "prismBar").count, 1)
+        XCTAssertEqual(application.tabBars.count, 0, "Opening the workspace must not create a tabbed duplicate")
+    }
+
+    func testKeyboardCommandReusesTheExistingMainWindow() {
+        let application = prismBarApplication()
+        application.launch()
+
+        let mainWindow = application.windows["prismBar"]
+        XCTAssertTrue(mainWindow.waitForExistence(timeout: 5))
+        application.typeKey("o", modifierFlags: [.command, .shift])
+
+        XCTAssertTrue(mainWindow.waitForExistence(timeout: 3))
+        XCTAssertEqual(application.windows.matching(identifier: "prismBar").count, 1)
+        XCTAssertEqual(application.tabBars.count, 0, "Open prismBar must activate the existing workspace")
+    }
+
     func testKeyboardCommandReopensTheMainWindow() {
         let application = prismBarApplication()
         application.launch()

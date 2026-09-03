@@ -6,13 +6,12 @@ import prismBarCore
 import SwiftUI
 
 struct PrismBarCommands: Commands {
-    @Environment(\.openWindow) private var openWindow
     @Bindable var model: AppModel
 
     var body: some Commands {
         CommandMenu("prismBar") {
             Button("Open prismBar") {
-                openWindow(id: PrismSceneID.workspace)
+                SceneActionRouter.shared.openWorkspace()
             }
             .keyboardShortcut("o", modifiers: [.command, .shift])
 

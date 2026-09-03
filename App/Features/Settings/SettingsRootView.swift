@@ -29,7 +29,6 @@ struct SettingsRootView: View {
 }
 
 private struct GeneralSettingsView: View {
-    @Environment(\.openWindow) private var openWindow
     @Environment(AppModel.self) private var model
     @AppStorage(PrismTextSizePreference.storageKey) private var storedTextSize =
         PrismTextSizePreference.standard.rawValue
@@ -72,7 +71,7 @@ private struct GeneralSettingsView: View {
                     Spacer()
 
                     Button("Open Workspace", systemImage: "rectangle.on.rectangle") {
-                        openWindow(id: PrismSceneID.workspace)
+                        SceneActionRouter.shared.openWorkspace()
                     }
                     .buttonStyle(.glass)
                 }
