@@ -18,7 +18,11 @@ struct PrismBarCommands: Commands {
 
             Divider()
 
-            Button(model.isHiddenSectionCollapsed ? "Reveal Hidden Items" : "Fold Hidden Items") {
+            Button(
+                PrismRailPresentation.sectionVisibilityAction(
+                    isCollapsed: model.isHiddenSectionCollapsed
+                )
+            ) {
                 model.setHiddenSectionCollapsed(!model.isHiddenSectionCollapsed)
             }
             .keyboardShortcut("b", modifiers: [.command, .shift])

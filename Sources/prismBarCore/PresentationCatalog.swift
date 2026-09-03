@@ -43,6 +43,10 @@ public enum WorkspaceDestination: String, CaseIterable, Identifiable, Sendable {
 
 public enum PrismRailPresentation {
     public static let title = "Rail"
+
+    public static func sectionVisibilityAction(isCollapsed: Bool) -> String {
+        isCollapsed ? "Reveal" : "Tuck Away"
+    }
 }
 
 public struct MenuBarObservationPresentation: Equatable, Sendable {

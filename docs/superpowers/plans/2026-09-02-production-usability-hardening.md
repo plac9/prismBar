@@ -86,7 +86,7 @@ Commit message: `fix(ux): explain limited menu bar scans`
 - Consumes: `PrismRailLayout`, selected item binding, native horizontal `ScrollView`.
 - Produces: lane edge affordances, consistent section-action labels, and accessibility scroll actions without changing movement semantics.
 
-- [ ] **Step 1: Add failing label and overflow-policy tests**
+- [x] **Step 1: Add failing label and overflow-policy tests**
 
 ```swift
 @Test("section actions use the product vocabulary")
@@ -96,25 +96,25 @@ func sectionActions() {
 }
 ```
 
-Add UI assertions that an overflowing Rail exposes a named trailing edge affordance and that fixed items remain reachable by accessibility scrolling.
+Use the exact-revision UI audit to verify that an overflowing Rail exposes the native horizontal scroll indicator and that fixed items remain reachable by accessibility scrolling. The indicator is system-owned presentation and does not warrant a source-constant test.
 
-- [ ] **Step 2: Run focused tests and verify missing policy symbols fail**
+- [x] **Step 2: Run focused tests and verify missing policy symbols fail**
 
 Run: `DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer swift test --filter PrismRail` plus the focused Rail UI test.
 
-- [ ] **Step 3: Implement lane overflow cues with native behavior**
+- [x] **Step 3: Implement lane overflow cues with native behavior**
 
-Use a subtle semantic trailing gradient and chevron only while content can continue in that direction. Preserve the native horizontal scroll view, keyboard/accessibility scrolling, and drag destinations. Do not add custom event monitors.
+Keep the native horizontal scroll indicator visible so overflow has a standard macOS cue and scroll path without custom geometry tracking. Preserve native momentum, keyboard/accessibility scrolling, and drag destinations. Do not add custom event monitors or decorative edge overlays.
 
-- [ ] **Step 4: Normalize action copy**
+- [x] **Step 4: Normalize action copy**
 
 Replace `Tuck Away Hidden` and `Reveal Tucked Away` with the shared `Tuck Away` and `Reveal` policy in the workspace, prismDeck, command menu, help, and UI assertions.
 
-- [ ] **Step 5: Verify direct multi-position action access**
+- [x] **Step 5: Verify direct multi-position action access**
 
 Assert every movable chip exposes drag plus first/last/left/right and cross-section actions. Assert macOS-owned chips say `fixed by macOS` and expose no movement action.
 
-- [ ] **Step 6: Commit the independently reviewable Rail affordance change**
+- [x] **Step 6: Commit the independently reviewable Rail affordance change**
 
 Commit message: `fix(ux): clarify Rail overflow and section actions`
 

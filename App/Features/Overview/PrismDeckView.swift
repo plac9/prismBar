@@ -240,7 +240,9 @@ private extension PrismDeckView {
         HStack(spacing: 8) {
             if model.menuBarSnapshot?.hiddenSectionDivider != nil {
                 Button(
-                    model.isHiddenSectionCollapsed ? "Reveal" : "Tuck Away",
+                    PrismRailPresentation.sectionVisibilityAction(
+                        isCollapsed: model.isHiddenSectionCollapsed
+                    ),
                     systemImage: model.isHiddenSectionCollapsed ? "eye" : "eye.slash"
                 ) {
                     model.setHiddenSectionCollapsed(!model.isHiddenSectionCollapsed)

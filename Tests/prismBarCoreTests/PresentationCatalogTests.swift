@@ -28,6 +28,18 @@ struct PresentationCatalogTests {
         #expect(PrismRailPresentation.title == "Rail")
     }
 
+    @Test("maps section state to the next visibility action")
+    func sectionVisibilityAction() {
+        #expect(
+            PrismRailPresentation.sectionVisibilityAction(isCollapsed: false) ==
+                "Tuck Away"
+        )
+        #expect(
+            PrismRailPresentation.sectionVisibilityAction(isCollapsed: true) ==
+                "Reveal"
+        )
+    }
+
     @Test("distinguishes observed items from unavailable sources")
     func menuBarObservationSummary() {
         let partial = MenuBarObservationPresentation(

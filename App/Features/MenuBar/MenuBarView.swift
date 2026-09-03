@@ -127,7 +127,9 @@ private extension MenuBarView {
     func immediateActions(_ snapshot: MenuBarSnapshot) -> some View {
         HStack(spacing: 10) {
             Button(
-                model.isHiddenSectionCollapsed ? "Reveal Tucked Away" : "Tuck Away Hidden",
+                PrismRailPresentation.sectionVisibilityAction(
+                    isCollapsed: model.isHiddenSectionCollapsed
+                ),
                 systemImage: model.isHiddenSectionCollapsed ? "eye" : "eye.slash"
             ) {
                 model.setHiddenSectionCollapsed(!model.isHiddenSectionCollapsed)
