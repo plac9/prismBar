@@ -204,7 +204,15 @@ final class LaunchTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(settings.frame.width, 640)
         XCTAssertGreaterThanOrEqual(settings.frame.height, 500)
         XCTAssertTrue(settings.buttons["General"].exists)
-        XCTAssertTrue(settings.buttons["Privacy"].exists)
+        let privacy = settings.buttons["Privacy"]
+        XCTAssertTrue(privacy.exists)
+
+        privacy.click()
+        XCTAssertGreaterThanOrEqual(
+            privacy.frame.minY - settings.frame.minY,
+            20,
+            "Switching Settings tabs must keep the native toolbar fully inside the window"
+        )
 
         application.typeKey(",", modifierFlags: .command)
         XCTAssertEqual(settingsWindows.count, 1)
