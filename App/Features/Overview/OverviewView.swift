@@ -25,7 +25,7 @@ struct OverviewView: View {
                 PrismContentSection {
                     VStack(alignment: .leading, spacing: 4) {
                         Label("Readiness", systemImage: "checkmark.circle")
-                            .font(.headline)
+                            .prismFont(.headline)
 
                         Divider()
 
@@ -52,7 +52,7 @@ struct OverviewView: View {
                 PrismContentSection {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Private by construction")
-                            .font(.headline)
+                            .prismFont(.headline)
 
                         ViewThatFits(in: .horizontal) {
                             HStack(spacing: 24) {
@@ -80,14 +80,14 @@ struct OverviewView: View {
         PrismContentSection(tint: permissionTint) {
             VStack(alignment: .leading, spacing: 16) {
                 Label(actionTitle, systemImage: actionSymbol)
-                    .font(.headline)
+                    .prismFont(.headline)
 
                 Text(actionMessage)
                     .foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Text(PrivacyCopy.observation + " " + PrivacyCopy.boundary)
-                    .font(.caption)
+                    .prismFont(.caption)
                     .foregroundStyle(.primary)
 
                 if model.accessibilityState == .denied {
@@ -239,9 +239,9 @@ private struct RecoveryStep: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             Text("\(number). \(title)")
-                .font(.callout.weight(.semibold))
+                .prismFont(.callout, weight: .semibold)
             Text(message)
-                .font(.caption)
+                .prismFont(.caption)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -256,7 +256,7 @@ private struct LocalBoundary: View {
 
     var body: some View {
         Label(title, systemImage: symbol)
-            .font(.callout)
+            .prismFont(.callout)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

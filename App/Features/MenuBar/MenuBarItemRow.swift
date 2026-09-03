@@ -7,6 +7,7 @@ import SwiftUI
 
 struct MenuBarItemRow: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.prismTextSizePreference) private var textSize
     let item: MenuBarItem
     let destinations: [MenuBarItem]
     let surfaceLabel: String
@@ -22,7 +23,7 @@ struct MenuBarItemRow: View {
                 .help("Include this item in a verified batch move")
 
             Image(systemName: ownershipSymbol)
-                .frame(width: 22)
+                .frame(width: 22 * CGFloat(textSize.scale))
                 .foregroundStyle(.secondary)
                 .accessibilityHidden(true)
 
@@ -30,19 +31,19 @@ struct MenuBarItemRow: View {
                 Text(item.displayName)
                     .lineLimit(1)
                 Text("\(ownershipLabel), \(surfaceLabel)")
-                    .font(.caption)
+                    .prismFont(.caption)
                     .foregroundStyle(.secondary)
             }
 
             Spacer()
 
             Text(sectionLabel)
-                .font(.caption.weight(.medium))
+                .prismFont(.caption, weight: .medium)
                 .foregroundStyle(section == .hidden ? .secondary : .primary)
 
             if item.ownership == .system {
                 Label("Fixed", systemImage: "lock.fill")
-                    .font(.caption.weight(.medium))
+                    .prismFont(.caption, weight: .medium)
                     .foregroundStyle(.secondary)
             } else {
                 sectionButton

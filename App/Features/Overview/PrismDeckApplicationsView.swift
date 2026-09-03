@@ -25,6 +25,7 @@ enum PrismDeckApplicationCommand: Equatable {
 }
 
 struct PrismDeckApplicationsView: View {
+    @Environment(\.prismTextSizePreference) private var textSize
     @Environment(AppModel.self) private var model
     let presentation: PrismDeckApplicationsPresentation
     @Binding var selectedItemID: MenuBarItemID?
@@ -41,10 +42,10 @@ struct PrismDeckApplicationsView: View {
         } label: {
             HStack(spacing: 8) {
                 Label("Applications", systemImage: "app.dashed")
-                    .font(.headline)
+                    .prismFont(.headline)
                 Spacer()
                 Text("\(presentation.totalApplicationCount)")
-                    .font(.caption.monospacedDigit().weight(.semibold))
+                    .prismFont(.caption, weight: .semibold, monospacedDigits: true)
                     .foregroundStyle(.secondary)
                     .accessibilityLabel(
                         "\(presentation.totalApplicationCount) manageable applications"
@@ -75,7 +76,7 @@ private extension PrismDeckApplicationsView {
             }
         }
         .padding(.horizontal, 10)
-        .frame(height: 30)
+        .frame(minHeight: 30 * CGFloat(textSize.scale))
         .background(.quaternary, in: .rect(cornerRadius: 9))
     }
 
@@ -114,7 +115,7 @@ private extension PrismDeckApplicationsView {
     ) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Label(title, systemImage: symbol)
-                .font(.caption.weight(.semibold))
+                .prismFont(.caption, weight: .semibold)
                 .foregroundStyle(.secondary)
 
             ForEach(rows) { row in
@@ -130,7 +131,7 @@ private extension PrismDeckApplicationsView {
             rowMoveMenu(row)
         }
         .padding(.horizontal, 8)
-        .frame(minHeight: 38)
+        .frame(minHeight: 38 * CGFloat(textSize.scale))
         .background(
             selectedItemID == row.id ? Color.accentColor.opacity(0.12) : .clear,
             in: .rect(cornerRadius: 10)
@@ -150,10 +151,10 @@ private extension PrismDeckApplicationsView {
                 )
                 VStack(alignment: .leading, spacing: 1) {
                     Text(row.name)
-                        .font(.callout.weight(.medium))
+                        .prismFont(.callout, weight: .medium)
                         .lineLimit(1)
                     Text(rowSubtitle(row))
-                        .font(.caption2)
+                        .prismFont(.caption2)
                         .foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 4)
@@ -201,9 +202,13 @@ private extension PrismDeckApplicationsView {
 
     func emptyMessage(_ message: String) -> some View {
         Text(message)
-            .font(.callout)
+            .prismFont(.callout)
             .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+            .frame(
+                maxWidth: .infinity,
+                minHeight: 48 * CGFloat(textSize.scale),
+                alignment: .leading
+            )
     }
 
     func canAct(on row: PrismDeckApplicationRow) -> Bool {

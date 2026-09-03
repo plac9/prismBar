@@ -3,7 +3,17 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import AppKit
+import prismBarCore
 import SwiftUI
+
+enum UIAuditWindowSizePolicy {
+    static func size(for textSize: PrismTextSizePreference) -> NSSize {
+        NSSize(
+            width: 920 + CGFloat(textSize.scale - 1) * 240,
+            height: 640 + CGFloat(textSize.scale - 1) * 120
+        )
+    }
+}
 
 /// Makes revision-bound screenshots deterministic without changing normal window restoration.
 struct UIAuditWindowConfiguration: NSViewRepresentable {
@@ -24,8 +34,13 @@ private final class UIAuditWindowView: NSView {
             return
         }
 
+        let textSize = PrismTextSizePreference(
+            storedValue: UserDefaults.standard.string(
+                forKey: PrismTextSizePreference.storageKey
+            )
+        )
         var frame = window.frame
-        frame.size = NSSize(width: 920, height: 640)
+        frame.size = UIAuditWindowSizePolicy.size(for: textSize)
         window.setFrame(frame, display: true)
         window.center()
     }

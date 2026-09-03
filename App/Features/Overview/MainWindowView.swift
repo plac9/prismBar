@@ -7,6 +7,7 @@ import SwiftUI
 
 struct MainWindowView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.prismTextSizePreference) private var textSize
     @State private var selection: WorkspaceDestination? = .home
 
     var body: some View {
@@ -31,7 +32,11 @@ struct MainWindowView: View {
             .listStyle(.sidebar)
             .navigationTitle("prismBar")
             .accessibilityIdentifier("workspace.sidebar")
-            .navigationSplitViewColumnWidth(min: 190, ideal: 220, max: 260)
+            .navigationSplitViewColumnWidth(
+                min: 190 + CGFloat(textSize.scale - 1) * 80,
+                ideal: 220 + CGFloat(textSize.scale - 1) * 100,
+                max: 260 + CGFloat(textSize.scale - 1) * 140
+            )
         } detail: {
             ZStack {
                 PrismCanvasBackground()
@@ -45,7 +50,7 @@ struct MainWindowView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Label(connectionLabel, systemImage: connectionSymbol)
-                    .font(.callout.weight(.medium))
+                    .prismFont(.callout, weight: .medium)
                     .foregroundStyle(.primary)
                     .accessibilityIdentifier("toolbar.connection")
             }
@@ -59,6 +64,10 @@ struct MainWindowView: View {
                 .accessibilityIdentifier("toolbar.refresh")
             }
         }
+        .frame(
+            minWidth: 760 + CGFloat(textSize.scale - 1) * 240,
+            minHeight: 520 + CGFloat(textSize.scale - 1) * 100
+        )
     }
 
     @ViewBuilder

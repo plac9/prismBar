@@ -30,18 +30,49 @@ final class PrismDeckApplicationsCommandTests: XCTestCase {
             PrismDeckLayoutPolicy.managementSections,
             [.topology, .rail, .applications, .actionStatus]
         )
-        XCTAssertEqual(PrismDeckLayoutPolicy.width, 440)
-        XCTAssertEqual(PrismDeckLayoutPolicy.compactHeight, 360)
-        XCTAssertEqual(PrismDeckLayoutPolicy.maximumHeight, 620)
+        XCTAssertEqual(PrismDeckLayoutPolicy.width(for: .standard), 440)
+        XCTAssertEqual(PrismDeckLayoutPolicy.compactHeight(for: .standard), 360)
+        XCTAssertEqual(PrismDeckLayoutPolicy.maximumHeight(for: .standard), 620)
         XCTAssertEqual(
-            PrismDeckLayoutPolicy.height(accessibilityGranted: false),
-            PrismDeckLayoutPolicy.compactHeight
+            PrismDeckLayoutPolicy.height(accessibilityGranted: false, textSize: .standard),
+            PrismDeckLayoutPolicy.compactHeight(for: .standard)
         )
         XCTAssertEqual(
-            PrismDeckLayoutPolicy.height(accessibilityGranted: true),
-            PrismDeckLayoutPolicy.maximumHeight
+            PrismDeckLayoutPolicy.height(accessibilityGranted: true, textSize: .standard),
+            PrismDeckLayoutPolicy.maximumHeight(for: .standard)
+        )
+        XCTAssertGreaterThan(
+            PrismDeckLayoutPolicy.width(for: .accessibility),
+            PrismDeckLayoutPolicy.width(for: .standard)
+        )
+        XCTAssertGreaterThan(
+            PrismDeckLayoutPolicy.maximumHeight(for: .accessibility),
+            PrismDeckLayoutPolicy.maximumHeight(for: .standard)
         )
         XCTAssertFalse(PrismDeckLayoutPolicy.showsPrismCards)
         XCTAssertFalse(PrismDeckLayoutPolicy.showsReset)
+    }
+
+    func testAccessibilityLayoutIsBoundedToTheVisibleDisplay() {
+        let size = PrismDeckLayoutPolicy.contentSize(
+            accessibilityGranted: true,
+            textSize: .accessibility,
+            visibleFrameSize: CGSize(width: 1_024, height: 640)
+        )
+
+        XCTAssertEqual(size.width, 560)
+        XCTAssertEqual(size.height, 600)
+        XCTAssertLessThan(size.height, 640)
+    }
+
+    func testDisplayConstraintNeverEnlargesThePreferredLayout() {
+        let size = PrismDeckLayoutPolicy.contentSize(
+            accessibilityGranted: false,
+            textSize: .standard,
+            visibleFrameSize: CGSize(width: 1_920, height: 1_080)
+        )
+
+        XCTAssertEqual(size.width, PrismDeckLayoutPolicy.width(for: .standard))
+        XCTAssertEqual(size.height, PrismDeckLayoutPolicy.compactHeight(for: .standard))
     }
 }

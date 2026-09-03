@@ -61,7 +61,7 @@ if rg -q '\.largeTitle|design: \.rounded' App/Design/PrismVisuals.swift; then
   fail 'workspace page headers still use oversized custom typography'
 fi
 
-if ! rg -Uq 'Text\(message\)\n[[:space:]]+\.font\(\.body\)\n[[:space:]]+\.foregroundStyle\(\.primary\)' \
+if ! rg -Uq 'Text\(message\)\n[[:space:]]+\.prismFont\(\.body\)\n[[:space:]]+\.foregroundStyle\(\.primary\)' \
   App/Design/PrismVisuals.swift; then
   fail 'workspace page copy no longer uses primary semantic contrast'
 fi

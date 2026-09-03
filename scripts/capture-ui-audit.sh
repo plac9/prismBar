@@ -77,7 +77,7 @@ xcrun xcresulttool export attachments \
 evidence_path="$repository_root/build/ui-audit/prismBar-ui-audit-$revision.json"
 jq -e --arg revision "$revision" '
   .sourceRevision == $revision and .sourceState == "clean local commit" and
-  .screenshotCount == 9 and .result == "passed"
+  .screenshotCount == 11 and .result == "passed"
 ' "$evidence_path" >/dev/null || fail 'revision-bound evidence validation failed'
 
 printf 'UI audit capture passed: %s\n' "$capture_root"

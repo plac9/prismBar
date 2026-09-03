@@ -23,7 +23,7 @@ struct AboutView: View {
                 PrismContentSection {
                     VStack(alignment: .leading, spacing: 18) {
                         Label("Build", systemImage: "hammer")
-                            .font(.headline)
+                            .prismFont(.headline)
 
                         Divider()
 
@@ -41,14 +41,14 @@ struct AboutView: View {
                         Label {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Public source")
-                                    .font(.headline)
+                                    .prismFont(.headline)
                                 Text("Every MPL-covered release maps to its public source revision.")
-                                    .font(.callout)
+                                    .prismFont(.callout)
                                     .foregroundStyle(.secondary)
                             }
                         } icon: {
                             Image(systemName: "chevron.left.forwardslash.chevron.right")
-                                .font(.title2)
+                                .prismFont(.title2)
                                 .foregroundStyle(.tint)
                         }
 
@@ -70,21 +70,21 @@ struct AboutView: View {
                         Label {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Independent work")
-                                    .font(.headline)
+                                    .prismFont(.headline)
                                 Text("Authored under a documented clean-room policy.")
-                                    .font(.callout)
+                                    .prismFont(.callout)
                                     .foregroundStyle(.secondary)
                             }
                         } icon: {
                             Image(systemName: "checkmark.seal")
-                                .font(.title2)
+                                .prismFont(.title2)
                                 .foregroundStyle(.tint)
                         }
                     }
                 }
 
                 Text("Copyright 2026 Patrick LaClair and LaClair Technologies")
-                    .font(.footnote)
+                    .prismFont(.footnote)
                     .foregroundStyle(.tertiary)
             }
             .frame(maxWidth: 760, alignment: .leading)
@@ -117,12 +117,13 @@ struct AboutView: View {
 
 private struct LegalDocumentsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.prismTextSizePreference) private var textSize
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text("Legal")
-                    .font(.title2.bold())
+                    .prismFont(.title2, weight: .bold)
                 Spacer()
                 Button("Done") {
                     dismiss()
@@ -148,15 +149,18 @@ private struct LegalDocumentsView: View {
             }
         }
         .padding(24)
-        .frame(minWidth: 720, minHeight: 600)
+        .frame(
+            minWidth: 720 + CGFloat(textSize.scale - 1) * 220,
+            minHeight: 600 + CGFloat(textSize.scale - 1) * 120
+        )
     }
 
     private func legalSection(title: String, resource: String) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
-                .font(.headline)
+                .prismFont(.headline)
             Text(bundledText(named: resource))
-                .font(.system(.caption, design: .monospaced))
+                .prismFont(.caption, design: .monospaced)
                 .textSelection(.enabled)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }

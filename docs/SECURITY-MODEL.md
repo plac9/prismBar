@@ -22,7 +22,7 @@ prismBar must provide useful menu bar control without becoming a route for infor
 | Accessibility | signed prismBar host | every other local process | host-only AX access, no delegation |
 | Dormant XPC design | future host protocol validator | future plugin service input and availability | excluded from the shipping target; reciprocal signing and protocol limits required before reintroduction |
 | Dormant plugin renderer | future host-owned native views | future plugin-provided descriptors | excluded from the shipping target; closed element vocabulary and validation preserved in source |
-| Preferences | typed domain layer | corrupted or stale stored data | versioned decoding, validation, safe defaults |
+| Preferences | typed domain layer | corrupted or stale stored data | bounded reading-size enum, validation, safe defaults; no stored value grants authority |
 | Recovery ledger | trusted host memory | stale topology and information disclosure | verified snapshots, compatibility checks, ten-entry bound, trust-loss clearing, no persistence or XPC |
 | Release | signed source revision | build machine and artifacts | clean build, SBOM, signature, notarization, stapling, hash publication |
 | Public repository | reviewed source | contributions and automation | no secrets, dependency review, provenance, branch review |

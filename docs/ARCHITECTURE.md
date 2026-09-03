@@ -25,6 +25,8 @@ The host is the only shipping process and the only component allowed to use Acce
 
 The host never passes AX objects, raw process inventory, PIDs, menu titles, application paths, file handles, environment data, or Accessibility-derived values to a plugin.
 
+The host persists an app-local reading-size choice as one bounded enum raw value. `prismBarCore` normalizes absent or malformed values to Standard, and the SwiftUI presentation layer maps the value to shared semantic font roles and responsive geometry. This preference never participates in permission, signing, topology, or movement decisions.
+
 ### Dormant Prism Card design
 
 No plugin service ships in the core release. If Prism Cards resume after core physical acceptance, the preserved design requires each first-party service to:

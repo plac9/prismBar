@@ -2,11 +2,53 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import AppKit
 import XCTest
 
 @MainActor
 final class VisualAuditTests: XCTestCase {
     private var systemUIOcclusionDetected = false
+
+    func testCapturesAccessibilityReadingSizeSurfaces() {
+        let interruptionMonitor = installSystemUIOcclusionMonitor()
+        defer { removeUIInterruptionMonitor(interruptionMonitor) }
+
+        let application = prismBarApplication(
+            additionalLaunchArguments: [
+                "--prismbar-ui-audit",
+                "-prismBar.textSize",
+                "accessibility",
+            ]
+        )
+        application.launch()
+        application.activate()
+
+        let workspace = openWorkspaceIfNeeded(in: application)
+        XCTAssertTrue(workspace.waitForExistence(timeout: 5))
+        XCTAssertGreaterThanOrEqual(workspace.frame.width, 995)
+        XCTAssertGreaterThanOrEqual(workspace.frame.height, 615)
+        assertShippingSurfaceIsUnobscured()
+        attach(workspace.screenshot(), named: "10-home-accessibility-size")
+
+        application.typeKey("w", modifierFlags: .command)
+        XCTAssertTrue(workspace.waitForNonExistence(timeout: 3))
+        let statusItem = application.descendants(matching: .statusItem)
+            .matching(identifier: "prismBar")
+            .firstMatch
+        XCTAssertTrue(statusItem.waitForExistence(timeout: 5))
+        statusItem.click()
+        let deck = application.popovers.firstMatch
+        XCTAssertTrue(deck.waitForExistence(timeout: 3))
+        XCTAssertGreaterThanOrEqual(deck.frame.width, 580)
+        XCTAssertTrue(application.buttons["Open prismBar"].isHittable)
+        let deckContent = deck.groups.firstMatch
+        XCTAssertTrue(deckContent.waitForExistence(timeout: 3))
+        assertShippingSurfaceIsUnobscured()
+        attachOpaquePopoverInterior(
+            deckContent.screenshot(),
+            named: "11-prismDeck-accessibility-size"
+        )
+    }
 
     func testCapturesPrivacySafeShippingSurfaces() {
         let interruptionMonitor = installSystemUIOcclusionMonitor()
@@ -90,8 +132,10 @@ final class VisualAuditTests: XCTestCase {
         } else {
             XCTAssertLessThanOrEqual(deck.frame.height, 646)
         }
+        let deckContent = deck.groups.firstMatch
+        XCTAssertTrue(deckContent.waitForExistence(timeout: 3))
         assertShippingSurfaceIsUnobscured()
-        attach(deck.screenshot(), named: "08-prismDeck")
+        attachOpaquePopoverInterior(deckContent.screenshot(), named: "08-prismDeck")
 
         application.typeKey(.escape, modifierFlags: [])
         XCTAssertTrue(deckTitle.waitForNonExistence(timeout: 3))
@@ -117,6 +161,41 @@ final class VisualAuditTests: XCTestCase {
 
     private func attach(_ screenshot: XCUIScreenshot, named name: String) {
         let attachment = XCTAttachment(screenshot: screenshot)
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
+    private func attachOpaquePopoverInterior(
+        _ screenshot: XCUIScreenshot,
+        named name: String
+    ) {
+        let image = screenshot.image
+        guard let representation = image.tiffRepresentation,
+              let bitmap = NSBitmapImageRep(data: representation),
+              let source = bitmap.cgImage
+        else {
+            XCTFail("Popover screenshot could not be decoded for privacy-safe cropping")
+            return
+        }
+
+        let inset = max(1, Int(round(16 * CGFloat(source.width) / image.size.width)))
+        let cropRect = CGRect(
+            x: inset,
+            y: inset,
+            width: source.width - inset * 2,
+            height: source.height - inset * 2
+        )
+        guard let cropped = source.cropping(to: cropRect) else {
+            XCTFail("Popover screenshot could not be cropped to its opaque interior")
+            return
+        }
+
+        let croppedImage = NSImage(
+            cgImage: cropped,
+            size: NSSize(width: cropRect.width, height: cropRect.height)
+        )
+        let attachment = XCTAttachment(image: croppedImage)
         attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)

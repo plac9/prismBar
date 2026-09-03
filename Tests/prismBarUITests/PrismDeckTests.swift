@@ -87,6 +87,41 @@ final class PrismDeckTests: XCTestCase {
         XCTAssertFalse(workspace.exists)
     }
 
+    func testAccessibilityTextSizeExpandsPrismDeckWithoutClippingItsCoreActions() {
+        let application = prismBarApplication(
+            opensWorkspace: false,
+            additionalLaunchArguments: [
+                "-prismBar.textSize",
+                "accessibility",
+            ]
+        )
+        application.launch()
+
+        let statusItem = prismBarStatusItem(in: application)
+        XCTAssertTrue(statusItem.waitForExistence(timeout: 5), application.debugDescription)
+        statusItem.click()
+
+        let deckTitle = application.staticTexts["prismDeck"]
+        XCTAssertTrue(deckTitle.waitForExistence(timeout: 3), application.debugDescription)
+        XCTAssertGreaterThanOrEqual(deckTitle.frame.height, 24)
+        let deck = application.popovers.firstMatch
+        XCTAssertTrue(deck.waitForExistence(timeout: 3), application.debugDescription)
+        XCTAssertGreaterThanOrEqual(deck.frame.width, 580)
+        XCTAssertGreaterThanOrEqual(deck.frame.height, 500)
+        XCTAssertTrue(application.buttons["Open prismBar"].isHittable)
+
+        if application.staticTexts["Accessibility needed"].exists {
+            XCTAssertTrue(application.buttons["Review Access"].isHittable)
+            XCTAssertTrue(application.buttons["Check Again"].isHittable)
+        } else {
+            XCTAssertTrue(
+                application.descendants(matching: .any)["prismDeck.actionStatus"]
+                    .waitForExistence(timeout: 3),
+                application.debugDescription
+            )
+        }
+    }
+
     private func closeWorkspaceIfNeeded(in application: XCUIApplication) -> XCUIElement {
         let workspace = application.windows["prismBar"]
         if workspace.waitForExistence(timeout: 1) {

@@ -84,10 +84,10 @@ if [ -f "$ui_audit_evidence" ]; then
   if jq -e --arg revision "$revision" '
       .schemaVersion == 1 and .product == "prismBar" and
       .sourceRevision == $revision and .sourceState == "clean local commit" and
-      .result == "passed" and .screenshotCount == 9
+      .result == "passed" and .screenshotCount == 11
     ' "$ui_audit_evidence" >/dev/null && [ -s "$ui_audit_report" ]; then
     ui_audit_class='pass'
-    ui_audit_status='Nine exact-revision shipping surfaces reviewed'
+    ui_audit_status='Eleven exact-revision shipping surfaces reviewed'
     ui_audit_link="<a href=\"../ui-audit/prismBar-ui-audit-$revision.html\">Open visual audit</a>"
   else
     ui_audit_class='fail'

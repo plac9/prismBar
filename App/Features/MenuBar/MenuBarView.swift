@@ -101,7 +101,7 @@ private extension MenuBarView {
                     ? "checkmark.circle.fill"
                     : "exclamationmark.triangle.fill"
             )
-            .font(.callout.weight(.medium))
+            .prismFont(.callout, weight: .medium)
             .foregroundStyle(snapshot.isComplete ? Color.secondary : .orange)
             .help(presentation.unavailableSourcesWarning ?? presentation.summary)
             .accessibilityHint(presentation.unavailableSourcesWarning ?? presentation.summary)
@@ -112,7 +112,7 @@ private extension MenuBarView {
                 model.isHiddenSectionCollapsed ? "Tucked away" : "All sections open",
                 systemImage: model.isHiddenSectionCollapsed ? "eye.slash" : "eye"
             )
-            .font(.callout)
+            .prismFont(.callout)
             .foregroundStyle(.secondary)
         }
     }
@@ -167,7 +167,7 @@ private extension MenuBarView {
             }
             .padding(.top, 10)
         }
-        .font(.callout.weight(.medium))
+        .prismFont(.callout, weight: .medium)
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
         .background(.background.secondary, in: .rect(cornerRadius: 14))
@@ -214,12 +214,12 @@ private extension MenuBarView {
         let sectionItems = items(in: section, snapshot: snapshot)
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
-                .font(.caption.weight(.semibold))
+                .prismFont(.caption, weight: .semibold)
                 .foregroundStyle(.secondary)
 
             if sectionItems.isEmpty {
                 Label("No items", systemImage: "checkmark.circle")
-                    .font(.caption)
+                    .prismFont(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.vertical, 8)
             } else {
@@ -249,7 +249,7 @@ private extension MenuBarView {
                 ProgressView()
                     .controlSize(.small)
                 Text(actionProgressMessage)
-                    .font(.callout.weight(.medium))
+                    .prismFont(.callout, weight: .medium)
                 Spacer()
             }
             .padding(.horizontal, 14)
@@ -259,7 +259,7 @@ private extension MenuBarView {
         case let .result(result):
             HStack(spacing: 10) {
                 Label(result.message, systemImage: result.symbol)
-                    .font(.callout.weight(.medium))
+                    .prismFont(.callout, weight: .medium)
                     .foregroundStyle(resultColor(for: result.kind))
                     .frame(maxWidth: .infinity, alignment: .leading)
 

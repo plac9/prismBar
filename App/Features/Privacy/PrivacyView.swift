@@ -19,7 +19,7 @@ struct PrivacyView: View {
                 PrismContentSection {
                     VStack(alignment: .leading, spacing: 16) {
                         Label("One permission, one purpose", systemImage: "checkmark.shield")
-                            .font(.headline)
+                            .prismFont(.headline)
 
                         Divider()
 
@@ -57,7 +57,7 @@ struct PrivacyView: View {
                 PrismContentSection(tint: .blue) {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Enforced boundaries")
-                            .font(.headline)
+                            .prismFont(.headline)
                         PrivacyPrinciple(
                             title: "No data exhaust",
                             message: "Production logs contain outcomes, never observed menu labels or screen content.",
@@ -102,14 +102,14 @@ private struct PrivacyPrinciple: View {
         Label {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.headline)
+                    .prismFont(.headline)
                 Text(message)
-                    .font(.callout)
+                    .prismFont(.callout)
                     .foregroundStyle(.secondary)
             }
         } icon: {
             Image(systemName: symbol)
-                .font(.title2)
+                .prismFont(.title2)
                 .foregroundStyle(.tint)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

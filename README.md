@@ -16,11 +16,14 @@ This repository is an independent clean-room implementation. It does not contain
 - Distribution: Developer ID signed, hardened, notarized direct distribution
 - Privacy: local-only operation, no analytics, telemetry, screen capture, OCR, or content upload
 - Accessibility: public macOS Accessibility APIs, requested only after the app is installed in a stable location
+- Reading size: app-local 100%, 125%, 150%, or 200% semantic type and responsive layout
 - Shipping scope: menu bar control only; no Prism Card runtime, file access, or network access
 
 ## Core-first scope
 
 The shipping app currently includes only the core model, Accessibility adapter, verified menu-bar engine, typed action receipts, and a bounded in-memory recovery ledger. `prismDeck` is its compact status-item control surface. Recovery snapshots are never persisted, logged, or sent across XPC. Persistent Scenes remain future work behind a separate privacy review.
+
+General Settings includes an explicit local reading-size control. Every shipping scene consumes the same semantic type roles and adapts its window, popover, Rail, list, and control geometry through 200% without changing system-wide settings or treating presentation state as security authority.
 
 Prism Cards are the future user-facing capability system. Their framework and prismCalc sources are preserved for later development but are not linked, embedded, launched, or visible in the application. Prism Cards resume only after the installed core menu-bar product passes its physical macOS 27 gates.
 
@@ -71,7 +74,7 @@ does not import certificates, read 1Password items, accept raw notarization cred
 login or System Keychain. Before creating an artifact, run `scripts/release-readiness.sh` with the named
 notary profile, dedicated Keychain path, and approved certificate fingerprint. The check is read-only,
 non-interactive, and reports only generic gate status; it requires clean `main`, exact-revision CI and
-nine-surface UI evidence, source audits, the isolated signing identity, and working Apple notarization
+eleven-surface UI evidence, including 200% reading-size captures, source audits, the isolated signing identity, and working Apple notarization
 authentication.
 
 After archive and notarization, install only through `scripts/install-release-candidate.sh` using the
