@@ -39,6 +39,7 @@ Tests/ReleaseWorkflowTests/pinned_swiftlint_install_contract.sh
 Tests/ReleaseWorkflowTests/core_shipping_contract.sh
 Tests/ReleaseWorkflowTests/local_package_normalization_contract.sh
 Tests/ReleaseWorkflowTests/clean_room_similarity_contract.sh
+Tests/ReleaseWorkflowTests/runtime_budget_contract.sh
 
 if [ "$(uname -m)" != "arm64" ] || [[ "$(xcrun --sdk macosx --show-sdk-version)" != 27.* ]]; then
   printf 'CI requires the Apple silicon Xcode 27 runner.\n' >&2
@@ -138,6 +139,7 @@ jq -n \
     scopes: [
       "toolchain contract",
       "licensing, public safety, and Liquid Glass structure",
+      "runtime budget source contract",
       "Git history secret scan",
       "Swift lint",
       "debug and release tests",

@@ -168,7 +168,7 @@ Commit message: `fix(ux): harden prismDeck daily workflow`
 - Consumes: live `AXIsProcessTrusted`, `CGPreflightPostEventAccess`, stable-install identity.
 - Produces: one non-cached readiness state shared by Home, Menu Bar, Settings, toolbar, and prismDeck.
 
-- [ ] **Step 1: Add or confirm tests for foreground recheck, runtime revocation, signed upgrade, and identity mismatch**
+- [x] **Step 1: Add or confirm tests for foreground recheck, runtime revocation, signed upgrade, and identity mismatch**
 
 The app must transition immediately to safe disabled controls when either authority is lost and recover without clearing unrelated preferences.
 
@@ -200,15 +200,15 @@ Commit message: `fix(access): reconcile live macOS permission state`
 - Consumes: running app PID and existing synthetic refresh/action fixtures.
 - Produces: a privacy-safe pass/fail runtime-budget report containing only aggregate CPU, footprint, task, and window counts.
 
-- [ ] **Step 1: Write a failing runtime-budget source contract**
+- [x] **Step 1: Write a failing runtime-budget source contract**
 
 Require explicit thresholds of less than 1% settled idle CPU and less than 100 MiB physical footprint, bounded sample count, no command-line/environment dump, no process inventory output, and nonzero failure status when a threshold is exceeded.
 
-- [ ] **Step 2: Add refresh coalescing tests**
+- [x] **Step 2: Add refresh coalescing tests**
 
 Start multiple refresh requests while one observation is pending and assert that only one live observation task owns publication while all callers settle without unbounded task creation.
 
-- [ ] **Step 3: Implement the minimum aggregate audit and any reproduced coalescing fix**
+- [x] **Step 3: Implement the minimum aggregate audit and any reproduced coalescing fix**
 
 The script reads only the exact prismBar PID, samples aggregate metrics, and emits generic values. It never captures menu-bar or environment content.
 
@@ -216,7 +216,7 @@ The script reads only the exact prismBar PID, samples aggregate metrics, and emi
 
 Compare beginning and ending physical footprint, task count, and window count. Fail on monotonic growth beyond a documented tolerance; preserve only aggregate results.
 
-- [ ] **Step 5: Commit the independently reviewable runtime gate**
+- [x] **Step 5: Commit the independently reviewable runtime gate**
 
 Commit message: `test(runtime): enforce prismBar resource budgets`
 
