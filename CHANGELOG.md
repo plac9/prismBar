@@ -62,6 +62,7 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 
 ### Fixed
 
+- Retried one exact Xcode accessibility-audit timeout while preserving every reported accessibility finding and failing repeated or unrelated errors.
 - Reused the existing prismBar workspace when Settings or the keyboard command opens it, preventing duplicate tabbed workspaces after a restored session.
 - Required both Accessibility and event-synthesis authorization before reporting menu-bar control as ready, and requested the separate PostEvent authority now enforced by macOS 27.
 - Kept hosted verification honest when GitHub provides the Xcode 27 SDK on a pre-macOS 27 runtime: app tests compile there, while execution remains a physical macOS 27 gate.
