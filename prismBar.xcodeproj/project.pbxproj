@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		01B5BF2BBC8F97D97D789529 /* AppModelActionFeedbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA48AA25661199CF523152D5 /* AppModelActionFeedbackTests.swift */; };
 		058E0E5D91058313EDE6A007 /* PrismStatusIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24DA04C9442819CB0ACBD9C3 /* PrismStatusIcon.swift */; };
+		1071045FE6060940ECBB78E9 /* SceneActionRouterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C2D620F78E44BA1A0566293 /* SceneActionRouterTests.swift */; };
 		1DCD7BEAAD307561022F20A9 /* AppModel+MenuBarReset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F4F978FB62B17B05978B939 /* AppModel+MenuBarReset.swift */; };
 		24D6BDA4F82765035F4809EF /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A756F325D68C0D906A6D4318 /* MenuBarView.swift */; };
 		261CF815A371C909B5308412 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE01E333B738C28E2DD3D464 /* AboutView.swift */; };
@@ -110,6 +111,7 @@
 		75ABFACBE8B5FA2F47CAF31F /* LaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchTests.swift; sourceTree = "<group>"; };
 		797D62515E8C48EE5BF939F7 /* AppModel+MenuBarActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+MenuBarActions.swift"; sourceTree = "<group>"; };
 		79D6E16A0136D1F283B728AB /* AppModel+MenuBarRecovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+MenuBarRecovery.swift"; sourceTree = "<group>"; };
+		7C2D620F78E44BA1A0566293 /* SceneActionRouterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneActionRouterTests.swift; sourceTree = "<group>"; };
 		7F750C30A67946F63A370161 /* PrismVisuals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismVisuals.swift; sourceTree = "<group>"; };
 		8E4704B12208803361392147 /* PrismDeckLayoutPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismDeckLayoutPolicy.swift; sourceTree = "<group>"; };
 		8FFF8A05443F8BB9B57C8CBC /* prismBarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = prismBarApp.swift; sourceTree = "<group>"; };
@@ -238,6 +240,7 @@
 				AA48AA25661199CF523152D5 /* AppModelActionFeedbackTests.swift */,
 				664F06B00E6B3DE43DE9C692 /* PrismDeckApplicationsCommandTests.swift */,
 				94634BEAD24C8AF53CD71F3C /* PrismTypographyTests.swift */,
+				7C2D620F78E44BA1A0566293 /* SceneActionRouterTests.swift */,
 			);
 			path = prismBarAppTests;
 			sourceTree = "<group>";
@@ -457,6 +460,7 @@
 				01B5BF2BBC8F97D97D789529 /* AppModelActionFeedbackTests.swift in Sources */,
 				F023727F1D7DFEF8B59B7821 /* PrismDeckApplicationsCommandTests.swift in Sources */,
 				EB96146DF2F3AEA1A0EB586E /* PrismTypographyTests.swift in Sources */,
+				1071045FE6060940ECBB78E9 /* SceneActionRouterTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
