@@ -47,6 +47,14 @@ if [ "$test_selection" = "--source-audit" ]; then
     echo "Manual AppKit ownership remains for a SwiftUI application window." >&2
     exit 1
   fi
+  if rg -n '\.font\(' App \
+      --glob '*.swift' \
+      --glob '!App/Design/PrismTypography.swift' \
+      --glob '!App/Features/Plugins/**' \
+      --glob '!App/Features/Overview/MenuBarApplicationIcon.swift'; then
+    echo "Shipping UI bypasses the semantic prismBar typography layer." >&2
+    exit 1
+  fi
   echo "UI source audit passed: native navigation, semantic content groups, and interactive glass are separated."
   exit 0
 fi
@@ -55,6 +63,7 @@ installed_executable='/Applications/prismBar.app/Contents/MacOS/prismBar'
 installed_was_running=false
 ui_scratch_is_temporary=false
 ui_derived_data_directory="${UI_DERIVED_DATA_DIR:-}"
+source_revision="${PRISM_SOURCE_REVISION:-$(git rev-parse HEAD)}"
 if [ -z "$ui_derived_data_directory" ]; then
   ui_derived_data_directory="$(mktemp -d "${TMPDIR:-/tmp}/prismbar-ui.XXXXXX")"
   ui_scratch_is_temporary=true
@@ -100,7 +109,7 @@ DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode-beta.app/Contents/Developer}
     -scheme prismBar \
     -destination 'platform=macOS,arch=arm64' \
     -derivedDataPath "$ui_derived_data_directory" \
-    "PRISM_SOURCE_REVISION=${PRISM_SOURCE_REVISION:-local-development}" \
+    "PRISM_SOURCE_REVISION=$source_revision" \
     CODE_SIGN_STYLE=Manual \
     CODE_SIGN_IDENTITY=- \
     DEVELOPMENT_TEAM= \

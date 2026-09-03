@@ -5,11 +5,10 @@
 import prismBarCore
 import AppKit
 import SwiftUI
-
 struct PrismRailView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.prismTextSizePreference) private var textSize
     let snapshot: MenuBarSnapshot
-
     @Binding private var selectedSurfaceID: MenuBarSurfaceID
     @Binding private var selectedItemID: MenuBarItemID?
     @State private var dragTokens: [MenuBarItemID: String]
@@ -69,18 +68,18 @@ private extension PrismRailView {
         HStack(spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(PrismRailPresentation.title)
-                    .font(.headline)
+                    .prismFont(.headline)
                     .accessibilityAddTraits(.isHeader)
 
                 Text("Drag once. prismBar verifies the result.")
-                    .font(.caption)
+                    .prismFont(.caption)
                     .foregroundStyle(.secondary)
             }
 
             Spacer()
 
             Text("\(layout.itemCount)")
-                .font(.caption.monospacedDigit().weight(.semibold))
+                .prismFont(.caption, weight: .semibold, monospacedDigits: true)
                 .foregroundStyle(.secondary)
                 .accessibilityLabel("\(layout.itemCount) items on this display")
 
@@ -113,16 +112,16 @@ private extension PrismRailView {
                     .accessibilityHidden(true)
 
                 Text(PrismRailViewSupport.sectionTitle(section))
-                    .font(.caption.weight(.semibold))
+                    .prismFont(.caption, weight: .semibold)
 
                 Text("\(laneItems.count)")
-                    .font(.caption2.monospacedDigit())
+                    .prismFont(.caption2, monospacedDigits: true)
                     .foregroundStyle(.tertiary)
 
                 Spacer()
 
                 Text(PrismRailViewSupport.sectionHint(section))
-                    .font(.caption2)
+                    .prismFont(.caption2)
                     .foregroundStyle(.tertiary)
             }
 
@@ -154,7 +153,7 @@ private extension PrismRailView {
             }
             .scrollIndicators(.never)
             .scrollTargetBehavior(.viewAligned)
-            .frame(height: 48)
+            .frame(height: 48 * CGFloat(textSize.scale))
             .dropDestination(for: String.self) { tokens, _ in
                 performDrop(tokens: tokens, targetItemID: nil, section: section)
             } isTargeted: { isTargeted in
@@ -201,9 +200,9 @@ private extension PrismRailView {
             itemIcon(item)
 
             Text(item.displayName)
-                .font(.caption.weight(.medium))
+                .prismFont(.caption, weight: .medium)
                 .lineLimit(1)
-                .frame(maxWidth: 150)
+                .frame(maxWidth: 150 * CGFloat(textSize.scale))
 
             if movingItemID == item.id {
                 ProgressView()
@@ -212,7 +211,7 @@ private extension PrismRailView {
             }
         }
         .padding(.horizontal, 10)
-        .frame(height: 34)
+        .frame(minHeight: 34 * CGFloat(textSize.scale))
         .overlay {
             Capsule()
                 .strokeBorder(itemStroke(item), lineWidth: itemStrokeWidth(item))
@@ -292,9 +291,12 @@ private extension PrismRailView {
 
     func emptyLane(_ section: MenuBarSection) -> some View {
         Label("Drop an item here", systemImage: "arrow.down.to.line.compact")
-            .font(.caption)
+            .prismFont(.caption)
             .foregroundStyle(.secondary)
-            .frame(minWidth: 150, minHeight: 34)
+            .frame(
+                minWidth: 150 * CGFloat(textSize.scale),
+                minHeight: 34 * CGFloat(textSize.scale)
+            )
             .accessibilityLabel(
                 "Empty \(PrismRailViewSupport.sectionTitle(section)). Drop an item here."
             )
@@ -359,7 +361,7 @@ private extension PrismRailView {
             )
         } else {
             Image(systemName: symbol)
-                .font(.caption2.weight(.semibold))
+                .prismFont(.caption2, weight: .semibold)
                 .foregroundStyle(movingItemID == item.id ? Color.accentColor : .secondary)
                 .accessibilityHidden(true)
         }
@@ -395,5 +397,4 @@ private extension PrismRailView {
             surfaceID: selectedSurfaceID
         )
     }
-
 }

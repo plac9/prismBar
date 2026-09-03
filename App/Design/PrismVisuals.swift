@@ -43,17 +43,17 @@ struct PrismGateView: View {
 
             HStack(spacing: 5) {
                 Image(systemName: "triangle.lefthalf.filled")
-                    .font(.caption2)
+                    .prismFont(.caption2)
                     .foregroundStyle(gateStyle)
                     .accessibilityHidden(true)
 
                 Text("PRISM GATE")
-                    .font(.caption2.weight(.bold))
+                    .prismFont(.caption2, weight: .bold)
                     .tracking(1.1)
                     .foregroundStyle(isActive ? .primary : .secondary)
 
                 Image(systemName: "triangle.righthalf.filled")
-                    .font(.caption2)
+                    .prismFont(.caption2)
                     .foregroundStyle(gateStyle)
                     .accessibilityHidden(true)
             }
@@ -142,16 +142,16 @@ struct PageHeader: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Label(eyebrow, systemImage: symbol)
-                .font(.caption.weight(.semibold))
+                .prismFont(.caption, weight: .semibold)
                 .foregroundStyle(.primary)
 
             Text(title)
-                .font(.title.weight(.semibold))
+                .prismFont(.title, weight: .semibold)
                 .accessibilityAddTraits(.isHeader)
                 .accessibilityIdentifier(identifier)
 
             Text(message)
-                .font(.body)
+                .prismFont(.body)
                 .foregroundStyle(.primary)
                 .fixedSize(horizontal: false, vertical: true)
         }

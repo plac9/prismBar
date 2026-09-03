@@ -34,6 +34,37 @@ if [ ! -f "$manifest" ]; then
   exit 1
 fi
 
+expected_screenshot_keys=(
+  '01-home'
+  '02-menu-bar'
+  '03-automation'
+  '04-privacy'
+  '05-about'
+  '06-settings-general'
+  '07-settings-privacy'
+  '08-prismDeck'
+  '09-status-item'
+  '10-home-accessibility-size'
+  '11-prismDeck-accessibility-size'
+)
+attachment_count="$(jq '[.[].attachments[] | select(.exportedFileName | endswith(".png"))] | length' "$manifest")"
+expected_screenshot_key_set="$(printf '%s\n' "${expected_screenshot_keys[@]}" | LC_ALL=C sort)"
+actual_screenshot_key_set="$(
+  jq -r '
+    .[].attachments[]
+    | select(.exportedFileName | endswith(".png"))
+    | .suggestedHumanReadableName
+    | sub("_0_.*$"; "")
+  ' "$manifest" | LC_ALL=C sort
+)"
+
+if [ "$attachment_count" -ne "${#expected_screenshot_keys[@]}" ] ||
+    [ "$actual_screenshot_key_set" != "$expected_screenshot_key_set" ]; then
+  printf 'UI audit report is incomplete: expected the exact %s shipping surfaces, found %s PNG attachments.\n' \
+    "${#expected_screenshot_keys[@]}" "$attachment_count" >&2
+  exit 1
+fi
+
 jq -r '
   def title:
     .suggestedHumanReadableName
@@ -41,13 +72,15 @@ jq -r '
     | {
         "01-home": "Home",
         "02-menu-bar": "Menu Bar",
-        "03-tools": "Tools",
-        "04-prism-calc": "prismCalc",
-        "05-automation": "Automation",
-        "06-privacy": "Privacy",
-        "07-about": "About",
-        "08-settings": "Settings",
-        "09-status-item": "Status Item"
+        "03-automation": "Automation",
+        "04-privacy": "Privacy",
+        "05-about": "About",
+        "06-settings-general": "Settings - General",
+        "07-settings-privacy": "Settings - Privacy",
+        "08-prismDeck": "prismDeck",
+        "09-status-item": "Status Item",
+        "10-home-accessibility-size": "Home at 200%",
+        "11-prismDeck-accessibility-size": "prismDeck at 200%"
       }[.] // .;
   [.[].attachments[] | select(.exportedFileName | endswith(".png"))]
   | sort_by(.suggestedHumanReadableName)
@@ -66,9 +99,8 @@ jq -r '
     "</main></body></html>"
 ' "$manifest" > "$report"
 
-attachment_count="$(jq '[.[].attachments[] | select(.exportedFileName | endswith(".png"))] | length' "$manifest")"
-if [ "$attachment_count" -ne 9 ] || [ ! -s "$report" ]; then
-  printf 'UI audit report is incomplete: expected 9 screenshots, found %s.\n' "$attachment_count" >&2
+if [ ! -s "$report" ]; then
+  printf 'UI audit report was not generated.\n' >&2
   exit 1
 fi
 

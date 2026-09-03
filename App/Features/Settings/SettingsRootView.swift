@@ -6,6 +6,8 @@ import prismBarCore
 import SwiftUI
 
 struct SettingsRootView: View {
+    @Environment(\.prismTextSizePreference) private var textSize
+
     var body: some View {
         TabView {
             Tab("General", systemImage: "gearshape") {
@@ -17,12 +19,27 @@ struct SettingsRootView: View {
             }
         }
         .padding(.top, 8)
+        .frame(
+            minWidth: 640 + CGFloat(textSize.scale - 1) * 180,
+            idealWidth: 680 + CGFloat(textSize.scale - 1) * 180,
+            minHeight: 500 + CGFloat(textSize.scale - 1) * 100,
+            idealHeight: 540 + CGFloat(textSize.scale - 1) * 100
+        )
     }
 }
 
 private struct GeneralSettingsView: View {
     @Environment(\.openWindow) private var openWindow
     @Environment(AppModel.self) private var model
+    @AppStorage(PrismTextSizePreference.storageKey) private var storedTextSize =
+        PrismTextSizePreference.standard.rawValue
+
+    private var textSizeSelection: Binding<String> {
+        Binding(
+            get: { PrismTextSizePreference(storedValue: storedTextSize).rawValue },
+            set: { storedTextSize = PrismTextSizePreference(storedValue: $0).rawValue }
+        )
+    }
 
     var body: some View {
         Form {
@@ -35,7 +52,7 @@ private struct GeneralSettingsView: View {
                 }
 
                 Text(accessibilitySummary)
-                    .font(.callout)
+                    .prismFont(.callout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -70,6 +87,25 @@ private struct GeneralSettingsView: View {
                 LabeledContent("Input Monitoring", value: "Never")
                 LabeledContent("Files and Folders", value: "Never")
                 LabeledContent("Network Requests", value: "Never")
+            }
+
+            Section {
+                Picker("Text size", selection: textSizeSelection) {
+                    ForEach(PrismTextSizePreference.allCases, id: \.rawValue) { preference in
+                        Text("\(preference.title) · \(preference.percentageLabel)")
+                            .tag(preference.rawValue)
+                    }
+                }
+                .accessibilityIdentifier("settings.textSize")
+
+                Text("Applies locally to prismDeck, the workspace, and Settings.")
+                    .prismFont(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } header: {
+                Text("Reading")
+            } footer: {
+                Text("Accessibility reaches 200% while preserving scrolling and native controls.")
             }
         }
         .formStyle(.grouped)

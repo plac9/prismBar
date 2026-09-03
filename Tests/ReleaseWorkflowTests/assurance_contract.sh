@@ -55,6 +55,7 @@ done
 for required in \
   'addUIInterruptionMonitor' \
   'systemUIOcclusionDetected' \
+  'attachOpaquePopoverInterior' \
   'System UI is obscuring the shipping surface'; do
   rg -Fq -- "$required" Tests/prismBarUITests/VisualAuditTests.swift || {
     printf 'Assurance contract failed: visual capture does not reject %s.\n' "$required" >&2
@@ -78,14 +79,16 @@ for required in \
   'git status --porcelain=v1' \
   'build/ui-audit' \
   'sourceRevision' \
-  'screenshotCount'; do
+  'screenshotCount' \
+  'expected_screenshot_keys' \
+  'actual_screenshot_key_set'; do
   rg -Fq -- "$required" scripts/generate-ui-audit-report.sh || {
     printf 'Assurance contract failed: UI audit evidence is missing %s.\n' "$required" >&2
     exit 1
   }
 done
 
-rg -Fq -- 'Nine exact-revision shipping surfaces reviewed' \
+rg -Fq -- 'Eleven exact-revision shipping surfaces reviewed' \
   scripts/generate-assurance-report.sh || {
   printf 'Assurance contract failed: visual audit count copy is stale.\n' >&2
   exit 1

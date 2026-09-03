@@ -8,6 +8,8 @@ The format follows Keep a Changelog. Versions follow Semantic Versioning after t
 
 ### Added
 
+- A local 100%, 125%, 150%, and 200% reading-size preference shared by every shipping scene.
+- Responsive workspace, Settings, Prism Deck, Rail, inventory, and control geometry for larger text.
 - Rail drag-to-place controls for direct, verified multi-position menu bar moves.
 - A searchable `prismDeck` Applications drawer with current order, role, availability, direct placement, and protected-anchor state.
 - VoiceOver actions for Rail show, hide, first-position, and last-position moves without requiring drag input.

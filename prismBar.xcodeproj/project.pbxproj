@@ -37,6 +37,7 @@
 		A2FDDC3813D932AB06E15FFD /* AppModel+MenuBarRecovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79D6E16A0136D1F283B728AB /* AppModel+MenuBarRecovery.swift */; };
 		AE30068A1AE8D0EAB237F76A /* PrismVisuals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F750C30A67946F63A370161 /* PrismVisuals.swift */; };
 		AFC0E90FF2A6E8DF6D4BCFDC /* AppModel+MenuBarActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 797D62515E8C48EE5BF939F7 /* AppModel+MenuBarActions.swift */; };
+		B643E4C7E0AA8B52B9888402 /* PrismTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E86129BD20B1E17F23D13DB /* PrismTypography.swift */; };
 		B75F478A2A853FE7086943BE /* PrismRailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF5C720A82C49A3A2A93918D /* PrismRailView.swift */; };
 		BEB5DD3EE10E1A5DE98304FB /* prismBar.icon in Resources */ = {isa = PBXBuildFile; fileRef = 42DE507D28E83BE99B7CC5CE /* prismBar.icon */; };
 		C0522F43C20205737E92FE31 /* PrismDeckTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A31F5C43CC8171F9EC4B8 /* PrismDeckTests.swift */; };
@@ -53,6 +54,7 @@
 		E5C70F149F116D0AE30145D2 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B99796874F6C0C859873DF49 /* PrivacyInfo.xcprivacy */; };
 		E64955DB63E19420FC76CC0C /* MenuBarSectionStatusController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D8BAE01F43F46DF5610002B /* MenuBarSectionStatusController.swift */; };
 		E9D571B8238F9A3B29D7EA68 /* VisualAuditTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74D21E1BE361A7B6B790F767 /* VisualAuditTests.swift */; };
+		EB96146DF2F3AEA1A0EB586E /* PrismTypographyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94634BEAD24C8AF53CD71F3C /* PrismTypographyTests.swift */; };
 		ED364C206C4501008BF199EC /* PrivacyCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE72ACFC08C1C6F47C155D /* PrivacyCopy.swift */; };
 		F023727F1D7DFEF8B59B7821 /* PrismDeckApplicationsCommandTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 664F06B00E6B3DE43DE9C692 /* PrismDeckApplicationsCommandTests.swift */; };
 		FED49BF4D873ED09D31CD928 /* PrismRailViewSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469614A59BF1325BAA234EFD /* PrismRailViewSupport.swift */; };
@@ -99,6 +101,7 @@
 		5F4F978FB62B17B05978B939 /* AppModel+MenuBarReset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+MenuBarReset.swift"; sourceTree = "<group>"; };
 		6419CB2641AFB03C2890E55D /* NOTICE */ = {isa = PBXFileReference; path = NOTICE; sourceTree = "<group>"; };
 		664F06B00E6B3DE43DE9C692 /* PrismDeckApplicationsCommandTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismDeckApplicationsCommandTests.swift; sourceTree = "<group>"; };
+		6E86129BD20B1E17F23D13DB /* PrismTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismTypography.swift; sourceTree = "<group>"; };
 		6F94844597D55920442A36A2 /* WorkspaceVisualStructureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceVisualStructureTests.swift; sourceTree = "<group>"; };
 		705CE0B7CDC26A16F16702C2 /* AppModel+MenuBarBatchActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+MenuBarBatchActions.swift"; sourceTree = "<group>"; };
 		72367E88666AEFDC8C0C684C /* MainWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowView.swift; sourceTree = "<group>"; };
@@ -111,6 +114,7 @@
 		8E4704B12208803361392147 /* PrismDeckLayoutPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismDeckLayoutPolicy.swift; sourceTree = "<group>"; };
 		8FFF8A05443F8BB9B57C8CBC /* prismBarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = prismBarApp.swift; sourceTree = "<group>"; };
 		90B72451308C4BB744C489CA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		94634BEAD24C8AF53CD71F3C /* PrismTypographyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismTypographyTests.swift; sourceTree = "<group>"; };
 		9D8BAE01F43F46DF5610002B /* MenuBarSectionStatusController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarSectionStatusController.swift; sourceTree = "<group>"; };
 		A756F325D68C0D906A6D4318 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
 		AA48AA25661199CF523152D5 /* AppModelActionFeedbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModelActionFeedbackTests.swift; sourceTree = "<group>"; };
@@ -233,6 +237,7 @@
 				EEF4DD93279456074BB6F7FD /* AppLifecycleTests.swift */,
 				AA48AA25661199CF523152D5 /* AppModelActionFeedbackTests.swift */,
 				664F06B00E6B3DE43DE9C692 /* PrismDeckApplicationsCommandTests.swift */,
+				94634BEAD24C8AF53CD71F3C /* PrismTypographyTests.swift */,
 			);
 			path = prismBarAppTests;
 			sourceTree = "<group>";
@@ -305,6 +310,7 @@
 			isa = PBXGroup;
 			children = (
 				24DA04C9442819CB0ACBD9C3 /* PrismStatusIcon.swift */,
+				6E86129BD20B1E17F23D13DB /* PrismTypography.swift */,
 				7F750C30A67946F63A370161 /* PrismVisuals.swift */,
 			);
 			path = Design;
@@ -450,6 +456,7 @@
 				D90EA618B13266052A72F806 /* AppLifecycleTests.swift in Sources */,
 				01B5BF2BBC8F97D97D789529 /* AppModelActionFeedbackTests.swift in Sources */,
 				F023727F1D7DFEF8B59B7821 /* PrismDeckApplicationsCommandTests.swift in Sources */,
+				EB96146DF2F3AEA1A0EB586E /* PrismTypographyTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -480,6 +487,7 @@
 				B75F478A2A853FE7086943BE /* PrismRailView.swift in Sources */,
 				FED49BF4D873ED09D31CD928 /* PrismRailViewSupport.swift in Sources */,
 				058E0E5D91058313EDE6A007 /* PrismStatusIcon.swift in Sources */,
+				B643E4C7E0AA8B52B9888402 /* PrismTypography.swift in Sources */,
 				AE30068A1AE8D0EAB237F76A /* PrismVisuals.swift in Sources */,
 				ED364C206C4501008BF199EC /* PrivacyCopy.swift in Sources */,
 				28CF60F875A77F50F17076A5 /* PrivacyView.swift in Sources */,

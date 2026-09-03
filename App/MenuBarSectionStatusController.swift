@@ -17,28 +17,13 @@ final class MenuBarSectionStatusController: NSObject {
     private var commandPopoverKeyMonitor: Any?
 
     private lazy var commandPopover: NSPopover = {
+        let size = currentDeckSize(for: NSScreen.main)
         let popover = NSPopover()
         popover.behavior = .transient
         popover.animates = true
-        popover.contentSize = NSSize(
-            width: PrismDeckLayoutPolicy.width,
-            height: PrismDeckLayoutPolicy.height(
-                accessibilityGranted: AppModel.shared.accessibilityState == .granted
-            )
-        )
+        popover.contentSize = size
         popover.delegate = self
-        popover.contentViewController = NSHostingController(
-            rootView: PrismDeckView(
-                model: AppModel.shared,
-                openWorkspace: { [weak self] in
-                    self?.dismissCommandCenter()
-                    SceneActionRouter.shared.openWorkspace()
-                },
-                dismissDeck: { [weak self] in
-                    self?.dismissCommandCenter()
-                }
-            )
-        )
+        popover.contentViewController = makeDeckContentController(size: size)
         return popover
     }()
 
@@ -86,8 +71,51 @@ final class MenuBarSectionStatusController: NSObject {
         if commandPopover.isShown {
             commandPopover.performClose(sender)
         } else {
+            updateCommandPopoverSize(for: sender.window?.screen)
             commandPopover.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
         }
+    }
+
+    private func updateCommandPopoverSize(for screen: NSScreen?) {
+        let size = currentDeckSize(for: screen)
+        commandPopover.contentSize = size
+        commandPopover.contentViewController = makeDeckContentController(size: size)
+    }
+
+    private func currentDeckSize(for screen: NSScreen?) -> NSSize {
+        let visibleFrameSize = (screen ?? NSScreen.main ?? NSScreen.screens.first)?.visibleFrame.size
+            ?? NSSize(width: 440, height: 360)
+        return PrismDeckLayoutPolicy.contentSize(
+            accessibilityGranted: AppModel.shared.accessibilityState == .granted,
+            textSize: currentTextSize,
+            visibleFrameSize: visibleFrameSize
+        )
+    }
+
+    private func makeDeckContentController(size: NSSize) -> NSViewController {
+        NSHostingController(
+            rootView: PrismTextSizeScope {
+                PrismDeckView(
+                    model: AppModel.shared,
+                    layoutSize: size,
+                    openWorkspace: { [weak self] in
+                        self?.dismissCommandCenter()
+                        SceneActionRouter.shared.openWorkspace()
+                    },
+                    dismissDeck: { [weak self] in
+                        self?.dismissCommandCenter()
+                    }
+                )
+            }
+        )
+    }
+
+    private var currentTextSize: PrismTextSizePreference {
+        PrismTextSizePreference(
+            storedValue: UserDefaults.standard.string(
+                forKey: PrismTextSizePreference.storageKey
+            )
+        )
     }
 
     @discardableResult

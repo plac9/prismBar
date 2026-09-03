@@ -56,6 +56,22 @@ final class AccessibilityAuditTests: XCTestCase {
             .matching(identifier: "com_apple_SwiftUI_Settings_window")
             .firstMatch
         XCTAssertTrue(settings.waitForExistence(timeout: 5), application.debugDescription)
+        let general = settings.buttons["General"]
+        XCTAssertTrue(general.waitForExistence(timeout: 3), application.debugDescription)
+        general.click()
+        XCTAssertTrue(
+            application.descendants(matching: .any)["settings.textSize"]
+                .waitForExistence(timeout: 3),
+            application.debugDescription
+        )
+        let textSizePicker = application.popUpButtons["settings.textSize"]
+        XCTAssertTrue(textSizePicker.isHittable, application.debugDescription)
+        textSizePicker.click()
+        XCTAssertTrue(
+            application.menuItems["Standard · 100%"].waitForExistence(timeout: 3),
+            application.debugDescription
+        )
+        application.typeKey(.escape, modifierFlags: [])
         try performAudit(in: application)
 
         let privacy = settings.buttons["Privacy"]
@@ -107,6 +123,14 @@ final class AccessibilityAuditTests: XCTestCase {
 
     private func performAudit(in application: XCUIApplication) throws {
         try application.performAccessibilityAudit(for: macOSAuditTypes) { issue in
+            if issue.auditType == .action,
+               issue.element?.elementType == .popUpButton,
+               issue.element?.identifier == "settings.textSize" {
+                // Xcode 27 beta reports that SwiftUI's native Picker lacks an
+                // action even after the direct open assertion above succeeds.
+                return true
+            }
+
             if issue.auditType == .contrast,
                issue.element?.elementType == .staticText {
                 // Xcode 27 beta reports contrast failures for every SwiftUI static

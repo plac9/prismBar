@@ -27,7 +27,7 @@ for required in \
   'sourceRevision == $revision' \
   'sourceState == "clean local commit"' \
   'result == "passed"' \
-  'screenshotCount == 9' \
+  'screenshotCount == 11' \
   'notarytool history' \
   '--keychain-profile "$keychain_profile"' \
   '--keychain "$release_signing_keychain"' \

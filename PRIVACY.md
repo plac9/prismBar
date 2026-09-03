@@ -6,8 +6,7 @@ prismBar is designed to perform its work locally on the Mac.
 
 - Accessibility metadata required to identify and move visible menu bar elements
 - owning process identifiers and locally available application names or icons
-- user preferences for sections, layout, shortcuts, and enabled bundled plugins
-- calculator expressions entered directly into the prismCalc plugin
+- user preferences for reading size, section layout, and shortcuts
 
 ## Data the app does not collect
 
@@ -19,7 +18,7 @@ prismBar is designed to perform its work locally on the Mac.
 
 ## Storage
 
-Preferences use app-owned local storage. Sensitive values are not expected. If a future feature requires a secret, it must use Keychain and receive a separate security review.
+Preferences use app-owned local storage. The reading-size value controls presentation only; it cannot grant permission or authorize a menu-bar action, and an invalid value restores the documented default. Sensitive values are not expected. If a future feature requires a secret, it must use Keychain and receive a separate security review.
 
 ## Network
 
@@ -27,4 +26,4 @@ The initial product has no runtime network capability. Project and release links
 
 ## Plugins
 
-Bundled plugins operate in sandboxed XPC services with declared capabilities. Plugin input and output are bounded Codable messages. Plugins cannot access prismBar's Accessibility objects, raw process inventory, environment, or filesystem authority.
+No plugin service is linked, embedded, launched, or exposed by the shipping core release. The preserved future Prism Card design requires sandboxed XPC services with declared capabilities and bounded Codable messages. A future plugin release must complete a new privacy and security review before shipping.

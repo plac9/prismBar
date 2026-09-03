@@ -10,6 +10,7 @@ import SwiftUI
 struct PrismDeckView: View {
     @Environment(\.openSettings) private var openSettings
     @Bindable private var model: AppModel
+    private let layoutSize: CGSize
     private let openWorkspace: () -> Void
     private let dismissDeck: () -> Void
     @State private var selectedRailSurfaceID: MenuBarSurfaceID = .unknown
@@ -19,10 +20,12 @@ struct PrismDeckView: View {
 
     init(
         model: AppModel,
+        layoutSize: CGSize,
         openWorkspace: @escaping () -> Void,
         dismissDeck: @escaping () -> Void
     ) {
         self.model = model
+        self.layoutSize = layoutSize
         self.openWorkspace = openWorkspace
         self.dismissDeck = dismissDeck
     }
@@ -35,12 +38,7 @@ struct PrismDeckView: View {
             Divider()
             footer
         }
-        .frame(
-            width: PrismDeckLayoutPolicy.width,
-            height: PrismDeckLayoutPolicy.height(
-                accessibilityGranted: model.accessibilityState == .granted
-            )
-        )
+        .frame(width: layoutSize.width, height: layoutSize.height)
         .environment(model)
         .onDisappear {
             clearEphemeralState()
@@ -57,15 +55,15 @@ private extension PrismDeckView {
     var header: some View {
         HStack(spacing: 10) {
             Image(nsImage: PrismStatusIcon.image)
-                .font(.title2.weight(.semibold))
+                .prismFont(.title2, weight: .semibold)
                 .foregroundStyle(.tint)
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 1) {
                 Text("prismDeck")
-                    .font(.headline)
+                    .prismFont(.headline)
                 Text(accessibilityTitle)
-                    .font(.caption)
+                    .prismFont(.caption)
                     .foregroundStyle(.secondary)
             }
 
@@ -163,7 +161,7 @@ private extension PrismDeckView {
                 presentation.summary,
                 systemImage: snapshot.isComplete ? "checkmark.circle.fill" : "exclamationmark.triangle.fill"
             )
-            .font(.caption.weight(.medium))
+            .prismFont(.caption, weight: .medium)
             .foregroundStyle(snapshot.isComplete ? Color.secondary : .orange)
             .help(presentation.unavailableSourcesWarning ?? presentation.summary)
             .accessibilityHint(presentation.unavailableSourcesWarning ?? presentation.summary)
@@ -172,7 +170,7 @@ private extension PrismDeckView {
 
             if model.isHiddenSectionCollapsed {
                 Label("Tucked away", systemImage: "eye.slash")
-                    .font(.caption)
+                    .prismFont(.caption)
                     .foregroundStyle(.secondary)
             }
         }
@@ -183,7 +181,7 @@ private extension PrismDeckView {
         switch model.menuBarActionState {
         case .idle:
             Label("Ready for direct changes", systemImage: "cursorarrow.motionlines")
-                .font(.caption)
+                .prismFont(.caption)
                 .foregroundStyle(.secondary)
                 .accessibilityIdentifier("statusMenu.actionReady")
         case .moving:
@@ -195,13 +193,13 @@ private extension PrismDeckView {
                         ? "Restoring and checking macOS"
                         : "Moving and checking macOS"
                 )
-                .font(.caption.weight(.medium))
+                .prismFont(.caption, weight: .medium)
             }
             .accessibilityIdentifier("statusMenu.actionProgress")
         case let .result(result):
             HStack(spacing: 8) {
                 Label(result.message, systemImage: result.symbol)
-                    .font(.caption.weight(.medium))
+                    .prismFont(.caption, weight: .medium)
                     .foregroundStyle(resultColor(for: result.kind))
                     .lineLimit(2)
 

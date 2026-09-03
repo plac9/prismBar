@@ -127,11 +127,12 @@ Repository work is preserved, but this phase is frozen and excluded from the shi
 - [x] Refine informational destinations into native system-color groups with consistent margins and testable semantic structure.
 - [x] Record current Apple guidance and public macOS 27 menu bar failure reports in a maintained compatibility matrix with explicit safeguards and physical gates.
 - [x] Implement keyboard navigation, help, focus, and accessibility actions.
+- [x] Implement one app-local 100%, 125%, 150%, and 200% reading-size preference with shared semantic typography, invalid-value fallback, and responsive shipping-scene geometry.
 - [x] Run automated action, non-text contrast, element-detection, hit-region, hierarchy, and description audits across every shipping workspace destination, native Settings, and `prismDeck`. Xcode 27 beta static-text contrast false positives remain covered by semantic-color source policy and visual review.
 - [x] Verify every shipping destination remains operational in light, dark, increased contrast, reduced transparency, and reduced motion launch variants.
 - [ ] Complete physical VoiceOver, text-size, and visual accessibility verification.
 - [x] Implement original application and template menu bar icons with no thaw imagery.
-- [x] Generate and visually inspect the required HTML UI audit from exact shipping surfaces for Development revision `ec5345f26baadfe9f673bf78c6761ae5da822bf5`.
+- [x] Generate and visually inspect the required HTML UI audit from exact shipping surfaces for notarized baseline revision `98f26606d4e720f6373234f16ded48407db415dc`. The audit contract now includes 200% Home and `prismDeck` captures, so a new eleven-surface revision-bound audit is required after the reading-size change is committed.
 
 ## Phase 9: Security, privacy, and licensing assurance
 
@@ -152,7 +153,7 @@ Repository work is preserved, but this phase is frozen and excluded from the shi
 
 ## Phase 10: Signed physical release proof
 
-Exact clean revision `924f79cd0d1b1b22ead07e2b57fbe72df2492545` passed the full core-only CI contract and nine-surface revision-bound UI audit on September 2, 2026. The app installed at `/Applications/prismBar.app` remains Apple Development revision `a153e65f3da48a4c9b63109720eb8d4d0d2499ac`; it is neither this source revision nor a notarized distribution candidate.
+Exact clean revision `98f26606d4e720f6373234f16ded48407db415dc` passed the full core-only CI contract, prior nine-surface revision-bound UI audit, Developer ID archive, notarization, staple, Gatekeeper, and installation checks on September 2, 2026. Its physical acceptance record is 13 of 19 gates: larger text, multiple displays, sleep/wake, logout, reboot, and clean-account Gatekeeper remain open. Any merged source change requires a new exact-revision candidate, the new eleven-surface audit, and physical release proof for that candidate.
 
 - [x] Verify Apple identifier and signing configuration for `com.laclairtech.prismbar`.
 - [x] Require an explicit dedicated release keychain containing only the approved certificate fingerprint so archive and notarization cannot fall back to the interactive login Keychain or another signing identity.

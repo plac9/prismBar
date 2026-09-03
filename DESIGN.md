@@ -84,13 +84,13 @@ Content surfaces, primary text, secondary text, separators, warnings, destructiv
 
 # Typography
 
-Use Apple system text styles in shipping SwiftUI code. The type tokens document hierarchy and design-tool targets. Page titles are compact and confident. Section titles label small groups. Body copy explains one decision at a time. Detail text is used only for secondary state and capability descriptions. Numeric results use monospaced digits but remain readable with system text scaling.
+Use semantic prismBar type roles backed by Apple system fonts in shipping SwiftUI code. General Settings offers Standard (100%), Large (125%), Extra Large (150%), and Accessibility (200%) reading sizes because macOS does not expose a user-controlled Dynamic Type text-size setting. Every shipping scene consumes the same local preference; malformed stored values fail back to Standard. The type tokens document hierarchy and design-tool targets. Page titles are compact and confident. Section titles label small groups. Body copy explains one decision at a time. Detail text is used only for secondary state and capability descriptions. Numeric results use monospaced digits and scale with the selected reading size.
 
 # Layout
 
 The menu-bar Prism Deck is a compact command surface with two stable modes: Bar and Tools. Keep one primary task above the fold and preserve a predictable footer for opening the workspace and Settings. The main workspace uses a standard `NavigationSplitView`. Tool experiences open in independent utility windows so they can remain available without keeping Settings or the workspace open.
 
-Use the spacing tokens as rhythm, not as fixed geometry that defeats platform adaptation. Preserve comfortable click targets, keyboard traversal, and localization growth. Avoid dense dashboard grids in the compact menu-bar surface.
+Use the spacing tokens as rhythm, not as fixed geometry that defeats platform adaptation. Window, popover, Rail, row, icon-column, and control geometry must respond to the selected reading size through 200%. Preserve comfortable click targets, keyboard traversal, and localization growth. Avoid dense dashboard grids in the compact menu-bar surface.
 
 # Elevation & Depth
 

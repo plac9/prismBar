@@ -7,6 +7,8 @@ This document turns current Apple guidance and public menu bar utility reports i
 ## Sources reviewed
 
 - [Apple macOS 27 release notes](https://developer.apple.com/documentation/macos-release-notes/macos-27-release-notes)
+- [Apple Human Interface Guidelines: Accessibility](https://developer.apple.com/design/human-interface-guidelines/accessibility)
+- [Apple SwiftUI documentation: `dynamicTypeSize`](https://developer.apple.com/documentation/swiftui/environmentvalues/dynamictypesize)
 - [Apple Developer Forums: macOS 27 Accessibility and PostEvent authorization divergence](https://developer.apple.com/forums/thread/842985)
 - [Ice issue 954: all menu bar icons become visible](https://github.com/jordanbaird/Ice/issues/954)
 - [Ice issue 965: menu bar layout breaks or remains busy](https://github.com/jordanbaird/Ice/issues/965)
@@ -26,12 +28,15 @@ This document turns current Apple guidance and public menu bar utility reports i
 | Secondary displays can produce incorrect scale or geometry | Input may target the wrong display or leave the reserved menu bar region | Movement accepts only one validated display surface, rejects missing reserved menu bar space, and rejects geometry that crosses displays | Geometry and multi-display invariant tests pass | Real multiple-display and display-scale combinations are physical acceptance pending |
 | Automatically hidden or full-screen menu bars can become unsafe movement targets | Synthetic drag input may land on an unavailable surface | `MenuBarInputSafetyValidator` fails closed when the target display has no safe reserved menu bar surface or the geometry is outside it | Input-safety rejection tests pass | Auto-hide, full-screen, Spaces, and recovery behavior are physical acceptance pending |
 | macOS 27 changes menu and control presentation | Custom chrome can age quickly or reduce accessibility | Native lists, navigation, tabs, materials, separators, controls, and semantic colors own the interface; custom Liquid Glass is limited to interactive elements | Source audits reject repeated decorative glass and legacy material cards; automated accessibility audits cover every shipping scene | Physical text-size and VoiceOver review remain pending; Xcode 27 beta static-text contrast findings are checked through semantic-color policy and visual review |
+| macOS does not provide a user-controlled Dynamic Type text-size setting | Users who need larger text can be left with fixed-size utility UI or clipped controls | General Settings provides local 100%, 125%, 150%, and 200% semantic type; every shipping scene shares the preference and adapts fixed geometry | Core preference, semantic typography, responsive-layout, and native UI tests cover invalid storage and the 200% surface | Inspect the exact signed candidate at all four sizes on physical macOS 27; record the larger-text gate only after unclipped keyboard and pointer operation |
 
 ## Apple interface guidance
 
 The macOS 27 release notes describe updated menu image behavior and semantic tab roles. prismBar therefore does not depend on decorative images in native application menus, and its scene navigation uses native semantic controls. The status item remains a purpose-drawn monochrome template image because it is a status-bar control, not a decorative menu-item image.
 
 Apple also records beta fixes for interactive glass hover behavior. prismBar targets the shipping macOS 27 SDK and uses system-provided glass behavior instead of recreating hover, focus, contrast, or reduced-transparency effects.
+
+SwiftUI exposes `dynamicTypeSize` on macOS, but Apple documents that macOS has no user-controlled Dynamic Type setting and does not automatically change text size. prismBar therefore provides an explicit local preference while retaining system fonts, semantic hierarchy, accessibility labels, and native controls.
 
 ## Acceptance discipline
 

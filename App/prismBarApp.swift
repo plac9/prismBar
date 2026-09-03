@@ -15,13 +15,14 @@ struct prismBarApp: App {
 
     var body: some Scene {
         WindowGroup("prismBar", id: PrismSceneID.workspace) {
-            MainWindowView()
-                .environment(AppModel.shared)
-                .background {
-                    SceneActionRegistrationView()
-                    UIAuditWindowConfiguration()
-                }
-                .frame(minWidth: 760, minHeight: 520)
+            PrismTextSizeScope {
+                MainWindowView()
+                    .environment(AppModel.shared)
+                    .background {
+                        SceneActionRegistrationView()
+                        UIAuditWindowConfiguration()
+                    }
+            }
         }
         .defaultSize(width: 920, height: 640)
         .windowResizability(.contentMinSize)
@@ -31,14 +32,10 @@ struct prismBarApp: App {
         .defaultLaunchBehavior(.suppressed)
 
         Settings {
-            SettingsRootView()
-                .environment(AppModel.shared)
-                .frame(
-                    minWidth: 640,
-                    idealWidth: 680,
-                    minHeight: 500,
-                    idealHeight: 540
-                )
+            PrismTextSizeScope {
+                SettingsRootView()
+                    .environment(AppModel.shared)
+            }
         }
     }
 }

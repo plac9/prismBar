@@ -54,7 +54,7 @@ jq -e --arg revision "$source_revision" '
 jq -e --arg revision "$source_revision" '
   .schemaVersion == 1 and .product == "prismBar" and
   .sourceRevision == $revision and .sourceState == "clean local commit" and
-  .result == "passed" and .screenshotCount == 9
+  .result == "passed" and .screenshotCount == 11
 ' "$ui_evidence" >/dev/null || fail 'exact-revision UI evidence is invalid'
 printf 'Release readiness: revision evidence passed.\n'
 

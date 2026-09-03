@@ -6,6 +6,7 @@ import prismBarCore
 import SwiftUI
 
 struct ShortcutsView: View {
+    @Environment(\.prismTextSizePreference) private var textSize
     private let shortcuts = ShortcutCatalog.defaults
 
     var body: some View {
@@ -23,7 +24,7 @@ struct ShortcutsView: View {
                 PrismContentSection {
                     VStack(alignment: .leading, spacing: 0) {
                         Label("prismBar commands", systemImage: "command")
-                            .font(.headline)
+                            .prismFont(.headline)
                             .padding(.bottom, 8)
 
                         Divider()
@@ -31,17 +32,17 @@ struct ShortcutsView: View {
                         ForEach(shortcuts, id: \.action) { shortcut in
                             HStack(spacing: 16) {
                                 Image(systemName: shortcut.symbol)
-                                    .font(.title3)
+                                    .prismFont(.title3)
                                     .foregroundStyle(.tint)
-                                    .frame(width: 28)
+                                    .frame(width: 28 * CGFloat(textSize.scale))
 
                                 Text(shortcut.title)
-                                    .font(.headline)
+                                    .prismFont(.headline)
 
                                 Spacer()
 
                                 Text(shortcut.gesture.displayValue)
-                                    .font(.system(.body, design: .rounded, weight: .semibold))
+                                    .prismFont(.body, weight: .semibold, design: .rounded)
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 7)
                                     .background(.background.secondary, in: .capsule)
@@ -60,17 +61,17 @@ struct ShortcutsView: View {
                     Label {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("No global keyboard monitoring")
-                                .font(.headline)
+                                .prismFont(.headline)
                             Text(
                                 "These are standard app commands. prismBar does not install a global " +
                                     "keystroke monitor or request Input Monitoring access."
                             )
-                            .font(.callout)
+                            .prismFont(.callout)
                             .foregroundStyle(.secondary)
                         }
                     } icon: {
                         Image(systemName: "keyboard.badge.ellipsis")
-                            .font(.title2)
+                            .prismFont(.title2)
                             .foregroundStyle(.tint)
                     }
                 }
