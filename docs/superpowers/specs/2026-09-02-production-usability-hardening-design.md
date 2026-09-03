@@ -140,4 +140,3 @@ Acceptance requires:
 - telemetry
 - Intel and macOS 26 support
 - publication or pricing changes
-
