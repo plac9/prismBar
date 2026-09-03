@@ -18,6 +18,17 @@ struct SceneActionRouterTests {
         )
     }
 
+    @Test("reuses a miniaturized prismBar workspace")
+    func reusesMiniaturizedWorkspace() {
+        #expect(
+            SceneActionRouter.shouldReuseWorkspace(
+                title: "prismBar",
+                isVisible: false,
+                isMiniaturized: true
+            )
+        )
+    }
+
     @Test("does not reuse a closed workspace")
     func ignoresClosedWorkspace() {
         #expect(
