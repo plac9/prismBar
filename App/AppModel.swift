@@ -25,8 +25,10 @@ final class AppModel {
     private var permissionSession: AccessibilityPermissionSession
     private var permissionRevision = 0
     private var topologyRevision = 0
+    private var isRecoveryRefreshPending = false
     private var recoveryLedger = MenuBarRecoveryLedger()
-    let menuBarController = LiveMenuBarController()
+    let menuBarController: LiveMenuBarController
+    private let menuBarSnapshotReader: any MenuBarSnapshotReading
 
     var recentActionReceipts: [MenuBarActionReceipt] {
         recoveryLedger.entries.map(\.receipt)
@@ -46,9 +48,13 @@ final class AppModel {
 
     init(
         defaults: UserDefaults = .standard,
-        automaticallyRefresh: Bool = true
+        automaticallyRefresh: Bool = true,
+        snapshotReader: (any MenuBarSnapshotReading)? = nil
     ) {
+        let liveMenuBarController = LiveMenuBarController()
         self.defaults = defaults
+        menuBarController = liveMenuBarController
+        menuBarSnapshotReader = snapshotReader ?? liveMenuBarController
         permissionSession = AccessibilityPermissionSession(
             evaluator: AccessibilityPermissionEvaluator(
                 expectedBundleIdentifier: "com.laclairtech.prismbar",
@@ -113,14 +119,18 @@ final class AppModel {
     }
 
     func refreshMenuBar(preservingActionResult: Bool = false) {
-        if !preservingActionResult {
-            clearVisibleMenuBarAction()
-        }
-
         guard accessibilityState == .granted else {
+            clearVisibleMenuBarAction(unlessPreserved: preservingActionResult)
             invalidateMenuBar()
             return
         }
+        guard menuBarState != .loading else {
+            if preservingActionResult {
+                isRecoveryRefreshPending = true
+            }
+            return
+        }
+        clearVisibleMenuBarAction(unlessPreserved: preservingActionResult)
 
         topologyRevision += 1
         let revision = topologyRevision
@@ -129,12 +139,13 @@ final class AppModel {
         Task { [weak self] in
             guard let self else { return }
             do {
-                let snapshot = try await menuBarController.snapshot(
+                let snapshot = try await menuBarSnapshotReader.snapshot(
                     deadline: OperationDeadline(timeout: .seconds(8))
                 )
                 guard revision == topologyRevision else { return }
                 menuBarSnapshot = snapshot
                 menuBarState = .ready
+                runPendingRecoveryRefreshIfNeeded()
             } catch MenuBarAuthorizationError.permissionRevoked {
                 guard revision == topologyRevision else { return }
                 handleAccessibilityRevocation()
@@ -142,20 +153,34 @@ final class AppModel {
                 guard revision == topologyRevision else { return }
                 menuBarSnapshot = nil
                 menuBarState = .unavailable
+                runPendingRecoveryRefreshIfNeeded()
             }
         }
     }
 
     func acceptVerifiedMenuBarSnapshot(_ snapshot: MenuBarSnapshot) {
         topologyRevision += 1
+        isRecoveryRefreshPending = false
         menuBarSnapshot = snapshot
         menuBarState = .ready
     }
 
     private func invalidateMenuBar() {
         topologyRevision += 1
+        isRecoveryRefreshPending = false
         menuBarSnapshot = nil
         menuBarState = .waitingForPermission
+    }
+
+    private func runPendingRecoveryRefreshIfNeeded() {
+        guard isRecoveryRefreshPending else { return }
+        isRecoveryRefreshPending = false
+        refreshMenuBar(preservingActionResult: true)
+    }
+
+    private func clearVisibleMenuBarAction(unlessPreserved isPreserved: Bool) {
+        guard !isPreserved else { return }
+        clearVisibleMenuBarAction()
     }
 
     func handleAccessibilityRevocation() {

@@ -132,7 +132,7 @@ Repository work is preserved, but this phase is frozen and excluded from the shi
 - [x] Verify every shipping destination remains operational in light, dark, increased contrast, reduced transparency, and reduced motion launch variants.
 - [ ] Complete physical VoiceOver, text-size, and visual accessibility verification.
 - [x] Implement original application and template menu bar icons with no thaw imagery.
-- [x] Generate and visually inspect the required HTML UI audit from exact shipping surfaces for notarized baseline revision `98f26606d4e720f6373234f16ded48407db415dc`. The audit contract now includes 200% Home and `prismDeck` captures, so a new eleven-surface revision-bound audit is required after the reading-size change is committed.
+- [x] Generate and visually inspect the required eleven-surface HTML UI audit, including 200% Home and `prismDeck`. Revision `bd1ed129922474e99b8d71382ab6443185cc00f6` proved the current capture contract and exposed then rejected unsettled Settings chrome; the final merged revision still requires its own exact audit.
 
 ## Phase 9: Security, privacy, and licensing assurance
 
@@ -148,12 +148,14 @@ Repository work is preserved, but this phase is frozen and excluded from the shi
 - [x] Exercise plugin decoding and calculator commands with deterministic hostile-input corpora.
 - [x] Run static analysis plus Address Sanitizer and Thread Sanitizer across the Swift modules.
 - [x] Reconcile the current source controls against the threat model and verify the preserved dormant reciprocal-signing implementation independently of the core-only release.
+- [x] Add a privacy-safe installed-process runtime budget with less than 1% settled idle CPU, less than 100 MiB physical footprint, at most 15 MiB beginning-to-end footprint growth, and at most two additional threads. Evidence contains aggregate values only.
+- [x] Prove ten consecutive native status-item open, prismDeck presentation, Escape, and dismissal cycles return to the original app-owned window count. The macOS 27 run completed in 324 seconds with zero failures or orphan windows.
 - [x] Repeat long-duration host, permission, movement, and plugin lifecycle stress tests on clean revision `2a3c087fda0faddcd1e7ee33d67900b0d0e5681c`: 2 complete cycles across 1,130 seconds, including 40 UI-test executions with zero failures. Physical signed-app movement stress remains a release gate.
 - [x] Produce and inspect the revision-bound dark HTML assurance report for clean revision `2a3c087fda0faddcd1e7ee33d67900b0d0e5681c`; automated and visual evidence pass while physical, distribution, and publication gates remain on hold.
 
 ## Phase 10: Signed physical release proof
 
-Exact clean revision `98f26606d4e720f6373234f16ded48407db415dc` passed the full core-only CI contract, prior nine-surface revision-bound UI audit, Developer ID archive, notarization, staple, Gatekeeper, and installation checks on September 2, 2026. Its physical acceptance record is 13 of 19 gates: larger text, multiple displays, sleep/wake, logout, reboot, and clean-account Gatekeeper remain open. Any merged source change requires a new exact-revision candidate, the new eleven-surface audit, and physical release proof for that candidate.
+Exact clean revision `98f26606d4e720f6373234f16ded48407db415dc` passed the full core-only CI contract, prior nine-surface revision-bound UI audit, Developer ID archive, notarization, staple, Gatekeeper, and installation checks on September 2, 2026. Its physical acceptance record is 13 of 19 gates: larger text, multiple displays, sleep/wake, logout, reboot, and clean-account Gatekeeper remain open. The production-usability branch adds limited-scan clarity, Rail overflow cues, refresh coalescing, Settings capture stability, and runtime/lifecycle budgets. Those changes require a new exact merged-revision candidate, eleven-surface audit, and physical release proof before replacing the baseline.
 
 - [x] Verify Apple identifier and signing configuration for `com.laclairtech.prismbar`.
 - [x] Require an explicit dedicated release keychain containing only the approved certificate fingerprint so archive and notarization cannot fall back to the interactive login Keychain or another signing identity.

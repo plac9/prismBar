@@ -151,7 +151,7 @@ private extension PrismRailView {
                 .scrollTargetLayout()
                 .padding(4)
             }
-            .scrollIndicators(.never)
+            .scrollIndicators(.visible)
             .scrollTargetBehavior(.viewAligned)
             .frame(height: 48 * CGFloat(textSize.scale))
             .dropDestination(for: String.self) { tokens, _ in

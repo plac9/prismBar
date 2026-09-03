@@ -36,5 +36,11 @@ fi
 if rg -Fq 'Text("Prism Deck")' App/Features/Overview/PrismDeckView.swift; then
   fail 'the visible control surface name must use exact prismDeck casing'
 fi
+for view in App/Features/MenuBar/MenuBarView.swift App/Features/Overview/PrismDeckView.swift; do
+  rg -Fq 'sourceAvailabilityNotice(' "$view" || \
+    fail 'limited-scan notices must use the collapse-aware presentation'
+  rg -Fq 'hiddenSectionCollapsed: model.isHiddenSectionCollapsed' "$view" || \
+    fail 'limited-scan notices must respect folded hidden-section state'
+done
 
 printf 'Core shipping contract passed.\n'

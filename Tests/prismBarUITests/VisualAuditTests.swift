@@ -106,6 +106,11 @@ final class VisualAuditTests: XCTestCase {
         let privacy = settings.buttons["Privacy"]
         XCTAssertTrue(privacy.waitForExistence(timeout: 3))
         privacy.click()
+        XCTAssertGreaterThanOrEqual(
+            privacy.frame.minY - settings.frame.minY,
+            20,
+            "Switching Settings tabs must not pull the native toolbar above the visible window"
+        )
         assertShippingSurfaceIsUnobscured()
         attach(settings.screenshot(), named: "07-settings-privacy")
 

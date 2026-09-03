@@ -122,6 +122,35 @@ final class PrismDeckTests: XCTestCase {
         }
     }
 
+    func testRepeatedOpenDismissKeepsWindowCountStable() {
+        let application = prismBarApplication(opensWorkspace: false)
+        application.launch()
+
+        _ = closeWorkspaceIfNeeded(in: application)
+        let statusItem = prismBarStatusItem(in: application)
+        XCTAssertTrue(statusItem.waitForExistence(timeout: 5), application.debugDescription)
+        let baselineWindowCount = application.windows.count
+        let deckTitle = application.staticTexts["prismDeck"]
+
+        for cycle in 1 ... 10 {
+            statusItem.click()
+            XCTAssertTrue(
+                deckTitle.waitForExistence(timeout: 8),
+                "prismDeck did not open during lifecycle cycle \(cycle)"
+            )
+            application.typeKey(.escape, modifierFlags: [])
+            XCTAssertTrue(
+                deckTitle.waitForNonExistence(timeout: 3),
+                "prismDeck did not dismiss during lifecycle cycle \(cycle)"
+            )
+            XCTAssertEqual(
+                application.windows.count,
+                baselineWindowCount,
+                "prismDeck left an app-owned window behind during lifecycle cycle \(cycle)"
+            )
+        }
+    }
+
     private func closeWorkspaceIfNeeded(in application: XCUIApplication) -> XCUIElement {
         let workspace = application.windows["prismBar"]
         if workspace.waitForExistence(timeout: 1) {

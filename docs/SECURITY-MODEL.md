@@ -78,6 +78,7 @@ These controls describe preserved future-facing code. The core release prevents 
 - Production logging uses static event names, action IDs, result categories, and timing buckets.
 - Privacy-sensitive values use redacted OSLog interpolation or are omitted.
 - Diagnostic export is absent from version 1.
+- Release-only runtime measurement binds to the exact canonical installed executable and records only aggregate CPU, physical-footprint, thread-count, and beginning-to-end growth values. It emits no process inventory, command line, environment, window metadata, or observed content.
 - Tests scan built strings and logs for forbidden synthetic canaries and local paths.
 - No third-party crash reporter is linked.
 
