@@ -86,34 +86,6 @@ final class AppModelActionFeedbackTests: XCTestCase {
         XCTAssertEqual(model.menuBarSnapshot, refreshed)
     }
 
-    func testRecoveryRefreshQueuedDuringActiveScanRunsAfterItCompletes() async throws {
-        let reader = ControllableSnapshotReader()
-        let model = makeModel(snapshotReader: reader)
-        let beforeAction = snapshot(generation: 1)
-        let staleScan = snapshot(generation: 2, reversed: true)
-        let recoveredScan = snapshot(generation: 3)
-        model.acceptAccessibilityState(.granted, refreshMenuBarWhenGranted: false)
-        model.acceptVerifiedMenuBarSnapshot(beforeAction)
-
-        model.refreshMenuBar()
-        try await waitUntil { await reader.callCount == 1 }
-
-        model.refreshMenuBar(preservingActionResult: true)
-        let coalescedCallCount = await reader.callCount
-        XCTAssertEqual(coalescedCallCount, 1)
-
-        await reader.complete(with: staleScan)
-        try await waitUntil { await reader.callCount == 2 }
-        XCTAssertEqual(model.menuBarState, .loading)
-
-        await reader.complete(with: recoveredScan)
-        try await waitUntil { model.menuBarState == .ready }
-
-        let finalCallCount = await reader.callCount
-        XCTAssertEqual(finalCallCount, 2)
-        XCTAssertEqual(model.menuBarSnapshot, recoveredScan)
-    }
-
     func testPermissionRevocationClearsVisibleReceiptAndRecoveryHistory() {
         let model = makeModel()
         let pending = model.beginMenuBarAction(
@@ -325,6 +297,36 @@ final class AppModelActionFeedbackTests: XCTestCase {
             ),
             surfaceID: surface
         )
+    }
+}
+
+extension AppModelActionFeedbackTests {
+    func testRecoveryRefreshQueuedDuringActiveScanRunsAfterItCompletes() async throws {
+        let reader = ControllableSnapshotReader()
+        let model = makeModel(snapshotReader: reader)
+        let beforeAction = snapshot(generation: 1)
+        let staleScan = snapshot(generation: 2, reversed: true)
+        let recoveredScan = snapshot(generation: 3)
+        model.acceptAccessibilityState(.granted, refreshMenuBarWhenGranted: false)
+        model.acceptVerifiedMenuBarSnapshot(beforeAction)
+
+        model.refreshMenuBar()
+        try await waitUntil { await reader.callCount == 1 }
+
+        model.refreshMenuBar(preservingActionResult: true)
+        let coalescedCallCount = await reader.callCount
+        XCTAssertEqual(coalescedCallCount, 1)
+
+        await reader.complete(with: staleScan)
+        try await waitUntil { await reader.callCount == 2 }
+        XCTAssertEqual(model.menuBarState, .loading)
+
+        await reader.complete(with: recoveredScan)
+        try await waitUntil { model.menuBarState == .ready }
+
+        let finalCallCount = await reader.callCount
+        XCTAssertEqual(finalCallCount, 2)
+        XCTAssertEqual(model.menuBarSnapshot, recoveredScan)
     }
 }
 
