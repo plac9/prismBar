@@ -49,5 +49,10 @@ rg -Fq "fail 'physical footprint growth exceeds the runtime budget'" "$script" |
   fail 'footprint-growth failures must return nonzero'
 rg -Fq "fail 'thread growth exceeds the runtime budget'" "$script" || \
   fail 'thread-growth failures must return nonzero'
+rg -Fq "printf 'Evidence written.\\n'" "$script" || \
+  fail 'the audit must confirm evidence without printing its filesystem path'
+if rg -Fq "printf 'Evidence: %s\\n'" "$script"; then
+  fail 'the audit must not print the runtime evidence path'
+fi
 
 printf 'Runtime budget contract passed.\n'

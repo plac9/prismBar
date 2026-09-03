@@ -185,4 +185,4 @@ jq -n \
 
 printf 'Runtime budget audit passed: CPU %s%%, footprint %s MiB, threads %s.\n' \
   "$average_cpu" "$maximum_footprint" "$maximum_threads"
-printf 'Evidence: %s\n' "$output_path"
+printf 'Evidence written.\n'
